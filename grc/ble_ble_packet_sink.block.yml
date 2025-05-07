@@ -9,7 +9,7 @@ description: |
 
 templates:
   imports: from gnuradio import ble
-  make: ble.ble_packet_sink(${base_address}, ${preamble_threshold})
+  make: ble.ble_packet_sink(${base_address}, ${preamble_threshold}, ${lfsr})
 
 parameters:
 -   id: base_address
@@ -20,6 +20,10 @@ parameters:
     label: Preamble Threshold
     dtype: int
     default: 4
+-   id: lfsr
+    label: Whitening LFSR
+    dtype: int
+    default: 0x01
 
 inputs:
 -   label: in

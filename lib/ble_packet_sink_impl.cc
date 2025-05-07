@@ -16,20 +16,23 @@ namespace ble {
 
 using input_type = float;
 
-ble_packet_sink::sptr ble_packet_sink::make(uint32_t base_address,
-                                            uint preamble_threshold)
+ble_packet_sink::sptr
+ble_packet_sink::make(uint32_t base_address, uint preamble_threshold, uint8_t lfsr)
 {
-    return gnuradio::make_block_sptr<ble_packet_sink_impl>(base_address,
-                                                           preamble_threshold);
+    return gnuradio::make_block_sptr<ble_packet_sink_impl>(
+        base_address, preamble_threshold, lfsr);
 }
 
 // Constructor
-ble_packet_sink_impl::ble_packet_sink_impl(uint32_t base_address, uint preamble_threshold)
+ble_packet_sink_impl::ble_packet_sink_impl(uint32_t base_address,
+                                           uint preamble_threshold,
+                                           uint8_t lfsr)
     : gr::sync_block("ble_packet_sink",
                      gr::io_signature::make(1, 1, sizeof(input_type)),
                      gr::io_signature::make(0, 0, 0)), // No output
       d_mask((~uint64_t(0)) >> (64 - d_access_code_len)),
-      d_threshold(preamble_threshold)
+      d_threshold(preamble_threshold),
+      d_lfsr(lfsr)
 {
     d_access_code = generate_access_code(base_address);
 }
