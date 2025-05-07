@@ -22,6 +22,7 @@ private:
     uint64_t generate_access_code(uint32_t base_address); // Generate access code
     uint8_t slice(float data_in); // Slice float data into binary data
 
+    uint8_t d_lfsr = 0x01;       // Linear Feedback Shift Register for whitening
     uint d_access_code_len = 48; // 1B preamble + 4B base address + 1B address prefix
     uint64_t d_shift_reg = 0;    // Shift register for the incoming data
     uint d_fill_buffer = 0;      // Ensures the shift register is filled before comparing
@@ -33,6 +34,8 @@ private:
 public:
     ble_packet_sink_impl(uint32_t base_address, uint preamble_threshold);
     ~ble_packet_sink_impl();
+    uint8_t whiten_bit(uint8_t data_bit,
+                       uint8_t polynomial); // Whiten a single bit using LFSR
 
     // Called for each chunk of data in the input stream
     int work(int noutput_items,
@@ -43,4 +46,4 @@ public:
 } // namespace ble
 } // namespace gr
 
-#endif /* INCLUDED_BLE_BLE_PACKET_SINK_IMPL_H */
+#endif // INCLUDED_BLE_BLE_PACKET_SINK_IMPL_H
