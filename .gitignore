@@ -1,0 +1,10 @@
+build/
+*.log
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+.vscode/
+.conda/

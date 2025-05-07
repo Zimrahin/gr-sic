@@ -1,0 +1,37 @@
+id: ble_ble_packet_sink
+label: BLE Packet Sink
+category: '[ble]'
+description: |
+  This block decodes BLE packets from demodulated float samples.
+  It searches for the preamble based on the given base address and
+  preamble threshold. 
+  Detected packets are de-whitened and CRC checked.
+
+templates:
+  imports: from gnuradio import ble
+  make: ble.ble_packet_sink(${base_address}, ${preamble_threshold})
+
+parameters:
+-   id: base_address
+    label: Base Address
+    dtype: int
+    default: 0x12345678
+-   id: preamble_threshold
+    label: Preamble Threshold
+    dtype: int
+    default: 4
+
+inputs:
+-   label: in
+    domain: stream
+    dtype: float
+    vlen: 1
+
+outputs: [] # Empty for now, later implement a message PMT output
+# -   id: out
+#     domain: message
+
+
+#  'file_format' specifies the version of the GRC yml format used in the file
+#  and should usually not be changed.
+file_format: 1
