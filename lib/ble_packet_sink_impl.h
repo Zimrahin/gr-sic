@@ -17,7 +17,10 @@ namespace ble {
 class ble_packet_sink_impl : public ble_packet_sink
 {
 private:
-    uint8_t slice(float data_in); // Slice float data into binary data
+    template <typename T>
+    T reverse_bits(T unsigned_integer); // Reverse bits in an unsigned integer
+    uint8_t slice(float data_in);       // Slice float data into binary data
+    // uint64_t generate_access_code(uint32_t base_address); // Generate access code
 
     uint d_access_code_len = 32; // Length of the code
     uint64_t d_shift_reg = 0;    // Shift register for the incoming data

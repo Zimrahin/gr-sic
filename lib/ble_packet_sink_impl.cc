@@ -32,12 +32,29 @@ ble_packet_sink_impl::ble_packet_sink_impl(uint32_t base_address, uint preamble_
       d_mask((~uint64_t(0)) >> (64 - d_access_code_len)),
       d_threshold(preamble_threshold)
 {
+    d_access_code = reverse_bits(d_access_code);
 }
 
 // Destructor
 ble_packet_sink_impl::~ble_packet_sink_impl() {}
 
 uint8_t ble_packet_sink_impl::slice(float data_in) { return data_in > 0 ? 1 : 0; }
+
+template <typename T>
+T ble_packet_sink_impl::reverse_bits(T unsigned_integer)
+{
+    static_assert(std::is_unsigned_v<T>,
+                  "reverse_bits requires an unsigned integer type");
+    T reversed = 0;
+    constexpr int num_bits = std::numeric_limits<T>::digits;
+
+    for (int i = 0; i < num_bits; ++i) {
+        reversed <<= 1;
+        reversed |= (unsigned_integer & 1);
+        unsigned_integer >>= 1;
+    }
+    return reversed;
+}
 
 int ble_packet_sink_impl::work(int noutput_items,
                                gr_vector_const_void_star& input_items,
@@ -57,13 +74,6 @@ int ble_packet_sink_impl::work(int noutput_items,
         } else {
             wrong_bits = (d_shift_reg ^ d_access_code) & d_mask;
             volk_64u_popcnt(&nwrong, wrong_bits); // Count wrong bits
-
-            // Debug print in hex
-            std::cout << std::hex;
-            // std::cout << "d_shift_reg = 0x" << d_shift_reg << ", ";
-            // std::cout << "d_access_code = 0x" << d_access_code << ", ";
-            std::cout << "d_mask = 0x" << d_mask << std::endl;
-            // std::cout << "wrong_bits = 0x" << wrong_bits << std::dec << std::endl;
 
             // std::cout << "nwrong=" << nwrong << std::endl;
         }
