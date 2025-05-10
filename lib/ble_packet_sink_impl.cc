@@ -85,12 +85,12 @@ uint64_t ble_packet_sink_impl::generate_access_code(uint32_t base_address)
 // Whiten a single bit using a 7‑bit LFSR
 uint8_t ble_packet_sink_impl::whiten_bit(uint8_t data_bit, uint8_t polynomial = 0x11)
 {
-    bool lfsr_msb = (d_lfsr & 0x40) != 0;    // Bit 6 of the LFSR
-    bool whitened_bit = data_bit ^ lfsr_msb; // XOR → whitened bit
-
-    // shift LFSR and apply feedback if needed
+    bool lfsr_msb = (d_lfsr & 0x40) != 0;  // Bit 6 of the LFSR
+    bool whitened_bit = data_bit ^ lfsr_msb;
+    
     d_lfsr = static_cast<uint8_t>((d_lfsr << 1) & 0x7F);
     if (lfsr_msb)
+        // Apply feedback
         d_lfsr ^= polynomial;
 
     return whitened_bit;
