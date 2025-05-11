@@ -39,8 +39,6 @@ ble_packet_sink_impl::ble_packet_sink_impl(uint32_t base_address,
     d_access_code = generate_access_code(base_address);
 
     // Variables
-    d_shift_reg = 0;
-    d_fill_buffer = 0;
     d_state = state::SEARCH_PREAMBLE;
 }
 
@@ -85,9 +83,9 @@ uint64_t ble_packet_sink_impl::generate_access_code(uint32_t base_address)
 // Whiten a single bit using a 7‑bit LFSR
 uint8_t ble_packet_sink_impl::whiten_bit(uint8_t data_bit, uint8_t polynomial = 0x11)
 {
-    bool lfsr_msb = (d_lfsr & 0x40) != 0;  // Bit 6 of the LFSR
+    bool lfsr_msb = (d_lfsr & 0x40) != 0; // Bit 6 of the LFSR
     bool whitened_bit = data_bit ^ lfsr_msb;
-    
+
     d_lfsr = static_cast<uint8_t>((d_lfsr << 1) & 0x7F);
     if (lfsr_msb)
         // Apply feedback
@@ -99,14 +97,14 @@ uint8_t ble_packet_sink_impl::whiten_bit(uint8_t data_bit, uint8_t polynomial = 
 // Finite State Machine methods
 void ble_packet_sink_impl::enter_search_preamble()
 {
-    d_state = state::SEARCH_PREAMBLE;
     d_shift_reg = 0;
     d_fill_buffer = 0;
+    d_state = state::SEARCH_PREAMBLE;
 }
 void ble_packet_sink_impl::enter_decode_length()
 {
-    d_state = state::DECODE_LENGTH;
     d_lfsr = d_lfsr_default; // Reset LFSR for whitening
+    d_state = state::DECODE_LENGTH;
 }
 void ble_packet_sink_impl::process_search_preamble(uint8_t bit, uint64_t sample_index)
 {
