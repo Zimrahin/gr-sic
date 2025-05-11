@@ -37,6 +37,7 @@ ble_packet_sink_impl::ble_packet_sink_impl(uint32_t base_address,
     d_access_code_len = 48; // 1B preamble + 4B base address + 1B address prefix
     d_mask = (~uint64_t(0)) >> (64 - d_access_code_len);
     d_access_code = generate_access_code(base_address);
+    d_whitening_polynomial = 0x11;
 
     // Variables
     d_state = state::SEARCH_PREAMBLE;
@@ -104,7 +105,18 @@ void ble_packet_sink_impl::enter_search_preamble()
 void ble_packet_sink_impl::enter_decode_length()
 {
     d_lfsr = d_lfsr_default; // Reset LFSR for whitening
+    d_payload_len = 0;
+    d_reg_byte = 0;
+    d_bits_count = 0;
+    d_bytes_count = 0;
     d_state = state::DECODE_LENGTH;
+}
+void ble_packet_sink_impl::enter_decode_payload()
+{
+    d_reg_byte = 0;
+    d_bits_count = 0;
+    d_bytes_count = 0;
+    d_state = state::DECODE_PAYLOAD;
 }
 void ble_packet_sink_impl::process_search_preamble(uint8_t bit, uint64_t sample_index)
 {
@@ -125,7 +137,25 @@ void ble_packet_sink_impl::process_search_preamble(uint8_t bit, uint64_t sample_
 }
 void ble_packet_sink_impl::process_decode_length(uint8_t bit, uint64_t sample_index)
 {
-    // TODO: implement length decoding
+    (void)sample_index;
+    uint8_t num_bytes = 2; // Assume S0 | LENGTH, received from an nRF52
+    uint8_t unwhitened_bit = whiten_bit(bit, d_whitening_polynomial);
+    d_reg_byte =
+        (d_reg_byte >> 1) | ((unwhitened_bit & 1) << 7); // Shift in new bit from MSB
+    if (++d_bits_count < 8)
+        return; // Still collecting bits to unpack a byte
+
+    d_bits_count = 0; // Reset bit counter
+    if (++d_bytes_count < num_bytes)
+        return; // We are only interested in the LENGTH byte
+
+    d_payload_len = d_reg_byte; // Unpack the LENGTH byte
+    std::cout << "Payload length: " << (int)d_payload_len << "\n";
+    enter_decode_payload();
+}
+void ble_packet_sink_impl::process_decode_payload(uint8_t bit, uint64_t sample_index)
+{
+    // TODO: Implement payload decoding
 }
 
 
@@ -149,6 +179,10 @@ int ble_packet_sink_impl::work(int noutput_items,
 
         case state::DECODE_LENGTH:
             process_decode_length(rx_bit, sample_count + i);
+            break;
+
+        case state::DECODE_PAYLOAD:
+            process_decode_payload(rx_bit, sample_count + i);
             break;
         }
     }
