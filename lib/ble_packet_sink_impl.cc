@@ -206,7 +206,6 @@ void ble_packet_sink_impl::process_decode_payload(uint8_t bit, uint64_t sample_i
         if (++d_bytes_count == d_payload_len) {
             enter_check_crc();
         }
-        return; // Still collecting payload bytes
     }
 }
 void ble_packet_sink_impl::process_check_crc(uint8_t bit, uint64_t sample_index)
@@ -226,6 +225,12 @@ void ble_packet_sink_impl::process_check_crc(uint8_t bit, uint64_t sample_index)
                   << d_shift_reg << std::endl;
         std::cout << "CRC, computed: " << std::hex << std::setfill('0') << std::setw(6)
                   << d_crc << std::endl;
+
+        if (d_shift_reg == d_crc) {
+            std::cout << "CRC check OK" << std::endl;
+        } else {
+            std::cout << "CRC check FAILED" << std::endl;
+        }
     }
 
     // enter_search_preamble();
