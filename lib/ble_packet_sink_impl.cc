@@ -88,29 +88,31 @@ uint64_t ble_packet_sink_impl::generate_access_code(uint32_t base_address)
 }
 
 // Whiten a single bit using a 7‑bit LFSR
-uint8_t ble_packet_sink_impl::whiten_bit(uint8_t data_bit, uint8_t polynomial)
+uint8_t
+ble_packet_sink_impl::whiten_bit(uint8_t data_bit, uint8_t& lfsr, uint8_t polynomial)
 {
     bool lfsr_msb = (d_lfsr & 0x40) != 0; // Bit 6 of the LFSR
     uint8_t whitened_bit = data_bit ^ lfsr_msb;
 
-    d_lfsr = static_cast<uint8_t>((d_lfsr << 1) & 0x7F);
+    lfsr = static_cast<uint8_t>((lfsr << 1) & 0x7F);
     if (lfsr_msb) {
-        d_lfsr ^= polynomial; // Apply feedback
+        lfsr ^= polynomial; // Apply feedback
     }
     return whitened_bit & 1;
 }
 
 // Compute CRC from payload and header to compare with the received CRC
 void ble_packet_sink_impl::compute_crc(uint8_t data_bit,
+                                       uint32_t& crc,
                                        uint32_t polynomial,
                                        uint32_t mask)
 {
     uint crc_len_bits = 8 * CRC_LEN;
-    d_crc ^= data_bit << (crc_len_bits - 1);
-    if (d_crc & (1 << (crc_len_bits - 1))) {
-        d_crc = ((d_crc << 1) ^ polynomial) & mask; // Apply feedback
+    crc ^= data_bit << (crc_len_bits - 1);
+    if (crc & (1 << (crc_len_bits - 1))) {
+        crc = ((crc << 1) ^ polynomial) & mask; // Apply feedback
     } else {
-        d_crc = (d_crc << 1) & mask;
+        crc = (crc << 1) & mask;
     }
 }
 
@@ -168,8 +170,8 @@ void ble_packet_sink_impl::process_decode_length(uint8_t bit, uint64_t sample_in
 {
     (void)sample_index;
     uint8_t num_bytes = 2; // Assume S0 | LENGTH, received from an nRF52
-    uint8_t unwhitened_bit = whiten_bit(bit, d_whitening_polynomial);
-    compute_crc(unwhitened_bit, d_crc_polynomial, d_crc_mask);
+    uint8_t unwhitened_bit = whiten_bit(bit, d_lfsr, d_whitening_polynomial);
+    compute_crc(unwhitened_bit, d_crc, d_crc_polynomial, d_crc_mask);
 
     d_reg_byte = (d_reg_byte >> 1) | (unwhitened_bit << 7); // Shift in new bit from MSB
 
@@ -187,8 +189,8 @@ void ble_packet_sink_impl::process_decode_length(uint8_t bit, uint64_t sample_in
 void ble_packet_sink_impl::process_decode_payload(uint8_t bit, uint64_t sample_index)
 {
     (void)sample_index;
-    uint8_t unwhitened_bit = whiten_bit(bit, d_whitening_polynomial);
-    compute_crc(unwhitened_bit, d_crc_polynomial, d_crc_mask);
+    uint8_t unwhitened_bit = whiten_bit(bit, d_lfsr, d_whitening_polynomial);
+    compute_crc(unwhitened_bit, d_crc, d_crc_polynomial, d_crc_mask);
 
     d_reg_byte = (d_reg_byte >> 1) | (unwhitened_bit << 7); // Shift in new bit from MSB
 
@@ -210,7 +212,7 @@ void ble_packet_sink_impl::process_decode_payload(uint8_t bit, uint64_t sample_i
 void ble_packet_sink_impl::process_check_crc(uint8_t bit, uint64_t sample_index)
 {
     (void)sample_index;
-    uint8_t unwhitened_bit = whiten_bit(bit, d_whitening_polynomial);
+    uint8_t unwhitened_bit = whiten_bit(bit, d_lfsr, d_whitening_polynomial);
     d_shift_reg = (d_shift_reg << 1) | unwhitened_bit; // Shift in new bit
 
     // Buffer yet to be filled

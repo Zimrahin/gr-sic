@@ -49,8 +49,12 @@ private:
     T reverse_bits(T unsigned_integer); // Reverse bits in an unsigned integer
     uint64_t generate_access_code(uint32_t base_address); // Generate access code
     uint8_t slice(float data_in); // Slice float data into binary data
-    uint8_t whiten_bit(uint8_t data_bit, uint8_t polynomial); // Whiten a single bit
-    void compute_crc(uint8_t data_bit, uint32_t polynomial,
+    uint8_t whiten_bit(uint8_t data_bit,
+                       uint8_t& lfsr,
+                       uint8_t polynomial); // Whiten a single bit
+    void compute_crc(uint8_t data_bit,
+                     uint32_t& crc,
+                     uint32_t polynomial,
                      uint32_t mask); // Compute CRC
 
     // Constants
