@@ -10,6 +10,9 @@
 #include "ble_packet_sink_impl.h"
 #include <gnuradio/io_signature.h>
 #include <volk/volk.h>
+#include <iomanip>
+#include <sstream>
+
 
 namespace gr {
 namespace ble {
@@ -35,7 +38,7 @@ ble_packet_sink_impl::ble_packet_sink_impl(uint32_t base_address,
 {
     // Constants
     d_access_code_len = 48; // 1B preamble + 4B base address + 1B address prefix
-    d_mask = (~uint64_t(0)) >> (64 - d_access_code_len);
+    d_code_len_mask = (~uint64_t(0)) >> (64 - d_access_code_len);
     d_access_code = generate_access_code(base_address);
     d_whitening_polynomial = 0x11;
 
@@ -89,17 +92,16 @@ uint8_t ble_packet_sink_impl::whiten_bit(uint8_t data_bit, uint8_t polynomial = 
 
     d_lfsr = static_cast<uint8_t>((d_lfsr << 1) & 0x7F);
     if (lfsr_msb)
-        // Apply feedback
-        d_lfsr ^= polynomial;
+        d_lfsr ^= polynomial; // Apply feedback
 
-    return whitened_bit;
+    return whitened_bit & 1;
 }
 
 // Finite State Machine methods
 void ble_packet_sink_impl::enter_search_preamble()
 {
     d_shift_reg = 0;
-    d_fill_buffer = 0;
+    d_fill_buffer_count = 0;
     d_state = state::SEARCH_PREAMBLE;
 }
 void ble_packet_sink_impl::enter_decode_length()
@@ -118,15 +120,23 @@ void ble_packet_sink_impl::enter_decode_payload()
     d_bytes_count = 0;
     d_state = state::DECODE_PAYLOAD;
 }
+void ble_packet_sink_impl::enter_check_crc()
+{
+    d_shift_reg = 0;
+    d_fill_buffer_count = 0;
+    d_state = state::CHECK_CRC;
+}
 void ble_packet_sink_impl::process_search_preamble(uint8_t bit, uint64_t sample_index)
 {
+    d_shift_reg = (d_shift_reg << 1) | bit; // Shift in new bit
+
     // Buffer yet to be filled
-    if (d_fill_buffer < d_access_code_len) {
-        d_fill_buffer++;
+    if (d_fill_buffer_count < d_access_code_len - 1) {
+        d_fill_buffer_count++;
         return;
     }
     // Count wrong bits
-    uint64_t diff = (d_shift_reg ^ d_access_code) & d_mask;
+    uint64_t diff = (d_shift_reg ^ d_access_code) & d_code_len_mask;
     uint64_t nwrong = d_threshold + 1; // Value greater than the threshold
     volk_64u_popcnt(&nwrong, diff);
 
@@ -140,8 +150,7 @@ void ble_packet_sink_impl::process_decode_length(uint8_t bit, uint64_t sample_in
     (void)sample_index;
     uint8_t num_bytes = 2; // Assume S0 | LENGTH, received from an nRF52
     uint8_t unwhitened_bit = whiten_bit(bit, d_whitening_polynomial);
-    d_reg_byte =
-        (d_reg_byte >> 1) | ((unwhitened_bit & 1) << 7); // Shift in new bit from MSB
+    d_reg_byte = (d_reg_byte >> 1) | (unwhitened_bit << 7); // Shift in new bit from MSB
     if (++d_bits_count < 8)
         return; // Still collecting bits to unpack a byte
 
@@ -155,9 +164,41 @@ void ble_packet_sink_impl::process_decode_length(uint8_t bit, uint64_t sample_in
 }
 void ble_packet_sink_impl::process_decode_payload(uint8_t bit, uint64_t sample_index)
 {
-    // TODO: Implement payload decoding
-}
+    (void)sample_index;
+    uint8_t unwhitened_bit = whiten_bit(bit, d_whitening_polynomial);
+    d_reg_byte = (d_reg_byte >> 1) | (unwhitened_bit << 7); // Shift in new bit from MSB
+    if (++d_bits_count < 8)
+        return; // Still collecting bits to unpack a byte
 
+    d_bits_count = 0; // Reset bit counter
+    if (d_bytes_count < d_payload_len) {
+        d_payload[d_bytes_count] = d_reg_byte;
+        std::cout << "0x" << std::hex << std::setfill('0') << std::setw(2)
+                  << static_cast<int>(d_payload[d_bytes_count]) << std::endl;
+        if (++d_bytes_count == d_payload_len)
+            enter_check_crc();
+        return; // Still collecting payload bytes
+    }
+}
+void ble_packet_sink_impl::process_check_crc(uint8_t bit, uint64_t sample_index)
+{
+    (void)sample_index;
+    uint8_t unwhitened_bit = whiten_bit(bit, d_whitening_polynomial);
+    d_shift_reg = (d_shift_reg << 1) | unwhitened_bit; // Shift in new bit
+
+    // Buffer yet to be filled
+    if (++d_fill_buffer_count < CRC_LEN * 8) {
+        return;
+    }
+    if (d_fill_buffer_count == CRC_LEN * 8) {
+        d_fill_buffer_count++;
+        // Compare read CRC with computed CRC
+        std::cout << "CRC: " << std::hex << std::setfill('0') << std::setw(6)
+                  << d_shift_reg << std::endl;
+    }
+
+    // enter_search_preamble();
+}
 
 // Called for each chunk of data in the input stream
 int ble_packet_sink_impl::work(int noutput_items,
@@ -170,7 +211,6 @@ int ble_packet_sink_impl::work(int noutput_items,
 
     for (int i = 0; i < noutput_items; i++) {
         uint8_t rx_bit = slice(in[i]);
-        d_shift_reg = (d_shift_reg << 1) | (rx_bit & 1); // Shift in new bit
 
         switch (d_state) {
         case state::SEARCH_PREAMBLE:
@@ -183,6 +223,10 @@ int ble_packet_sink_impl::work(int noutput_items,
 
         case state::DECODE_PAYLOAD:
             process_decode_payload(rx_bit, sample_count + i);
+            break;
+
+        case state::CHECK_CRC:
+            process_check_crc(rx_bit, sample_count + i);
             break;
         }
     }
