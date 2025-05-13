@@ -162,7 +162,7 @@ void ble_packet_sink_impl::process_search_preamble(uint8_t bit, uint64_t sample_
     volk_64u_popcnt(&nwrong, diff);
 
     if (nwrong <= d_threshold) {
-        std::cout << "Preamble found at sample " << sample_index << "\n";
+        std::cout << std::dec << "Preamble found at sample " << sample_index << "\n";
         enter_decode_length();
     }
 }
@@ -183,7 +183,7 @@ void ble_packet_sink_impl::process_decode_length(uint8_t bit, uint64_t sample_in
         return; // We are only interested in the LENGTH byte
     }
     d_payload_len = d_reg_byte; // Unpack the LENGTH byte
-    std::cout << "Payload length: " << (int)d_payload_len << "\n";
+    std::cout << std::dec << "Payload length: " << (int)d_payload_len << "\n";
     enter_decode_payload();
 }
 void ble_packet_sink_impl::process_decode_payload(uint8_t bit, uint64_t sample_index)
@@ -200,8 +200,8 @@ void ble_packet_sink_impl::process_decode_payload(uint8_t bit, uint64_t sample_i
     d_bits_count = 0; // Reset bit counter
     if (d_bytes_count < d_payload_len) {
         d_payload[d_bytes_count] = d_reg_byte;
-        std::cout << "0x" << std::hex << std::setfill('0') << std::setw(2)
-                  << static_cast<int>(d_payload[d_bytes_count]) << std::endl;
+        // std::cout << "0x" << std::hex << std::setfill('0') << std::setw(2)
+        //           << static_cast<int>(d_payload[d_bytes_count]) << std::endl;
 
         if (++d_bytes_count == d_payload_len) {
             enter_check_crc();
@@ -231,9 +231,9 @@ void ble_packet_sink_impl::process_check_crc(uint8_t bit, uint64_t sample_index)
         } else {
             std::cout << "CRC check FAILED" << std::endl;
         }
-    }
 
-    // enter_search_preamble();
+        enter_search_preamble();
+    }
 }
 
 // Called for each chunk of data in the input stream
