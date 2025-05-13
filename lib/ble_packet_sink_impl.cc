@@ -91,9 +91,9 @@ uint8_t ble_packet_sink_impl::whiten_bit(uint8_t data_bit, uint8_t polynomial = 
     bool whitened_bit = data_bit ^ lfsr_msb;
 
     d_lfsr = static_cast<uint8_t>((d_lfsr << 1) & 0x7F);
-    if (lfsr_msb)
+    if (lfsr_msb) {
         d_lfsr ^= polynomial; // Apply feedback
-
+    }
     return whitened_bit & 1;
 }
 
@@ -151,13 +151,13 @@ void ble_packet_sink_impl::process_decode_length(uint8_t bit, uint64_t sample_in
     uint8_t num_bytes = 2; // Assume S0 | LENGTH, received from an nRF52
     uint8_t unwhitened_bit = whiten_bit(bit, d_whitening_polynomial);
     d_reg_byte = (d_reg_byte >> 1) | (unwhitened_bit << 7); // Shift in new bit from MSB
-    if (++d_bits_count < 8)
+    if (++d_bits_count < 8) {
         return; // Still collecting bits to unpack a byte
-
+    }
     d_bits_count = 0; // Reset bit counter
-    if (++d_bytes_count < num_bytes)
+    if (++d_bytes_count < num_bytes) {
         return; // We are only interested in the LENGTH byte
-
+    }
     d_payload_len = d_reg_byte; // Unpack the LENGTH byte
     std::cout << "Payload length: " << (int)d_payload_len << "\n";
     enter_decode_payload();
@@ -167,16 +167,18 @@ void ble_packet_sink_impl::process_decode_payload(uint8_t bit, uint64_t sample_i
     (void)sample_index;
     uint8_t unwhitened_bit = whiten_bit(bit, d_whitening_polynomial);
     d_reg_byte = (d_reg_byte >> 1) | (unwhitened_bit << 7); // Shift in new bit from MSB
-    if (++d_bits_count < 8)
+    if (++d_bits_count < 8) {
         return; // Still collecting bits to unpack a byte
-
+    }
     d_bits_count = 0; // Reset bit counter
     if (d_bytes_count < d_payload_len) {
         d_payload[d_bytes_count] = d_reg_byte;
         std::cout << "0x" << std::hex << std::setfill('0') << std::setw(2)
                   << static_cast<int>(d_payload[d_bytes_count]) << std::endl;
-        if (++d_bytes_count == d_payload_len)
+
+        if (++d_bytes_count == d_payload_len) {
             enter_check_crc();
+        }
         return; // Still collecting payload bytes
     }
 }
