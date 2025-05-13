@@ -50,6 +50,8 @@ private:
     uint64_t generate_access_code(uint32_t base_address); // Generate access code
     uint8_t slice(float data_in); // Slice float data into binary data
     uint8_t whiten_bit(uint8_t data_bit, uint8_t polynomial); // Whiten a single bit
+    void compute_crc(uint8_t data_bit, uint32_t polynomial,
+                     uint32_t mask); // Compute CRC
 
     // Constants
     uint d_threshold;               // Allowed bit errors in the preamble detection
@@ -59,6 +61,9 @@ private:
     uint64_t d_code_len_mask;       // (1 << code_len) - 1
     uint8_t d_lfsr_default;         // Linear Feedback Shift Register for whitening
     uint8_t d_whitening_polynomial; // Polynomial for whitening
+    uint32_t d_crc_mask;            // Mask for CRC computation
+    uint32_t d_crc_polynomial;      // Polynomial for CRC computation
+    uint32_t d_crc_init;            // Initial value for CRC computation
 
     // Variables
     uint64_t d_shift_reg;     // Shift register for preamble detection
