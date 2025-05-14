@@ -47,6 +47,9 @@ ble_packet_sink_impl::ble_packet_sink_impl(uint32_t base_address,
 
     // Variables
     d_state = state::SEARCH_PREAMBLE;
+
+    // PMT message output port
+    message_port_register_out(pmt::mp("out"));
 }
 
 // Destructor
@@ -136,6 +139,7 @@ void ble_packet_sink_impl::enter_decode_length()
 }
 void ble_packet_sink_impl::enter_decode_payload()
 {
+    // std::fill(d_payload.begin(), d_payload.end(), 0); // Clear payload buffer
     d_reg_byte = 0;
     d_bits_count = 0;
     d_bytes_count = 0;
@@ -200,8 +204,6 @@ void ble_packet_sink_impl::process_decode_payload(uint8_t bit, uint64_t sample_i
     d_bits_count = 0; // Reset bit counter
     if (d_bytes_count < d_payload_len) {
         d_payload[d_bytes_count] = d_reg_byte;
-        // std::cout << "0x" << std::hex << std::setfill('0') << std::setw(2)
-        //           << static_cast<int>(d_payload[d_bytes_count]) << std::endl;
 
         if (++d_bytes_count == d_payload_len) {
             enter_check_crc();
@@ -219,18 +221,17 @@ void ble_packet_sink_impl::process_check_crc(uint8_t bit, uint64_t sample_index)
         return;
     }
     if (d_fill_buffer_count == CRC_LEN * 8) {
-        d_fill_buffer_count++;
-        // Compare read CRC with computed CRC
-        std::cout << "CRC, read: " << std::hex << std::setfill('0') << std::setw(6)
-                  << d_shift_reg << std::endl;
-        std::cout << "CRC, computed: " << std::hex << std::setfill('0') << std::setw(6)
-                  << d_crc << std::endl;
+        bool crc_ok = (d_shift_reg == d_crc) ? true : false;
 
-        if (d_shift_reg == d_crc) {
-            std::cout << "CRC check OK" << std::endl;
-        } else {
-            std::cout << "CRC check FAILED" << std::endl;
-        }
+        // Prepare PMT output message
+        pmt::pmt_t meta = pmt::make_dict();
+        meta = pmt::dict_add(meta,
+                             pmt::mp("CRC check"),
+                             pmt::from_bool(crc_ok)); // CRC check prints #t if ok
+        pmt::pmt_t payload =
+            pmt::make_blob(d_payload.data(),
+                           d_payload_len); // Only copy d_payload_len bytes from d_payload
+        message_port_pub(pmt::mp("out"), pmt::cons(meta, payload));
 
         enter_search_preamble();
     }
