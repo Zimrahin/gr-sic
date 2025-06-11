@@ -15,7 +15,7 @@ namespace gr {
 namespace ble {
 
 /*!
- * \brief <+description of block+>
+ * \brief
  * \ingroup ble
  *
  */
@@ -25,12 +25,18 @@ public:
     typedef std::shared_ptr<ble_packet_sink> sptr;
 
     /*!
-     * \brief Return a shared_ptr to a new instance of ble::ble_packet_sink.
-     *
-     * To avoid accidental use of raw pointers, ble::ble_packet_sink's
-     * constructor is in a private implementation
-     * class. ble::ble_packet_sink::make is the public interface for
-     * creating new instances.
+     * \brief This block detects BLE packets in hard-decision bitstreams and publishes
+     * them as PDUs. It searches for the preamble based on the base address and preamble
+     * threshold. Detected packets are de-whitened and CRC checked.
+     * \param base_address The base address used to generate the access code for preamble
+     * detection.
+     * \param preamble_threshold The maximum number of bit errors allowed in the preamble
+     * detection. If the number of errors exceeds this threshold, the preamble is not
+     * detected.
+     * \param lfsr The initial value of the LFSR used for whitening. It should be a 7-bit
+     * value (0x00 to 0x7F).
+     * \param block_id An identifier for the block instance, used in the output message
+     * metadata.
      */
     static sptr
     make(uint32_t base_address, uint preamble_threshold, uint8_t lfsr, uint block_id);

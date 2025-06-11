@@ -2,9 +2,8 @@ id: ble_ble_packet_sink
 label: BLE Packet Sink
 category: '[ble]'
 description: |
-  This block decodes BLE packets from demodulated float samples.
-  It searches for the preamble based on the given base address and
-  preamble threshold. 
+  This block detects BLE packets in hard-decision bitstreams and publishes them as PDUs.
+  It searches for the preamble based on the base address and preamble threshold.
   Detected packets are de-whitened and CRC checked.
 
 templates:
@@ -32,7 +31,6 @@ parameters:
     default: 0
     hide: none
     tooltip: "Unique integer ID for this block instance"
-
 
 inputs:
 -   label: in
