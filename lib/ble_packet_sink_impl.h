@@ -68,6 +68,7 @@ private:
     uint32_t d_crc_mask;            // Mask for CRC computation
     uint32_t d_crc_polynomial;      // Polynomial for CRC computation
     uint32_t d_crc_init;            // Initial value for CRC computation
+    uint8_t d_num_preamble_bytes;   // Number of bytes after access code (S0 | LENGTH)
 
     // Variables
     uint64_t d_shift_reg;     // Shift register for preamble detection
@@ -79,6 +80,7 @@ private:
     uint8_t d_payload_len;    // Length of the payload
     uint32_t d_crc;           // Computed CRC from payload and header
     std::array<uint8_t, MAX_PAYLOAD_LEN> d_payload; // Payload buffer
+    uint64_t d_sample_payload_index;                // First sample index of the payload
 };
 
 } // namespace ble

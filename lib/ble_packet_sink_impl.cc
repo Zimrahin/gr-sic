@@ -44,6 +44,7 @@ ble_packet_sink_impl::ble_packet_sink_impl(uint32_t base_address,
     d_crc_polynomial = 0x00065B;
     d_crc_mask = (~uint64_t(0)) >> (64 - CRC_LEN * 8);
     d_crc_init = 0x00FFFF;
+    d_num_preamble_bytes = 2; // Assume (S0 | LENGTH), received from an nRF52
 
     // Variables
     d_state = state::SEARCH_PREAMBLE;
@@ -166,14 +167,13 @@ void ble_packet_sink_impl::process_search_preamble(uint8_t bit, uint64_t sample_
     volk_64u_popcnt(&nwrong, diff);
 
     if (nwrong <= d_threshold) {
-        std::cout << std::dec << "Preamble found at sample " << sample_index << "\n";
+        d_sample_payload_index = sample_index + 8 * d_num_preamble_bytes + 1;
         enter_decode_length();
     }
 }
 void ble_packet_sink_impl::process_decode_length(uint8_t bit, uint64_t sample_index)
 {
     (void)sample_index;
-    uint8_t num_bytes = 2; // Assume S0 | LENGTH, received from an nRF52
     uint8_t unwhitened_bit = whiten_bit(bit, d_lfsr, d_whitening_polynomial);
     compute_crc(unwhitened_bit, d_crc, d_crc_polynomial, d_crc_mask);
 
@@ -183,11 +183,10 @@ void ble_packet_sink_impl::process_decode_length(uint8_t bit, uint64_t sample_in
         return; // Still collecting bits to unpack a byte
     }
     d_bits_count = 0; // Reset bit counter
-    if (++d_bytes_count < num_bytes) {
+    if (++d_bytes_count < d_num_preamble_bytes) {
         return; // We are only interested in the LENGTH byte
     }
     d_payload_len = d_reg_byte; // Unpack the LENGTH byte
-    std::cout << std::dec << "Payload length: " << (int)d_payload_len << "\n";
     enter_decode_payload();
 }
 void ble_packet_sink_impl::process_decode_payload(uint8_t bit, uint64_t sample_index)
@@ -228,6 +227,9 @@ void ble_packet_sink_impl::process_check_crc(uint8_t bit, uint64_t sample_index)
         meta = pmt::dict_add(meta,
                              pmt::mp("CRC check"),
                              pmt::from_bool(crc_ok)); // CRC check prints #t if ok
+        meta = pmt::dict_add(meta,
+                             pmt::mp("Payload start sample"),
+                             pmt::from_uint64(d_sample_payload_index));
         pmt::pmt_t payload =
             pmt::make_blob(d_payload.data(),
                            d_payload_len); // Only copy d_payload_len bytes from d_payload
