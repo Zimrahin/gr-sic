@@ -9,13 +9,14 @@ description: |
 
 templates:
   imports: from gnuradio import ble
-  make: ble.ble_packet_sink(${base_address}, ${preamble_threshold}, ${lfsr})
+  make: ble.ble_packet_sink(${base_address}, ${preamble_threshold}, ${lfsr}, ${block_id})
 
 parameters:
 -   id: base_address
     label: Base Address
     dtype: int
     default: 0x12345678
+    tooltip: "Base address for the BLE device, used to identify packets"
 -   id: preamble_threshold
     label: Preamble Threshold
     dtype: int
@@ -24,6 +25,14 @@ parameters:
     label: Whitening LFSR
     dtype: int
     default: 0x01
+    tooltip: "Initial LFSR value for whitening, used to de-whiten the packets"
+-   id: block_id
+    label: Block ID
+    dtype: int
+    default: 0
+    hide: none
+    tooltip: "Unique integer ID for this block instance"
+
 
 inputs:
 -   label: in

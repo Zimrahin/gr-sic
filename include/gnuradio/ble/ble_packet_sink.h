@@ -32,7 +32,8 @@ public:
      * class. ble::ble_packet_sink::make is the public interface for
      * creating new instances.
      */
-    static sptr make(uint32_t base_address, uint preamble_threshold, uint8_t lfsr);
+    static sptr
+    make(uint32_t base_address, uint preamble_threshold, uint8_t lfsr, uint block_id);
 };
 
 } // namespace ble

@@ -19,22 +19,26 @@ namespace ble {
 
 using input_type = float;
 
-ble_packet_sink::sptr
-ble_packet_sink::make(uint32_t base_address, uint preamble_threshold, uint8_t lfsr)
+ble_packet_sink::sptr ble_packet_sink::make(uint32_t base_address,
+                                            uint preamble_threshold,
+                                            uint8_t lfsr,
+                                            uint block_id)
 {
     return gnuradio::make_block_sptr<ble_packet_sink_impl>(
-        base_address, preamble_threshold, lfsr);
+        base_address, preamble_threshold, lfsr, block_id);
 }
 
 // Constructor
 ble_packet_sink_impl::ble_packet_sink_impl(uint32_t base_address,
                                            uint preamble_threshold,
-                                           uint8_t lfsr)
+                                           uint8_t lfsr,
+                                           uint block_id)
     : gr::sync_block("ble_packet_sink",
                      gr::io_signature::make(1, 1, sizeof(input_type)),
                      gr::io_signature::make(0, 0, 0)), // No output
       d_threshold(preamble_threshold),
-      d_lfsr_default(lfsr)
+      d_lfsr_default(lfsr),
+      d_block_id(block_id)
 {
     // Constants
     d_access_code_len = 48; // 1B preamble + 4B base address + 1B address prefix
@@ -224,6 +228,9 @@ void ble_packet_sink_impl::process_check_crc(uint8_t bit, uint64_t sample_index)
 
         // Prepare PMT output message
         pmt::pmt_t meta = pmt::make_dict();
+        meta = pmt::dict_add(meta,
+                             pmt::mp("Block ID"),
+                             pmt::from_uint64(d_block_id)); // Block instance ID
         meta = pmt::dict_add(meta,
                              pmt::mp("CRC check"),
                              pmt::from_bool(crc_ok)); // CRC check prints #t if ok

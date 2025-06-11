@@ -22,7 +22,10 @@ namespace ble {
 class ble_packet_sink_impl : public ble_packet_sink
 {
 public:
-    ble_packet_sink_impl(uint32_t base_address, uint preamble_threshold, uint8_t lfsr);
+    ble_packet_sink_impl(uint32_t base_address,
+                         uint preamble_threshold,
+                         uint8_t lfsr,
+                         uint block_id);
     ~ble_packet_sink_impl();
 
     // Called for each chunk of data in the input stream
@@ -69,6 +72,7 @@ private:
     uint32_t d_crc_polynomial;      // Polynomial for CRC computation
     uint32_t d_crc_init;            // Initial value for CRC computation
     uint8_t d_num_preamble_bytes;   // Number of bytes after access code (S0 | LENGTH)
+    uint d_block_id;                // Block instance ID
 
     // Variables
     uint64_t d_shift_reg;     // Shift register for preamble detection
