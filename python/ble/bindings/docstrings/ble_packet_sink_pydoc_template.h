@@ -15,13 +15,10 @@
  */
 
 
-
- static const char *__doc_gr_ble_ble_packet_sink = R"doc()doc";
-
-
- static const char *__doc_gr_ble_ble_packet_sink_ble_packet_sink_0 = R"doc()doc";
+static const char* __doc_gr_ble_ble_packet_sink = R"doc()doc";
 
 
- static const char *__doc_gr_ble_ble_packet_sink_make = R"doc()doc";
+static const char* __doc_gr_ble_ble_packet_sink_ble_packet_sink_0 = R"doc()doc";
 
-  
+
+static const char* __doc_gr_ble_ble_packet_sink_make = R"doc()doc";
