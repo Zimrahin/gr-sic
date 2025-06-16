@@ -18,6 +18,7 @@ namespace gr {
 namespace ble {
 
 using input_type = float;
+using output_type = uint8_t; // Optional output, sliced data
 
 ble_packet_sink::sptr ble_packet_sink::make(uint32_t base_address,
                                             uint preamble_threshold,
@@ -35,7 +36,7 @@ ble_packet_sink_impl::ble_packet_sink_impl(uint32_t base_address,
                                            uint block_id)
     : gr::sync_block("ble_packet_sink",
                      gr::io_signature::make(1, 1, sizeof(input_type)),
-                     gr::io_signature::make(0, 0, 0)), // No output
+                     gr::io_signature::make(0, 1, sizeof(output_type))),
       d_threshold(preamble_threshold),
       d_lfsr_default(lfsr),
       d_block_id(block_id)
@@ -54,7 +55,7 @@ ble_packet_sink_impl::ble_packet_sink_impl(uint32_t base_address,
     d_state = state::SEARCH_PREAMBLE;
 
     // PMT message output port
-    message_port_register_out(pmt::mp("out"));
+    message_port_register_out(pmt::mp("pmt"));
 }
 
 // Destructor
@@ -240,7 +241,7 @@ void ble_packet_sink_impl::process_check_crc(uint8_t bit, uint64_t sample_index)
         pmt::pmt_t payload =
             pmt::make_blob(d_payload.data(),
                            d_payload_len); // Only copy d_payload_len bytes from d_payload
-        message_port_pub(pmt::mp("out"), pmt::cons(meta, payload));
+        message_port_pub(pmt::mp("pmt"), pmt::cons(meta, payload));
 
         enter_search_preamble();
     }
@@ -252,27 +253,38 @@ int ble_packet_sink_impl::work(int noutput_items,
                                gr_vector_void_star& output_items)
 {
     auto in = static_cast<const input_type*>(input_items[0]);
+    output_type* out = nullptr;
+    d_output_connected = output_items.size() > 0 && output_items[0] != nullptr;
+    if (d_output_connected) {
+        out = static_cast<output_type*>(output_items[0]);
+    }
 
     uint64_t sample_count = nitems_read(0);
 
     for (int i = 0; i < noutput_items; i++) {
         uint8_t rx_bit = slice(in[i]);
 
+        if (out) {
+            out[i] = rx_bit; // Optional output: sliced data
+        }
+
+        uint64_t sample_index = sample_count + i;
+
         switch (d_state) {
         case state::SEARCH_PREAMBLE:
-            process_search_preamble(rx_bit, sample_count + i);
+            process_search_preamble(rx_bit, sample_index);
             break;
 
         case state::DECODE_LENGTH:
-            process_decode_length(rx_bit, sample_count + i);
+            process_decode_length(rx_bit, sample_index);
             break;
 
         case state::DECODE_PAYLOAD:
-            process_decode_payload(rx_bit, sample_count + i);
+            process_decode_payload(rx_bit, sample_index);
             break;
 
         case state::CHECK_CRC:
-            process_check_crc(rx_bit, sample_count + i);
+            process_check_crc(rx_bit, sample_index);
             break;
         }
     }

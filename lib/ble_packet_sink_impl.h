@@ -75,6 +75,7 @@ private:
     uint d_block_id;                // Block instance ID
 
     // Variables
+    bool d_output_connected;  // Indicates if the output port is connected
     uint64_t d_shift_reg;     // Shift register for preamble detection
     uint d_fill_buffer_count; // Ensures the shift register is filled before comparing
     uint8_t d_lfsr;           // Linear Feedback Shift Register for whitening
