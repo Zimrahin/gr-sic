@@ -192,6 +192,14 @@ void ble_packet_sink_impl::process_decode_length(uint8_t bit, uint64_t sample_in
         return; // We are only interested in the LENGTH byte
     }
     d_payload_len = d_reg_byte; // Unpack the LENGTH byte
+
+    if (d_output_connected) {
+        add_item_tag(0,
+                     d_sample_payload_index,
+                     pmt::intern("Payload length"),
+                     pmt::from_uint64(d_payload_len));
+    }
+
     enter_decode_payload();
 }
 void ble_packet_sink_impl::process_decode_payload(uint8_t bit, uint64_t sample_index)
@@ -242,6 +250,14 @@ void ble_packet_sink_impl::process_check_crc(uint8_t bit, uint64_t sample_index)
             pmt::make_blob(d_payload.data(),
                            d_payload_len); // Only copy d_payload_len bytes from d_payload
         message_port_pub(pmt::mp("pmt"), pmt::cons(meta, payload));
+
+        // Optiona output stream tag
+        if (d_output_connected) {
+            add_item_tag(0,
+                         sample_index,
+                         pmt::intern("CRC check"),
+                         pmt::from_bool(crc_ok)); // CRC check prints #t if ok
+        }
 
         enter_search_preamble();
     }
