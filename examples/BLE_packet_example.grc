@@ -200,7 +200,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [608, 648.0]
+    coordinate: [600, 632.0]
     rotation: 0
     state: enabled
 - name: blocks_throttle2_0
@@ -236,7 +236,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [592, 608.0]
+    coordinate: [592, 576.0]
     rotation: 0
     state: true
 - name: digital_symbol_sync_xx_0

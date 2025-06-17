@@ -235,7 +235,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [600, 656.0]
+    coordinate: [600, 648.0]
     rotation: 0
     state: enabled
 - name: blocks_multiply_xx_0
@@ -289,7 +289,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [584, 616.0]
+    coordinate: [560, 584.0]
     rotation: 0
     state: true
 - name: digital_symbol_sync_xx_0
