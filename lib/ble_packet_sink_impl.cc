@@ -304,7 +304,7 @@ int ble_packet_sink_impl::work(int noutput_items,
             break;
         }
     }
-    return noutput_items;
+    return noutput_items; // Tell runtime system how many output items we produced.
 }
 
 

@@ -10,4 +10,5 @@
 # Install public header files
 ########################################################################
 install(FILES api.h
-    ble_packet_sink.h DESTINATION include/gnuradio/ble)
+    ble_packet_sink.h
+    tag_stream_from_message.h DESTINATION include/gnuradio/ble)

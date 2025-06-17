@@ -13,8 +13,8 @@
 /* If manual edits are made, the following tags should be modified accordingly.    */
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
-/* BINDTOOL_HEADER_FILE(ble_packet_sink.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(0b076511e44f2bebcdd7052d8f2db082)                     */
+/* BINDTOOL_HEADER_FILE(tag_stream_from_message.h) */
+/* BINDTOOL_HEADER_FILE_HASH(0a99aa3056c8fff21eba299d6a9b16f2)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -23,28 +23,24 @@
 
 namespace py = pybind11;
 
-#include <gnuradio/ble/ble_packet_sink.h>
+#include <gnuradio/ble/tag_stream_from_message.h>
 // pydoc.h is automatically generated in the build directory
-#include <ble_packet_sink_pydoc.h>
+#include <tag_stream_from_message_pydoc.h>
 
-void bind_ble_packet_sink(py::module& m)
+void bind_tag_stream_from_message(py::module& m)
 {
 
-    using ble_packet_sink = ::gr::ble::ble_packet_sink;
+    using tag_stream_from_message = ::gr::ble::tag_stream_from_message;
 
 
-    py::class_<ble_packet_sink,
+    py::class_<tag_stream_from_message,
                gr::sync_block,
                gr::block,
                gr::basic_block,
-               std::shared_ptr<ble_packet_sink>>(m, "ble_packet_sink", D(ble_packet_sink))
+               std::shared_ptr<tag_stream_from_message>>(
+        m, "tag_stream_from_message", D(tag_stream_from_message))
 
-        .def(py::init(&ble_packet_sink::make),
-             py::arg("base_address"),
-             py::arg("preamble_threshold"),
-             py::arg("lfsr"),
-             py::arg("block_id"),
-             D(ble_packet_sink, make))
+        .def(py::init(&tag_stream_from_message::make), D(tag_stream_from_message, make))
 
 
         ;

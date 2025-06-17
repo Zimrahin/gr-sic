@@ -93,6 +93,18 @@ blocks:
     coordinate: [584, 16.0]
     rotation: 0
     state: enabled
+- name: trigger_delay
+  id: variable
+  parameters:
+    comment: ''
+    value: 200E-6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [816, 16.0]
+    rotation: 0
+    state: enabled
 - name: tuning_LPF_cutoff_kHz
   id: variable_qtgui_range
   parameters:
@@ -163,7 +175,22 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [288, 560.0]
+    coordinate: [240, 584.0]
+    rotation: 0
+    state: enabled
+- name: ble_tag_stream_from_message_0
+  id: ble_tag_stream_from_message
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [384, 440.0]
     rotation: 0
     state: enabled
 - name: blocks_file_source_0
@@ -200,7 +227,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [600, 632.0]
+    coordinate: [552, 656.0]
     rotation: 0
     state: enabled
 - name: blocks_throttle2_0
@@ -214,7 +241,7 @@ blocks:
     maximum: '0.1'
     maxoutbuf: '0'
     minoutbuf: '0'
-    samples_per_second: samp_rate/400
+    samples_per_second: samp_rate/800
     type: complex
     vlen: '1'
   states:
@@ -236,7 +263,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [592, 576.0]
+    coordinate: [544, 600.0]
     rotation: 0
     state: true
 - name: digital_symbol_sync_xx_0
@@ -288,6 +315,103 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [488, 248.0]
+    rotation: 0
+    state: enabled
+- name: qtgui_time_sink_x_0
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: ''
+    ctrlpanel: 'False'
+    entags: 'True'
+    grid: 'False'
+    gui_hint: ''
+    label1: Signal 1
+    label10: Signal 10
+    label2: Signal 2
+    label3: Signal 3
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '"Testing Tag Stream From Message block"'
+    nconnections: '1'
+    size: plot_N
+    srate: samp_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: trigger_delay
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_TAG
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '"test_key"'
+    type: complex
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Amplitude
+    ymax: '1'
+    ymin: '-1'
+    yunit: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [688, 408.0]
     rotation: 0
     state: enabled
 - name: qtgui_time_sink_x_1
@@ -359,7 +483,7 @@ blocks:
     style8: '1'
     style9: '1'
     tr_chan: '1'
-    tr_delay: 200E-6
+    tr_delay: trigger_delay
     tr_level: '0.0'
     tr_mode: qtgui.TRIG_MODE_TAG
     tr_slope: qtgui.TRIG_SLOPE_POS
@@ -384,7 +508,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [816, 512.0]
+    coordinate: [768, 536.0]
     rotation: 0
     state: enabled
 - name: qtgui_time_sink_x_1_0
@@ -542,9 +666,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [880, 24.0]
+    coordinate: [856, 128.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: virtual_sink_0
   id: virtual_sink
   parameters:
@@ -568,7 +692,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [64, 520.0]
+    coordinate: [16, 544.0]
     rotation: 0
     state: enabled
 
@@ -577,9 +701,12 @@ connections:
 - [analog_quadrature_demod_cf_0, '0', qtgui_time_sink_x_1_0, '0']
 - [analog_simple_squelch_cc_0, '0', low_pass_filter_0_0, '0']
 - [ble_ble_packet_sink_0, '0', blocks_uchar_to_float_0_0_0_0, '0']
+- [ble_ble_packet_sink_0, pmt, ble_tag_stream_from_message_0, in]
 - [ble_ble_packet_sink_0, pmt, blocks_message_debug_0, print]
+- [ble_tag_stream_from_message_0, '0', qtgui_time_sink_x_0, '0']
 - [blocks_file_source_0, '0', blocks_throttle2_0, '0']
 - [blocks_throttle2_0, '0', analog_simple_squelch_cc_0, '0']
+- [blocks_throttle2_0, '0', ble_tag_stream_from_message_0, '0']
 - [blocks_uchar_to_float_0_0_0_0, '0', qtgui_time_sink_x_1, '1']
 - [digital_symbol_sync_xx_0, '0', virtual_sink_0, '0']
 - [low_pass_filter_0_0, '0', analog_quadrature_demod_cf_0, '0']

@@ -1,6 +1,7 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2025 Diego Badillo-San-Juan.
+ * Author: Diego Badillo-San-Juan <diego.badillo-san-juan@inria.fr>
+ * Copyright 2025 Inria.
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */

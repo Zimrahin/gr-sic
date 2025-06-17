@@ -7,4 +7,5 @@
 #
 
 install(FILES
-    ble_ble_packet_sink.block.yml DESTINATION share/gnuradio/grc/blocks)
+    ble_ble_packet_sink.block.yml
+    ble_tag_stream_from_message.block.yml DESTINATION share/gnuradio/grc/blocks)
