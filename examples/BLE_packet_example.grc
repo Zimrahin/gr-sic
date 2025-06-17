@@ -358,12 +358,12 @@ blocks:
     style7: '1'
     style8: '1'
     style9: '1'
-    tr_chan: '0'
-    tr_delay: '0'
+    tr_chan: '1'
+    tr_delay: 200E-6
     tr_level: '0.0'
-    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_mode: qtgui.TRIG_MODE_TAG
     tr_slope: qtgui.TRIG_SLOPE_POS
-    tr_tag: '""'
+    tr_tag: '"Payload length"'
     type: float
     update_time: '0.10'
     width1: '1'
