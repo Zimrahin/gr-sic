@@ -16,6 +16,7 @@ import math
 from gnuradio import ble
 from gnuradio import blocks
 import pmt
+from gnuradio import blocks, gr
 from gnuradio import digital
 from gnuradio import filter
 from gnuradio.filter import firdes
@@ -205,14 +206,15 @@ class BLE_packet_example(gr.top_block, Qt.QWidget):
             0.045,
             1.0,
             1.0,
-            1.5,
+            (samples_per_bit / 1E6),
             1,
             digital.constellation_bpsk().base(),
             digital.IR_MMSE_8TAP,
             128,
             [])
         self.blocks_uchar_to_float_0_0_0_0 = blocks.uchar_to_float()
-        self.blocks_throttle2_0 = blocks.throttle( gr.sizeof_gr_complex*1, (samp_rate/400), True, 0 if "auto" == "auto" else max( int(float(0.1) * (samp_rate/400)) if "auto" == "time" else int(0.1), 1) )
+        self.blocks_throttle2_0 = blocks.throttle( gr.sizeof_gr_complex*1, (samp_rate/100/4), True, 0 if "auto" == "auto" else max( int(float(0.1) * (samp_rate/100/4)) if "auto" == "time" else int(0.1), 1) )
+        self.blocks_message_debug_0 = blocks.message_debug(True, gr.log_levels.info)
         self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, '/home/diego/Documents/GNU_radio_OOT_modules/gr-ble/examples/data/BLE_124B.dat', True, 0, 0)
         self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
         self.ble_tag_iq_stream_0 = ble.tag_iq_stream(samples_per_bit)
@@ -224,6 +226,7 @@ class BLE_packet_example(gr.top_block, Qt.QWidget):
         ##################################################
         # Connections
         ##################################################
+        self.msg_connect((self.ble_ble_packet_sink_0, 'pmt'), (self.blocks_message_debug_0, 'print'))
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.digital_symbol_sync_xx_0, 0))
         self.connect((self.analog_simple_squelch_cc_0, 0), (self.low_pass_filter_0_0, 0))
         self.connect((self.ble_ble_packet_sink_0, 0), (self.ble_tag_iq_stream_0, 1))
@@ -275,7 +278,7 @@ class BLE_packet_example(gr.top_block, Qt.QWidget):
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
         self.analog_quadrature_demod_cf_0.set_gain(((self.samp_rate / self.decimation)/(2*math.pi*self.fsk_deviation_hz)))
-        self.blocks_throttle2_0.set_sample_rate((self.samp_rate/400))
+        self.blocks_throttle2_0.set_sample_rate((self.samp_rate/100/4))
         self.low_pass_filter_0_0.set_taps(firdes.low_pass(1, self.samp_rate, (self.tuning_LPF_cutoff_kHz*1000), (self.samp_rate/100), window.WIN_HAMMING, 6.76))
         self.qtgui_time_sink_x_0.set_samp_rate(self.samp_rate)
         self.qtgui_time_sink_x_1.set_samp_rate(int(self.samp_rate / self.samples_per_bit))

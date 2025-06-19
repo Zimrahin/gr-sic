@@ -225,7 +225,7 @@ class BLE_adjacent_bands(gr.top_block, Qt.QWidget):
             0.045,
             1.0,
             1.0,
-            1.5,
+            (samples_per_bit / 1E6),
             1,
             digital.constellation_bpsk().base(),
             digital.IR_MMSE_8TAP,

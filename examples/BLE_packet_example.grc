@@ -230,7 +230,7 @@ blocks:
     bus_structure: null
     coordinate: [552, 688.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_throttle2_0
   id: blocks_throttle2
   parameters:
@@ -242,7 +242,7 @@ blocks:
     maximum: '0.1'
     maxoutbuf: '0'
     minoutbuf: '0'
-    samples_per_second: samp_rate/400
+    samples_per_second: samp_rate/100/4
     type: complex
     vlen: '1'
   states:
@@ -276,7 +276,7 @@ blocks:
     constellation: digital.constellation_bpsk().base()
     damping: '1.0'
     loop_bw: '0.045'
-    max_dev: '1.5'
+    max_dev: samples_per_bit / 1E6
     maxoutbuf: '0'
     minoutbuf: '0'
     nfilters: '128'
