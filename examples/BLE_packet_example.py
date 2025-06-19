@@ -140,7 +140,7 @@ class BLE_packet_example(gr.top_block, Qt.QWidget):
         for c in range(0, 1):
             self.top_grid_layout.setColumnStretch(c, 1)
         self.qtgui_time_sink_x_0 = qtgui.time_sink_c(
-            (plot_N*2), #size
+            plot_N, #size
             samp_rate, #samp_rate
             "Testing Tag Stream From Message block", #name
             1, #number of inputs
@@ -152,7 +152,7 @@ class BLE_packet_example(gr.top_block, Qt.QWidget):
         self.qtgui_time_sink_x_0.set_y_label('Amplitude', "")
 
         self.qtgui_time_sink_x_0.enable_tags(True)
-        self.qtgui_time_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_NORM, qtgui.TRIG_SLOPE_POS, 0.0, trigger_delay, 0, "Payload length")
+        self.qtgui_time_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_TAG, qtgui.TRIG_SLOPE_POS, 0.0, trigger_delay, 0, "Payload length")
         self.qtgui_time_sink_x_0.enable_autoscale(False)
         self.qtgui_time_sink_x_0.enable_grid(False)
         self.qtgui_time_sink_x_0.enable_axis_labels(True)
@@ -258,7 +258,7 @@ class BLE_packet_example(gr.top_block, Qt.QWidget):
 
     def set_trigger_delay(self, trigger_delay):
         self.trigger_delay = trigger_delay
-        self.qtgui_time_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_NORM, qtgui.TRIG_SLOPE_POS, 0.0, self.trigger_delay, 0, "Payload length")
+        self.qtgui_time_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_TAG, qtgui.TRIG_SLOPE_POS, 0.0, self.trigger_delay, 0, "Payload length")
         self.qtgui_time_sink_x_1.set_trigger_mode(qtgui.TRIG_MODE_TAG, qtgui.TRIG_SLOPE_POS, 0.0, self.trigger_delay, 1, "Payload length")
 
     def get_samples_per_bit(self):

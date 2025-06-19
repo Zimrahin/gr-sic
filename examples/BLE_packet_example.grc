@@ -373,7 +373,7 @@ blocks:
     marker9: '-1'
     name: '"Testing Tag Stream From Message block"'
     nconnections: '1'
-    size: plot_N*2
+    size: plot_N
     srate: samp_rate
     stemplot: 'False'
     style1: '1'
@@ -389,7 +389,7 @@ blocks:
     tr_chan: '0'
     tr_delay: trigger_delay
     tr_level: '0.0'
-    tr_mode: qtgui.TRIG_MODE_NORM
+    tr_mode: qtgui.TRIG_MODE_TAG
     tr_slope: qtgui.TRIG_SLOPE_POS
     tr_tag: '"Payload length"'
     type: complex
