@@ -13,8 +13,8 @@
 /* If manual edits are made, the following tags should be modified accordingly.    */
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
-/* BINDTOOL_HEADER_FILE(tag_stream_from_message.h) */
-/* BINDTOOL_HEADER_FILE_HASH(0a99aa3056c8fff21eba299d6a9b16f2)                     */
+/* BINDTOOL_HEADER_FILE(tag_iq_stream.h)                                        */
+/* BINDTOOL_HEADER_FILE_HASH(3048fec22e79edff8902d266ab81198a)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -23,24 +23,20 @@
 
 namespace py = pybind11;
 
-#include <gnuradio/ble/tag_stream_from_message.h>
+#include <gnuradio/ble/tag_iq_stream.h>
 // pydoc.h is automatically generated in the build directory
-#include <tag_stream_from_message_pydoc.h>
+#include <tag_iq_stream_pydoc.h>
 
-void bind_tag_stream_from_message(py::module& m)
+void bind_tag_iq_stream(py::module& m)
 {
 
-    using tag_stream_from_message = ::gr::ble::tag_stream_from_message;
+    using tag_iq_stream = ::gr::ble::tag_iq_stream;
 
 
-    py::class_<tag_stream_from_message,
-               gr::sync_block,
-               gr::block,
-               gr::basic_block,
-               std::shared_ptr<tag_stream_from_message>>(
-        m, "tag_stream_from_message", D(tag_stream_from_message))
+    py::class_<tag_iq_stream, gr::block, gr::basic_block, std::shared_ptr<tag_iq_stream>>(
+        m, "tag_iq_stream", D(tag_iq_stream))
 
-        .def(py::init(&tag_stream_from_message::make), D(tag_stream_from_message, make))
+        .def(py::init(&tag_iq_stream::make), py::arg("sps"), D(tag_iq_stream, make))
 
 
         ;

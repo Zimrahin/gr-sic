@@ -15,11 +15,10 @@
  */
 
 
-static const char* __doc_gr_ble_tag_stream_from_message = R"doc()doc";
+static const char* __doc_gr_ble_tag_iq_stream = R"doc()doc";
 
 
-static const char* __doc_gr_ble_tag_stream_from_message_tag_stream_from_message_0 =
-    R"doc()doc";
+static const char* __doc_gr_ble_tag_iq_stream_tag_iq_stream_0 = R"doc()doc";
 
 
-static const char* __doc_gr_ble_tag_stream_from_message_make = R"doc()doc";
+static const char* __doc_gr_ble_tag_iq_stream_make = R"doc()doc";
