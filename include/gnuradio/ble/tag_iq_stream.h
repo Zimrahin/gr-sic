@@ -16,7 +16,7 @@ namespace gr {
 namespace ble {
 
 /*!
- * \brief <+description of block+>
+ * \brief
  * \ingroup ble
  *
  */
@@ -26,12 +26,12 @@ public:
     typedef std::shared_ptr<tag_iq_stream> sptr;
 
     /*!
-     * \brief Return a shared_ptr to a new instance of ble::tag_iq_stream.
-     *
-     * To avoid accidental use of raw pointers, ble::tag_iq_stream's
-     * constructor is in a private implementation
-     * class. ble::tag_iq_stream::make is the public interface for
-     * creating new instances.
+     * \brief This block tags an IQ stream with a symbol stream coming from the
+     * demodulation of the input IQ stream. Tagging packets in the IQ stream allows for
+     * post-processing of the IQ data, such as Successive Interference Cancellation (SIC).
+     * \param sps Samples per symbol. This parameter defines the ratio of data rates
+     * between IQ imput and symbol input. The block expects the IQ input to be at a higher
+     * rate than the symbol input by a factor of `sps`.
      */
     static sptr make(uint sps);
 };
