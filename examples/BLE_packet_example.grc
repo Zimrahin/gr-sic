@@ -191,7 +191,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [400, 448.0]
+    coordinate: [416, 448.0]
     rotation: 0
     state: enabled
 - name: blocks_file_source_0
@@ -242,7 +242,7 @@ blocks:
     maximum: '0.1'
     maxoutbuf: '0'
     minoutbuf: '0'
-    samples_per_second: samp_rate/800
+    samples_per_second: samp_rate/400
     type: complex
     vlen: '1'
   states:
@@ -373,7 +373,7 @@ blocks:
     marker9: '-1'
     name: '"Testing Tag Stream From Message block"'
     nconnections: '1'
-    size: plot_N
+    size: plot_N*2
     srate: samp_rate
     stemplot: 'False'
     style1: '1'
@@ -389,9 +389,9 @@ blocks:
     tr_chan: '0'
     tr_delay: trigger_delay
     tr_level: '0.0'
-    tr_mode: qtgui.TRIG_MODE_TAG
+    tr_mode: qtgui.TRIG_MODE_NORM
     tr_slope: qtgui.TRIG_SLOPE_POS
-    tr_tag: '"test_key"'
+    tr_tag: '"Payload length"'
     type: complex
     update_time: '0.10'
     width1: '1'
