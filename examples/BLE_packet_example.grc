@@ -175,7 +175,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [232, 744.0]
+    coordinate: [240, 616.0]
     rotation: 0
     state: enabled
 - name: ble_tag_iq_stream_0
@@ -191,7 +191,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [416, 448.0]
+    coordinate: [136, 432.0]
     rotation: 0
     state: enabled
 - name: blocks_file_source_0
@@ -228,7 +228,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [544, 816.0]
+    coordinate: [552, 688.0]
     rotation: 0
     state: disabled
 - name: blocks_throttle2_0
@@ -264,7 +264,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [536, 760.0]
+    coordinate: [544, 632.0]
     rotation: 0
     state: true
 - name: digital_symbol_sync_xx_0
@@ -412,7 +412,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [680, 432.0]
+    coordinate: [400, 416.0]
     rotation: 0
     state: enabled
 - name: qtgui_time_sink_x_1
@@ -509,7 +509,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [760, 696.0]
+    coordinate: [768, 568.0]
     rotation: 0
     state: enabled
 - name: qtgui_time_sink_x_1_0
@@ -693,7 +693,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [8, 704.0]
+    coordinate: [16, 576.0]
     rotation: 0
     state: enabled
 

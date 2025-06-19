@@ -12,7 +12,6 @@
 #include <gnuradio/ble/ble_packet_sink.h>
 #include <array>
 
-
 constexpr size_t MAX_PAYLOAD_LEN = 256;
 constexpr size_t CRC_LEN = 3;
 
