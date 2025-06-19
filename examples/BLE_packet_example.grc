@@ -371,7 +371,7 @@ blocks:
     marker7: '-1'
     marker8: '-1'
     marker9: '-1'
-    name: '"Testing Tag Stream From Message block"'
+    name: '"Testing Tag IQ Stream block"'
     nconnections: '1'
     size: plot_N
     srate: samp_rate

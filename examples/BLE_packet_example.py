@@ -142,7 +142,7 @@ class BLE_packet_example(gr.top_block, Qt.QWidget):
         self.qtgui_time_sink_x_0 = qtgui.time_sink_c(
             plot_N, #size
             samp_rate, #samp_rate
-            "Testing Tag Stream From Message block", #name
+            "Testing Tag IQ Stream block", #name
             1, #number of inputs
             None # parent
         )

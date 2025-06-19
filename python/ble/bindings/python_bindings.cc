@@ -21,9 +21,8 @@ namespace py = pybind11;
 // Please do not delete
 /**************************************/
 // BINDING_FUNCTION_PROTOTYPES(
-    void bind_ble_packet_sink(py::module& m);
-    void bind_tag_stream_from_message(py::module& m);
-    void bind_tag_iq_stream(py::module& m);
+void bind_ble_packet_sink(py::module& m);
+void bind_tag_iq_stream(py::module& m);
 // ) END BINDING_FUNCTION_PROTOTYPES
 
 
@@ -53,7 +52,6 @@ PYBIND11_MODULE(ble_python, m)
     /**************************************/
     // BINDING_FUNCTION_CALLS(
     bind_ble_packet_sink(m);
-    bind_tag_stream_from_message(m);
     bind_tag_iq_stream(m);
     // ) END BINDING_FUNCTION_CALLS
 }
