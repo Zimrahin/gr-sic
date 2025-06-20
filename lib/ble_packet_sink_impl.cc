@@ -194,7 +194,7 @@ void ble_packet_sink_impl::process_decode_length(uint8_t bit, uint64_t sample_in
     if (d_output_connected) {
         add_item_tag(0,
                      d_sample_payload_index,
-                     pmt::intern("Payload length"),
+                     pmt::intern("Payload start"),
                      pmt::from_uint64(d_payload_len));
     }
 
