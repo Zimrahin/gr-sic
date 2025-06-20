@@ -230,7 +230,7 @@ blocks:
     bus_structure: null
     coordinate: [552, 688.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_throttle2_0
   id: blocks_throttle2
   parameters:
