@@ -35,7 +35,8 @@ private:
     uint64_t d_max_gap;              // Maximum gap between tags for the same packet
     uint64_t d_buffer_size;          // Maximum size of the buffer
     std::deque<gr_complex> d_buffer; // Double-end queue to hold the samples
-    uint64_t d_base; // How many samples the buffer has been shifter since filling it
+    uint64_t d_buffer_base; // Buffer base index, used to calculate absolute sample
+                            // indices of input stream
     std::map<uint64_t, uint64_t> d_active_starts; // Store the active (not yet processed)
                                                   // start tags with their ID (counter)
 

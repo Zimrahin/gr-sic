@@ -215,7 +215,7 @@ class BLE_packet_example(gr.top_block, Qt.QWidget):
         self.blocks_throttle2_0 = blocks.throttle( gr.sizeof_gr_complex*1, (samp_rate/100/4), True, 0 if "auto" == "auto" else max( int(float(0.1) * (samp_rate/100/4)) if "auto" == "time" else int(0.1), 1) )
         self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, '/home/diego/Documents/GNU_radio_OOT_modules/gr-ble/examples/data/BLE_124B.dat', True, 0, 0)
         self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
-        self.ble_tagged_iq_to_vector_0 = ble.tagged_iq_to_vector(0, 0, (128*8*8*samples_per_bit))
+        self.ble_tagged_iq_to_vector_0 = ble.tagged_iq_to_vector((int(trigger_delay * samp_rate)), (int(trigger_delay * samp_rate)), (128*8*8*samples_per_bit))
         self.ble_tag_iq_stream_0 = ble.tag_iq_stream(samples_per_bit)
         self.ble_ble_packet_sink_0 = ble.ble_packet_sink(0x12345678, 0, 0x1, 0)
         self.analog_simple_squelch_cc_0 = analog.simple_squelch_cc((-50), 1)

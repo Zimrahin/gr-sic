@@ -203,13 +203,13 @@ blocks:
     max_gap: 128*8*8*samples_per_bit
     maxoutbuf: '0'
     minoutbuf: '0'
-    post_offset: '0'
-    pre_offset: '0'
+    post_offset: int(trigger_delay * samp_rate)
+    pre_offset: int(trigger_delay * samp_rate)
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [632, 456.0]
+    coordinate: [400, 496.0]
     rotation: 0
     state: enabled
 - name: blocks_file_source_0
@@ -430,7 +430,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [400, 416.0]
+    coordinate: [400, 392.0]
     rotation: 0
     state: enabled
 - name: qtgui_time_sink_x_1

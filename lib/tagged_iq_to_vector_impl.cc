@@ -34,7 +34,7 @@ tagged_iq_to_vector_impl::tagged_iq_to_vector_impl(uint64_t pre_offset,
 {
     // Initialise buffer size based on input parameters
     d_buffer_size = d_pre_offset + d_max_gap + d_pre_offset;
-    d_base = 0;
+    d_buffer_base = 0;
 
     // PMT message output port
     message_port_register_out(pmt::mp("out"));
@@ -103,14 +103,50 @@ int tagged_iq_to_vector_impl::work(int noutput_items,
         d_buffer.push_back(in[i]);
         if (d_buffer.size() > d_buffer_size) {
             d_buffer.pop_front();
-            d_base++;
+            d_buffer_base++;
         }
     }
 
-    // Process incoming tags
+    // Add packet extraction requests based on tags
     std::vector<tag_t> tags;
     get_tags_in_range(tags, 0, start_abs, end_abs);
     process_tags(tags);
+
+    // Process pending requests
+    auto request_iterator = d_pending_requests.begin();
+    while (request_iterator != d_pending_requests.end()) {
+        // Have we received enough samples to process this request?
+        if (end_abs < request_iterator->window_end) {
+            request_iterator++;
+            continue; // Not enough samples yet
+        }
+
+        // Check if the start of the window is within the buffer
+        if (request_iterator->window_start >= d_buffer_base) {
+            // Extract samples from buffer
+            std::vector<gr_complex> samples_out;
+            samples_out.reserve(request_iterator->window_end -
+                                request_iterator->window_start);
+
+            for (uint64_t offset = request_iterator->window_start;
+                 offset < request_iterator->window_end;
+                 offset++) {
+                samples_out.push_back(d_buffer[offset - d_buffer_base]);
+            }
+            // Create PMT message
+            pmt::pmt_t samples_out_pmt =
+                pmt::init_c32vector(samples_out.size(), samples_out);
+            pmt::pmt_t meta = pmt::make_dict();
+            meta = pmt::dict_add(meta,
+                                 pmt::mp("Packet ID"),
+                                 pmt::from_long(request_iterator->id)); // Add packet ID
+            pmt::pmt_t pdu = pmt::cons(meta, samples_out_pmt);
+            message_port_pub(pmt::mp("out"), pdu);
+        }
+
+        // Remove the request even if not processed due to buffer size limitations
+        request_iterator = d_pending_requests.erase(request_iterator);
+    }
 
     return noutput_items; // Tell runtime system how many output items we produced
 }
