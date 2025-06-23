@@ -194,6 +194,24 @@ blocks:
     coordinate: [136, 432.0]
     rotation: 0
     state: enabled
+- name: ble_tagged_iq_to_vector_0
+  id: ble_tagged_iq_to_vector
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    max_gap: 128*8*8*samples_per_bit
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    post_offset: '0'
+    pre_offset: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [632, 456.0]
+    rotation: 0
+    state: enabled
 - name: blocks_file_source_0
   id: blocks_file_source
   parameters:
@@ -704,6 +722,7 @@ connections:
 - [ble_ble_packet_sink_0, '0', ble_tag_iq_stream_0, '1']
 - [ble_ble_packet_sink_0, '0', blocks_uchar_to_float_0_0_0_0, '0']
 - [ble_ble_packet_sink_0, pmt, blocks_message_debug_0, print]
+- [ble_tag_iq_stream_0, '0', ble_tagged_iq_to_vector_0, '0']
 - [ble_tag_iq_stream_0, '0', qtgui_time_sink_x_0, '0']
 - [blocks_file_source_0, '0', blocks_throttle2_0, '0']
 - [blocks_throttle2_0, '0', analog_simple_squelch_cc_0, '0']

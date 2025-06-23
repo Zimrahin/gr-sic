@@ -26,7 +26,8 @@ include(GrPybind)
 
 list(APPEND ble_python_files
     ble_packet_sink_python.cc
-    tag_iq_stream_python.cc python_bindings.cc)
+    tag_iq_stream_python.cc
+    tagged_iq_to_vector_python.cc python_bindings.cc)
 
 gr_pybind_make_oot(ble ../../.. gr::ble "${ble_python_files}")
 
