@@ -45,27 +45,9 @@ tagged_iq_to_vector_impl::tagged_iq_to_vector_impl(uint64_t pre_offset,
 // Destructor
 tagged_iq_to_vector_impl::~tagged_iq_to_vector_impl() {}
 
-int tagged_iq_to_vector_impl::work(int noutput_items,
-                                   gr_vector_const_void_star& input_items,
-                                   gr_vector_void_star& output_items)
+// Add packet requests based on tags
+void tagged_iq_to_vector_impl::process_tags(const std::vector<tag_t> tags)
 {
-    auto in = static_cast<const input_type*>(input_items[0]);
-    int ninput = noutput_items;
-    uint64_t start_abs = nitems_read(0);
-    uint64_t end_abs = start_abs + ninput;
-
-    // Buffer incoming samples
-    for (int i = 0; i < ninput; i++) {
-        d_buffer.push_back(in[i]);
-        if (d_buffer.size() > d_buffer_size) {
-            d_buffer.pop_front();
-            d_base++;
-        }
-    }
-
-    // Process incoming tags
-    std::vector<tag_t> tags;
-    get_tags_in_range(tags, 0, start_abs, end_abs);
     for (const auto& tag : tags) {
         if (pmt::eq(tag.key, pmt::intern("Payload start")) && pmt::is_tuple(tag.value)) {
             uint64_t id = pmt::to_uint64(pmt::tuple_ref(tag.value, 0));
@@ -105,6 +87,30 @@ int tagged_iq_to_vector_impl::work(int noutput_items,
             d_active_starts.erase(iterator);
         }
     }
+}
+
+int tagged_iq_to_vector_impl::work(int noutput_items,
+                                   gr_vector_const_void_star& input_items,
+                                   gr_vector_void_star& output_items)
+{
+    auto in = static_cast<const input_type*>(input_items[0]);
+    int ninput = noutput_items;
+    uint64_t start_abs = nitems_read(0);
+    uint64_t end_abs = start_abs + ninput;
+
+    // Buffer incoming samples
+    for (int i = 0; i < ninput; i++) {
+        d_buffer.push_back(in[i]);
+        if (d_buffer.size() > d_buffer_size) {
+            d_buffer.pop_front();
+            d_base++;
+        }
+    }
+
+    // Process incoming tags
+    std::vector<tag_t> tags;
+    get_tags_in_range(tags, 0, start_abs, end_abs);
+    process_tags(tags);
 
     return noutput_items; // Tell runtime system how many output items we produced
 }

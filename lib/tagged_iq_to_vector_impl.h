@@ -26,6 +26,10 @@ public:
              gr_vector_void_star& output_items);
 
 private:
+    // Helper functions
+    void process_tags(const std::vector<tag_t> tags); // Add packet requests based on tags
+
+    // Variables
     uint64_t d_pre_offset;           // Sample offset before the starting tag
     uint64_t d_post_offset;          // Sample offset after the ending tag
     uint64_t d_max_gap;              // Maximum gap between tags for the same packet
