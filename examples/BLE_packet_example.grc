@@ -178,6 +178,19 @@ blocks:
     coordinate: [240, 616.0]
     rotation: 0
     state: enabled
+- name: ble_plot_iq_from_pmt_0
+  id: ble_plot_iq_from_pmt
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [688, 456.0]
+    rotation: 0
+    state: enabled
 - name: ble_tag_iq_stream_0
   id: ble_tag_iq_stream
   parameters:
@@ -624,7 +637,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1072, 368.0]
+    coordinate: [1072, 312.0]
     rotation: 0
     state: disabled
 - name: qtgui_waterfall_sink_x_0
@@ -724,6 +737,7 @@ connections:
 - [ble_ble_packet_sink_0, pmt, blocks_message_debug_0, print]
 - [ble_tag_iq_stream_0, '0', ble_tagged_iq_to_vector_0, '0']
 - [ble_tag_iq_stream_0, '0', qtgui_time_sink_x_0, '0']
+- [ble_tagged_iq_to_vector_0, out, ble_plot_iq_from_pmt_0, in]
 - [blocks_file_source_0, '0', blocks_throttle2_0, '0']
 - [blocks_throttle2_0, '0', analog_simple_squelch_cc_0, '0']
 - [blocks_throttle2_0, '0', ble_tag_iq_stream_0, '0']

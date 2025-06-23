@@ -217,6 +217,7 @@ class BLE_packet_example(gr.top_block, Qt.QWidget):
         self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
         self.ble_tagged_iq_to_vector_0 = ble.tagged_iq_to_vector((int(trigger_delay * samp_rate)), (int(trigger_delay * samp_rate)), (128*8*8*samples_per_bit))
         self.ble_tag_iq_stream_0 = ble.tag_iq_stream(samples_per_bit)
+        self.ble_plot_iq_from_pmt_0 = ble.plot_iq_from_pmt()
         self.ble_ble_packet_sink_0 = ble.ble_packet_sink(0x12345678, 0, 0x1, 0)
         self.analog_simple_squelch_cc_0 = analog.simple_squelch_cc((-50), 1)
         self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(((samp_rate / decimation)/(2*math.pi*fsk_deviation_hz)))
@@ -225,6 +226,7 @@ class BLE_packet_example(gr.top_block, Qt.QWidget):
         ##################################################
         # Connections
         ##################################################
+        self.msg_connect((self.ble_tagged_iq_to_vector_0, 'out'), (self.ble_plot_iq_from_pmt_0, 'in'))
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.digital_symbol_sync_xx_0, 0))
         self.connect((self.analog_simple_squelch_cc_0, 0), (self.low_pass_filter_0_0, 0))
         self.connect((self.ble_ble_packet_sink_0, 0), (self.ble_tag_iq_stream_0, 1))

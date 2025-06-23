@@ -80,8 +80,8 @@ void tagged_iq_to_vector_impl::process_tags(const std::vector<tag_t> tags)
 
             // Append the window extraction request to pending requests
             d_pending_requests.push_back({ id, window_start, window_end });
-            std::cout << "Requesting samples for ID: " << id << ", Window: ["
-                      << window_start << ", " << window_end << "]\n";
+            // std::cout << "Requesting samples for ID: " << id << ", Window: ["
+            //           << window_start << ", " << window_end << "]\n";
 
             // Tag processed, remove it from active starts
             d_active_starts.erase(iterator);
