@@ -184,6 +184,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
+    sample_rate: samp_rate
   states:
     bus_sink: false
     bus_source: false

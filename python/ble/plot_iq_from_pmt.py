@@ -17,8 +17,12 @@ class plot_iq_from_pmt(gr.sync_block):
     Plot IQ data from PMT messages.
     """
 
-    def __init__(self):
+    def __init__(self, sample_rate=1.0):
         gr.sync_block.__init__(self, name="plot_iq_from_pmt", in_sig=None, out_sig=None)
+
+        # Parameters
+        self.sample_rate = sample_rate
+        print(f"{sample_rate = } Hz")
 
         # PMT message input port
         self.message_port_register_in(gr.pmt.intern("in"))

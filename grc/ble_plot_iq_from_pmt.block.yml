@@ -4,9 +4,14 @@ category: '[ble]'
 
 templates:
   imports: from gnuradio import ble
-  make: ble.plot_iq_from_pmt()
+  make: ble.plot_iq_from_pmt(${sample_rate})
 
-parameters: []
+parameters:
+-   id: sample_rate
+    label: Sample Rate
+    dtype: float
+    default: 1.0
+    tooltip: "Sample rate of the IQ data in Hz"
 
 inputs:
 -   label: in
