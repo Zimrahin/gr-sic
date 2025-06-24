@@ -60,10 +60,14 @@ void tagged_iq_to_vector_impl::process_tags(const std::vector<tag_t> tags)
         } else if (pmt::eq(tag.key, pmt::intern("CRC check")) &&
                    pmt::is_tuple(tag.value)) {
             uint64_t id = pmt::to_uint64(pmt::tuple_ref(tag.value, 0));
+            bool crc_check = pmt::to_bool(pmt::tuple_ref(tag.value, 1));
 
             auto iterator = d_active_starts.find(id);
             if (iterator == d_active_starts.end()) {
                 // No start tag found for this ID, ignore it
+                continue;
+            } else if (!crc_check) {
+                d_active_starts.erase(iterator);
                 continue;
             }
             uint64_t start_tag_offset = iterator->second;
@@ -80,8 +84,6 @@ void tagged_iq_to_vector_impl::process_tags(const std::vector<tag_t> tags)
 
             // Append the window extraction request to pending requests
             d_pending_requests.push_back({ id, window_start, window_end });
-            // std::cout << "Requesting samples for ID: " << id << ", Window: ["
-            //           << window_start << ", " << window_end << "]\n";
 
             // Tag processed, remove it from active starts
             d_active_starts.erase(iterator);
