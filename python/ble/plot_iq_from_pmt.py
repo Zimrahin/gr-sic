@@ -22,7 +22,6 @@ class plot_iq_from_pmt(gr.sync_block):
 
         # Parameters
         self.sample_rate = sample_rate
-        print(f"{sample_rate = } Hz")
 
         # PMT message input port
         self.message_port_register_in(gr.pmt.intern("in"))

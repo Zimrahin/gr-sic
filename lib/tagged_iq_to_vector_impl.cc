@@ -57,7 +57,7 @@ void tagged_iq_to_vector_impl::process_tags(const std::vector<tag_t> tags)
                 // New start tag, store it
                 d_active_starts[id] = tag.offset;
             }
-        } else if (pmt::eq(tag.key, pmt::intern("CRC check")) &&
+        } else if (pmt::eq(tag.key, pmt::intern("Packet end")) &&
                    pmt::is_tuple(tag.value)) {
             uint64_t id = pmt::to_uint64(pmt::tuple_ref(tag.value, 0));
             bool crc_check = pmt::to_bool(pmt::tuple_ref(tag.value, 1));

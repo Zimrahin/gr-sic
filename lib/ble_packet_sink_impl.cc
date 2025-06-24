@@ -247,19 +247,14 @@ void ble_packet_sink_impl::process_check_crc(uint8_t bit, uint64_t sample_index)
         meta = pmt::dict_add(meta,
                              pmt::mp("Payload start sample"),
                              pmt::from_uint64(d_sample_payload_index));
-        pmt::pmt_t payload =
-            pmt::make_blob(d_payload.data(),
-                           d_payload_len); // Only copy d_payload_len bytes from d_payload
+        pmt::pmt_t payload = pmt::make_blob(d_payload.data(), d_payload_len);
         message_port_pub(pmt::mp("pmt"), pmt::cons(meta, payload));
 
         // Optional output stream tag
         if (d_output_connected) {
             pmt::pmt_t tag_value = pmt::make_tuple(pmt::from_uint64(d_packet_count++),
                                                    pmt::from_bool(crc_ok));
-            add_item_tag(0,
-                         sample_index,
-                         pmt::intern("CRC check"),
-                         tag_value); // CRC check prints #t if ok
+            add_item_tag(0, sample_index, pmt::intern("Packet end"), tag_value);
         }
 
         enter_search_preamble();
