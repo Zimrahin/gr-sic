@@ -16,7 +16,7 @@ namespace gr {
 namespace ble {
 
 /*!
- * \brief <+description of block+>
+ * \brief
  * \ingroup ble
  *
  */
@@ -26,12 +26,16 @@ public:
     typedef std::shared_ptr<tagged_iq_to_vector> sptr;
 
     /*!
-     * \brief Return a shared_ptr to a new instance of ble::tagged_iq_to_vector.
-     *
-     * To avoid accidental use of raw pointers, ble::tagged_iq_to_vector's
-     * constructor is in a private implementation
-     * class. ble::tagged_iq_to_vector::make is the public interface for
-     * creating new instances.
+     * \brief This blocks receives a stream of IQ samples and extracts packets based on
+     * tags. It buffers the IQ samples and allows for extraction of packets based on start
+     * and end tags. The block outputs a PMT message containing the extracted samples as a
+     * vector for further processing.
+     * \param pre_offset The number of samples before the start tag to include in the
+     * output.
+     * \param post_offset The number of samples after the end tag to include in the
+     * output.
+     * \param max_gap The maximum gap between start and end tags to consider a valid
+     * packet
      */
     static sptr make(uint64_t pre_offset, uint64_t post_offset, uint64_t max_gap);
 };
