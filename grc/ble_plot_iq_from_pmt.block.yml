@@ -1,0 +1,26 @@
+id: ble_plot_iq_from_pmt
+label: Plot IQ from PMT
+category: '[ble]'
+
+templates:
+  imports: from gnuradio import ble
+  make: ble.plot_iq_from_pmt(${sample_rate})
+
+parameters:
+-   id: sample_rate
+    label: Sample Rate
+    dtype: float
+    default: 1.0
+    tooltip: "Sample rate of the IQ data in Hz"
+
+inputs:
+-   label: in
+    domain: message
+    dtype: pmt
+    tooltip: "Input stream of PMT messages containing IQ data"
+
+outputs: []
+
+#  'file_format' specifies the version of the GRC yml format used in the file
+#  and should usually not be changed.
+file_format: 1

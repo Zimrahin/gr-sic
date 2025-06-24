@@ -19,7 +19,8 @@ add_subdirectory(bindings)
 ########################################################################
 # Install python sources
 ########################################################################
-gr_python_install(FILES __init__.py DESTINATION ${GR_PYTHON_DIR}/gnuradio/ble)
+gr_python_install(FILES __init__.py
+    plot_iq_from_pmt.py DESTINATION ${GR_PYTHON_DIR}/gnuradio/ble)
 
 ########################################################################
 # Handle the unit tests

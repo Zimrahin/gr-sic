@@ -416,7 +416,7 @@ blocks:
     tr_level: '0.0'
     tr_mode: qtgui.TRIG_MODE_TAG
     tr_slope: qtgui.TRIG_SLOPE_POS
-    tr_tag: '"Payload length"'
+    tr_tag: '"Payload start"'
     type: float
     update_time: '0.10'
     width1: '1'

@@ -178,6 +178,20 @@ blocks:
     coordinate: [240, 616.0]
     rotation: 0
     state: enabled
+- name: ble_plot_iq_from_pmt_0
+  id: ble_plot_iq_from_pmt
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    sample_rate: samp_rate
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [688, 456.0]
+    rotation: 0
+    state: enabled
 - name: ble_tag_iq_stream_0
   id: ble_tag_iq_stream
   parameters:
@@ -192,6 +206,24 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [136, 432.0]
+    rotation: 0
+    state: enabled
+- name: ble_tagged_iq_to_vector_0
+  id: ble_tagged_iq_to_vector
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    max_gap: 128*8*8*samples_per_bit
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    post_offset: int(trigger_delay * samp_rate)
+    pre_offset: int(trigger_delay * samp_rate)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [400, 496.0]
     rotation: 0
     state: enabled
 - name: blocks_file_source_0
@@ -230,7 +262,7 @@ blocks:
     bus_structure: null
     coordinate: [552, 688.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_throttle2_0
   id: blocks_throttle2
   parameters:
@@ -391,7 +423,7 @@ blocks:
     tr_level: '0.0'
     tr_mode: qtgui.TRIG_MODE_TAG
     tr_slope: qtgui.TRIG_SLOPE_POS
-    tr_tag: '"Payload length"'
+    tr_tag: '"Payload start"'
     type: complex
     update_time: '0.10'
     width1: '1'
@@ -412,7 +444,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [400, 416.0]
+    coordinate: [400, 392.0]
     rotation: 0
     state: enabled
 - name: qtgui_time_sink_x_1
@@ -488,7 +520,7 @@ blocks:
     tr_level: '0.0'
     tr_mode: qtgui.TRIG_MODE_TAG
     tr_slope: qtgui.TRIG_SLOPE_POS
-    tr_tag: '"Payload length"'
+    tr_tag: '"Payload start"'
     type: float
     update_time: '0.10'
     width1: '1'
@@ -606,7 +638,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1072, 368.0]
+    coordinate: [1072, 312.0]
     rotation: 0
     state: disabled
 - name: qtgui_waterfall_sink_x_0
@@ -704,7 +736,9 @@ connections:
 - [ble_ble_packet_sink_0, '0', ble_tag_iq_stream_0, '1']
 - [ble_ble_packet_sink_0, '0', blocks_uchar_to_float_0_0_0_0, '0']
 - [ble_ble_packet_sink_0, pmt, blocks_message_debug_0, print]
+- [ble_tag_iq_stream_0, '0', ble_tagged_iq_to_vector_0, '0']
 - [ble_tag_iq_stream_0, '0', qtgui_time_sink_x_0, '0']
+- [ble_tagged_iq_to_vector_0, out, ble_plot_iq_from_pmt_0, in]
 - [blocks_file_source_0, '0', blocks_throttle2_0, '0']
 - [blocks_throttle2_0, '0', analog_simple_squelch_cc_0, '0']
 - [blocks_throttle2_0, '0', ble_tag_iq_stream_0, '0']

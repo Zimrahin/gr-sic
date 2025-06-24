@@ -85,6 +85,7 @@ private:
     uint32_t d_crc;           // Computed CRC from payload and header
     std::array<uint8_t, MAX_PAYLOAD_LEN> d_payload; // Payload buffer
     uint64_t d_sample_payload_index;                // First sample index of the payload
+    uint64_t d_packet_count;                        // Packet count for the current packet
 };
 
 } // namespace ble

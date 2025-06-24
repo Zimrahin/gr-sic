@@ -51,6 +51,7 @@ ble_packet_sink_impl::ble_packet_sink_impl(uint32_t base_address,
 
     // Variables
     d_state = state::SEARCH_PREAMBLE;
+    d_packet_count = 0;
 
     // PMT message output port
     message_port_register_out(pmt::mp("pmt"));
@@ -192,10 +193,9 @@ void ble_packet_sink_impl::process_decode_length(uint8_t bit, uint64_t sample_in
     d_payload_len = d_reg_byte; // Unpack the LENGTH byte
 
     if (d_output_connected) {
-        add_item_tag(0,
-                     d_sample_payload_index,
-                     pmt::intern("Payload length"),
-                     pmt::from_uint64(d_payload_len));
+        pmt::pmt_t tag_value = pmt::make_tuple(pmt::from_uint64(d_packet_count),
+                                               pmt::from_uint64(d_payload_len));
+        add_item_tag(0, d_sample_payload_index, pmt::intern("Payload start"), tag_value);
     }
 
     enter_decode_payload();
@@ -239,6 +239,9 @@ void ble_packet_sink_impl::process_check_crc(uint8_t bit, uint64_t sample_index)
                              pmt::mp("Block ID"),
                              pmt::from_uint64(d_block_id)); // Block instance ID
         meta = pmt::dict_add(meta,
+                             pmt::mp("Packet count"),
+                             pmt::from_uint64(d_packet_count)); // Packet count
+        meta = pmt::dict_add(meta,
                              pmt::mp("CRC check"),
                              pmt::from_bool(crc_ok)); // CRC check prints #t if ok
         meta = pmt::dict_add(meta,
@@ -249,12 +252,14 @@ void ble_packet_sink_impl::process_check_crc(uint8_t bit, uint64_t sample_index)
                            d_payload_len); // Only copy d_payload_len bytes from d_payload
         message_port_pub(pmt::mp("pmt"), pmt::cons(meta, payload));
 
-        // Optiona output stream tag
+        // Optional output stream tag
         if (d_output_connected) {
+            pmt::pmt_t tag_value = pmt::make_tuple(pmt::from_uint64(d_packet_count++),
+                                                   pmt::from_bool(crc_ok));
             add_item_tag(0,
                          sample_index,
                          pmt::intern("CRC check"),
-                         pmt::from_bool(crc_ok)); // CRC check prints #t if ok
+                         tag_value); // CRC check prints #t if ok
         }
 
         enter_search_preamble();

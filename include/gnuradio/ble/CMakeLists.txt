@@ -11,4 +11,5 @@
 ########################################################################
 install(FILES api.h
     ble_packet_sink.h
-    tag_iq_stream.h DESTINATION include/gnuradio/ble)
+    tag_iq_stream.h
+    tagged_iq_to_vector.h DESTINATION include/gnuradio/ble)
