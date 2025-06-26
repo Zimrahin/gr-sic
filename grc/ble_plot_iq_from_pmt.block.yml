@@ -9,12 +9,17 @@ templates:
 parameters:
 -   id: sample_rate
     label: Sample Rate
-    dtype: float
-    default: 1.0
+    dtype: int
+    default: 1
     tooltip: "Sample rate of the IQ data in Hz"
+-   id: max_queue_size
+    label: Max Queue Size
+    dtype: int
+    default: 10
+    tooltip: "Maximum number of IQ arrays to queue before dropping new ones"
 
 inputs:
--   label: in
+-   label: IQ
     domain: message
     dtype: pmt
     tooltip: "Input stream of PMT messages containing IQ data"
