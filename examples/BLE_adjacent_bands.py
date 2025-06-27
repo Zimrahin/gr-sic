@@ -222,10 +222,10 @@ class BLE_adjacent_bands(gr.top_block, Qt.QWidget):
         self.digital_symbol_sync_xx_0 = digital.symbol_sync_ff(
             digital.TED_MOD_MUELLER_AND_MULLER,
             (samples_per_bit / decimation),
-            0.045,
+            (0.045/10),
             1.0,
             1.0,
-            (samples_per_bit / 1E6),
+            0,
             1,
             digital.constellation_bpsk().base(),
             digital.IR_MMSE_8TAP,
@@ -246,7 +246,6 @@ class BLE_adjacent_bands(gr.top_block, Qt.QWidget):
         ##################################################
         # Connections
         ##################################################
-        self.msg_connect((self.ble_ble_packet_sink_0, 'pmt'), (self.blocks_message_debug_0, 'print'))
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.digital_symbol_sync_xx_0, 0))
         self.connect((self.analog_sig_source_x_0, 0), (self.blocks_multiply_xx_0, 1))
         self.connect((self.analog_simple_squelch_cc_0, 0), (self.low_pass_filter_0_0, 0))
