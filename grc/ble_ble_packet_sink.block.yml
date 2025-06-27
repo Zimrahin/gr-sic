@@ -43,7 +43,7 @@ outputs:
     domain: stream
     dtype: byte
     optional: true
--   id: pmt
+-   id: pdu
     domain: message
     optional: true
 

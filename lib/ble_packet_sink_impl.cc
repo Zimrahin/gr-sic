@@ -54,7 +54,7 @@ ble_packet_sink_impl::ble_packet_sink_impl(uint32_t base_address,
     d_packet_count = 0;
 
     // PMT message output port
-    message_port_register_out(pmt::mp("pmt"));
+    message_port_register_out(pmt::mp("pdu"));
 }
 
 // Destructor
@@ -239,7 +239,7 @@ void ble_packet_sink_impl::process_check_crc(uint8_t bit, uint64_t sample_index)
                              pmt::mp("Block ID"),
                              pmt::from_uint64(d_block_id)); // Block instance ID
         meta = pmt::dict_add(meta,
-                             pmt::mp("Packet count"),
+                             pmt::mp("Packet ID"),
                              pmt::from_uint64(d_packet_count)); // Packet count
         meta = pmt::dict_add(meta,
                              pmt::mp("CRC check"),
@@ -248,7 +248,7 @@ void ble_packet_sink_impl::process_check_crc(uint8_t bit, uint64_t sample_index)
                              pmt::mp("Payload start sample"),
                              pmt::from_uint64(d_sample_payload_index));
         pmt::pmt_t payload = pmt::make_blob(d_payload.data(), d_payload_len);
-        message_port_pub(pmt::mp("pmt"), pmt::cons(meta, payload));
+        message_port_pub(pmt::mp("pdu"), pmt::cons(meta, payload));
 
         // Optional output stream tag
         if (d_output_connected) {

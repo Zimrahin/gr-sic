@@ -19,10 +19,14 @@ parameters:
     tooltip: "Maximum number of IQ arrays to queue before dropping new ones"
 
 inputs:
--   label: IQ
+-   label: iq
     domain: message
     dtype: pmt
     tooltip: "Input stream of PMT messages containing IQ data"
+-   label: pdu
+    domain: message
+    dtype: pmt
+    tooltip: "Input stream of PMT messages containing Payload"
 
 outputs: []
 

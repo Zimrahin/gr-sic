@@ -227,7 +227,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [496, 568.0]
+    coordinate: [464, 504.0]
     rotation: 0
     state: enabled
 - name: blocks_add_xx_0
@@ -296,7 +296,7 @@ blocks:
     maximum: '0.1'
     maxoutbuf: '0'
     minoutbuf: '0'
-    samples_per_second: samp_rate/100/4
+    samples_per_second: samp_rate/10
     type: complex
     vlen: '1'
   states:
@@ -330,7 +330,7 @@ blocks:
     constellation: digital.constellation_bpsk().base()
     damping: '1.0'
     loop_bw: '0.045'
-    max_dev: samples_per_bit / 1E6
+    max_dev: samples_per_bit / 1E10
     maxoutbuf: '0'
     minoutbuf: '0'
     nfilters: '128'
@@ -466,7 +466,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [496, 464.0]
+    coordinate: [464, 392.0]
     rotation: 0
     state: enabled
 - name: qtgui_time_sink_x_1
@@ -757,10 +757,11 @@ connections:
 - [analog_quadrature_demod_cf_0, '0', qtgui_time_sink_x_1_0, '0']
 - [ble_ble_packet_sink_0, '0', ble_tag_iq_stream_0, '1']
 - [ble_ble_packet_sink_0, '0', blocks_uchar_to_float_0_0_0_0, '0']
-- [ble_ble_packet_sink_0, pmt, blocks_message_debug_0, print]
+- [ble_ble_packet_sink_0, pdu, ble_plot_iq_from_pmt_0, pdu]
+- [ble_ble_packet_sink_0, pdu, blocks_message_debug_0, print]
 - [ble_tag_iq_stream_0, '0', ble_tagged_iq_to_vector_0, '0']
 - [ble_tag_iq_stream_0, '0', qtgui_time_sink_x_0, '0']
-- [ble_tagged_iq_to_vector_0, out, ble_plot_iq_from_pmt_0, IQ]
+- [ble_tagged_iq_to_vector_0, out, ble_plot_iq_from_pmt_0, iq]
 - [blocks_add_xx_0, '0', ble_tag_iq_stream_0, '0']
 - [blocks_add_xx_0, '0', low_pass_filter_0_0, '0']
 - [blocks_file_source_0, '0', blocks_throttle2_0, '0']
