@@ -61,11 +61,8 @@ class plot_iq_from_pmt(gr.sync_block):
 
         # Initialise plot
         plt.ion()
-        self.fig, self.ax = plt.subplots()
-        self.ax.set_xlabel("Time")
-        self.ax.set_ylabel("Amplitude")
-        self.ax.grid(True)
-        self.ax.set_title("Waiting for data...")
+        self.fig, self.ax_grid = plt.subplots(2, 2)
+        self.fig.suptitle("Waiting for data...", fontsize=14)
         self.fig.tight_layout()
         self.fig.canvas.draw()
         self.fig.show()
@@ -125,32 +122,10 @@ class plot_iq_from_pmt(gr.sync_block):
             time.sleep(2)
 
             # Prepare title with payload info
-            payload_hex: str = payload.hex()
-            if len(payload_hex) > 10:  # Truncate long payloads
-                payload_hex = payload_hex[:20] + "..."
-            title = f"Packet {packet_id} (Payload: {payload_hex})"
+            title = f"Packet {packet_id}"
 
-            # Generate plot data
-            real: np.ndarray = np.real(iq)
-            imag: np.ndarray = np.imag(iq)
-            time_axis: np.ndarray = np.arange(len(real)) / self.sample_rate
-            max_amp: float = max(np.max(np.abs(real)), np.max(np.abs(imag))) * 1.1
-
-            # Update plot
-            self.ax.clear()
-            self.ax.plot(time_axis, real, "b-", label="I (In-phase)", alpha=0.7)
-            self.ax.plot(time_axis, imag, "r-", label="Q (Quadrature)", alpha=0.7)
-            self.ax.legend(loc="upper right")
-            self.ax.set_xlabel("Time (µs)" if self.sample_rate != 1 else "Samples")
-            self.ax.set_ylabel("Amplitude")
-            self.ax.set_title(title)
-            self.ax.set_ylim(-max_amp, max_amp)
-            self.ax.set_xlim(time_axis[0], time_axis[-1])
-            self.ax.axhline(0, color="k", linestyle="--", alpha=0.3)
-
-            # GUI update
-            self.fig.canvas.draw_idle()
-            self.fig.canvas.flush_events()
+            # Plot results
+            self.plot_results(iq, iq, payload, payload, title)
 
         except Exception as e:
             if packet_id is not None:
@@ -158,6 +133,71 @@ class plot_iq_from_pmt(gr.sync_block):
                     if packet_id in self.payload_cache:
                         del self.payload_cache[packet_id]
             print(f"Message processing failed: {e}")
+
+    def plot_results(
+        self, iq_before: np.ndarray, iq_after: np.ndarray, payload_before: bytes, payload_after: bytes, title: str
+    ) -> None:
+        """Update the plot with the SIC results."""
+        if not self.fig:
+            return
+        try:
+            # Convert payloads to integer arrays
+            payload_before_ints: np.ndarray = np.frombuffer(payload_before, dtype=np.uint8)
+            payload_after_ints: np.ndarray = np.frombuffer(payload_after, dtype=np.uint8)
+
+            # --- Top Left: IQ Before ---
+            ax = self.ax_grid[0, 0]
+            ax.clear()
+            time_axis = np.arange(len(iq_before)) / self.sample_rate
+            ax.plot(time_axis, np.real(iq_before), "b-", label="I (In-phase)", alpha=0.7)
+            ax.plot(time_axis, np.imag(iq_before), "r-", label="Q (Quadrature)", alpha=0.7)
+            ax.set_xlabel("Time (µs)" if self.sample_rate != 1 else "Samples")
+            ax.set_ylabel("Amplitude")
+            ax.set_title("IQ (Before SIC)")
+            ax.legend(loc="upper right")
+            ax.axhline(0, color="k", linestyle="--", alpha=0.3)
+
+            # --- Bottom Left: IQ After ---
+            ax = self.ax_grid[1, 0]
+            ax.clear()
+            time_axis = np.arange(len(iq_after)) / self.sample_rate
+            ax.plot(time_axis, np.real(iq_after), "b-", label="I (In-phase)", alpha=0.7)
+            ax.plot(time_axis, np.imag(iq_after), "r-", label="Q (Quadrature)", alpha=0.7)
+            ax.set_xlabel("Time (µs)" if self.sample_rate != 1 else "Samples")
+            ax.set_ylabel("Amplitude")
+            ax.set_title("IQ (After SIC)")
+            ax.legend(loc="upper right")
+            ax.axhline(0, color="k", linestyle="--", alpha=0.3)
+
+            # --- Top Right: Payload Before ---
+            ax = self.ax_grid[0, 1]
+            ax.clear()
+            ax.plot(payload_before_ints, "ro-", markersize=4, alpha=0.9)
+            ax.set_xlabel("Byte Index")
+            ax.set_ylabel("Value (0-255)")
+            ax.set_title(f"Payload (Before SIC)")
+            ax.set_ylim(-5, 260)
+            ax.set_yticks(np.arange(0, 256, 32))
+            ax.grid(True)
+
+            # --- Bottom Right: Payload After ---
+            ax = self.ax_grid[1, 1]
+            ax.clear()
+            ax.plot(payload_after_ints, "bo-", markersize=4, alpha=0.9)
+            ax.set_xlabel("Byte Index")
+            ax.set_ylabel("Value (0-255)")
+            ax.set_title(f"Payload (After SIC)")
+            ax.set_ylim(-5, 260)
+            ax.set_yticks(np.arange(0, 256, 32))
+            ax.grid(True)
+
+            self.fig.suptitle(title, fontsize=14)
+
+            self.fig.canvas.draw_idle()
+            self.fig.canvas.flush_events()
+
+        except Exception as e:
+            print(f"plot_results() failed: {e}")
 
     def work(self, input_items, output_items) -> int:
         return len(input_items[0])  # No stream processing
