@@ -45,7 +45,7 @@ ble_packet_sink_impl::ble_packet_sink_impl(uint32_t base_address,
     d_access_code = generate_access_code(base_address);
     d_whitening_polynomial = 0x11;
     d_crc_polynomial = 0x00065B;
-    d_crc_mask = (~uint64_t(0)) >> (64 - CRC_LEN * 8);
+    d_crc_mask = (~uint64_t(0)) >> (64 - d_crc_len * 8);
     d_crc_init = 0x00FFFF;
     d_num_preamble_bytes = 2; // Assume (S0 | LENGTH), received from an nRF52
 
@@ -115,7 +115,7 @@ void ble_packet_sink_impl::compute_crc(uint8_t data_bit,
                                        uint32_t polynomial,
                                        uint32_t mask)
 {
-    uint crc_len_bits = 8 * CRC_LEN;
+    uint crc_len_bits = 8 * d_crc_len;
     crc ^= data_bit << (crc_len_bits - 1);
     if (crc & (1 << (crc_len_bits - 1))) {
         crc = ((crc << 1) ^ polynomial) & mask; // Apply feedback
@@ -144,7 +144,6 @@ void ble_packet_sink_impl::enter_decode_length()
 }
 void ble_packet_sink_impl::enter_decode_payload()
 {
-    // std::fill(d_payload.begin(), d_payload.end(), 0); // Clear payload buffer
     d_reg_byte = 0;
     d_bits_count = 0;
     d_bytes_count = 0;
@@ -227,10 +226,10 @@ void ble_packet_sink_impl::process_check_crc(uint8_t bit, uint64_t sample_index)
     d_shift_reg = (d_shift_reg << 1) | unwhitened_bit; // Shift in new bit
 
     // Buffer yet to be filled
-    if (++d_fill_buffer_count < CRC_LEN * 8) {
+    if (++d_fill_buffer_count < d_crc_len * 8) {
         return;
     }
-    if (d_fill_buffer_count == CRC_LEN * 8) {
+    if (d_fill_buffer_count == d_crc_len * 8) {
         bool crc_ok = (d_shift_reg == d_crc) ? true : false;
 
         // Prepare PMT output message
@@ -273,16 +272,14 @@ int ble_packet_sink_impl::work(int noutput_items,
         out = static_cast<output_type*>(output_items[0]);
     }
 
-    uint64_t sample_count = nitems_read(0);
-
     for (int i = 0; i < noutput_items; i++) {
         uint8_t rx_bit = slice(in[i]);
 
         if (out) {
-            out[i] = rx_bit; // Optional output: sliced data
+            out[i] = rx_bit; // Optional stream output: sliced data
         }
 
-        uint64_t sample_index = sample_count + i;
+        uint64_t sample_index = nitems_read(0) + i;
 
         switch (d_state) {
         case state::SEARCH_PREAMBLE:
