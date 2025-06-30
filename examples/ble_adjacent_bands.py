@@ -238,7 +238,6 @@ class ble_adjacent_bands(gr.top_block, Qt.QWidget):
         self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, '/home/diego/Documents/SDR_projects/capture_nRF/data/new/BLE_BLE_2424MHz_2426MHz.dat', True, 0, 0)
         self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
         self.ble_ble_packet_sink_0 = ble.ble_packet_sink(0x12345678, 0, 0x1, 0)
-        self.analog_simple_squelch_cc_0 = analog.simple_squelch_cc((-50), 1)
         self.analog_sig_source_x_0 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, freq_offset, 1, 0, 0)
         self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(((samp_rate / decimation)/(2*math.pi*fsk_deviation_hz)))
 
@@ -248,11 +247,10 @@ class ble_adjacent_bands(gr.top_block, Qt.QWidget):
         ##################################################
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.digital_symbol_sync_xx_0, 0))
         self.connect((self.analog_sig_source_x_0, 0), (self.blocks_multiply_xx_0, 1))
-        self.connect((self.analog_simple_squelch_cc_0, 0), (self.low_pass_filter_0_0, 0))
-        self.connect((self.analog_simple_squelch_cc_0, 0), (self.qtgui_waterfall_sink_x_1, 0))
         self.connect((self.ble_ble_packet_sink_0, 0), (self.blocks_uchar_to_float_0_0_0_0, 0))
         self.connect((self.blocks_file_source_0, 0), (self.blocks_throttle2_0, 0))
-        self.connect((self.blocks_multiply_xx_0, 0), (self.analog_simple_squelch_cc_0, 0))
+        self.connect((self.blocks_multiply_xx_0, 0), (self.low_pass_filter_0_0, 0))
+        self.connect((self.blocks_multiply_xx_0, 0), (self.qtgui_waterfall_sink_x_1, 0))
         self.connect((self.blocks_throttle2_0, 0), (self.blocks_multiply_xx_0, 0))
         self.connect((self.blocks_uchar_to_float_0_0_0_0, 0), (self.qtgui_time_sink_x_1, 1))
         self.connect((self.digital_symbol_sync_xx_0, 0), (self.ble_ble_packet_sink_0, 0))
