@@ -10,7 +10,6 @@
 #define INCLUDED_BLE_BLE_PACKET_SINK_IMPL_H
 
 #include <gnuradio/ble/ble_packet_sink.h>
-#include <array>
 
 namespace gr {
 namespace ble {

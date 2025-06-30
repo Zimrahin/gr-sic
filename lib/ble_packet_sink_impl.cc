@@ -9,8 +9,6 @@
 #include "ble_packet_sink_impl.h"
 #include <gnuradio/io_signature.h>
 #include <volk/volk.h>
-#include <iomanip>
-#include <sstream>
 
 namespace gr {
 namespace ble {
