@@ -14,7 +14,8 @@ include(GrPlatform) #define LIB_SUFFIX
 list(APPEND ble_sources
     ble_packet_sink_impl.cc
     tag_iq_stream_impl.cc
-    tagged_iq_to_vector_impl.cc)
+    tagged_iq_to_vector_impl.cc
+    ieee802154_packet_sink_impl.cc)
 
 set(ble_sources
     "${ble_sources}"

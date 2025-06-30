@@ -1,0 +1,44 @@
+id: ble_ieee802154_packet_sink
+label: IEEE 802.15.4 Packet Sink
+category: '[ble]'
+
+description: |
+  This block detects IEEE 802.15.4 packets in hard-decision bitstreams and
+  publishes them as PDUs. It searches for the preamble based on the preamble
+  threshold. Detected packets are CRC checked (last two bytes of the payload).
+
+templates:
+  imports: from gnuradio import ble
+  make: ble.ieee802154_packet_sink(${preamble_threshold})
+
+parameters:
+- id: preamble_threshold
+  label: Preamble Threshold
+  dtype: int
+  default: 12
+  tooltip: "The maximum number of chip errors allowed in the preamble detection."
+- id: block_id
+  label: Block ID
+  dtype: int
+  default: 0
+  hide: none
+  tooltip: "Unique integer ID for this block instance"
+
+inputs:
+- label: in
+  domain: stream
+  dtype: float
+  vlen: 1
+
+outputs:
+- label: out
+  domain: stream
+  dtype: byte
+  optional: true
+- id: pdu
+  domain: message
+  optional: true
+
+#  'file_format' specifies the version of the GRC yml format used in the file
+#  and should usually not be changed.
+file_format: 1

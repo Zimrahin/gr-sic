@@ -10,23 +10,23 @@ templates:
   make: ble.tag_iq_stream(${sps})
 
 parameters:
--   id: sps
-    label: Samples Per Symbol
-    dtype: int
-    default: 10
+- id: sps
+  label: Samples Per Symbol
+  dtype: int
+  default: 10
 
 inputs:
--   label: in_iq
-    domain: stream
-    dtype: complex
--   label: in_sym
-    domain: stream
-    dtype: byte
+- label: in_iq
+  domain: stream
+  dtype: complex
+- label: in_sym
+  domain: stream
+  dtype: byte
 
 outputs:
--   label: out
-    domain: stream
-    dtype: complex
+- label: out
+  domain: stream
+  dtype: complex
 
 #  'file_format' specifies the version of the GRC yml format used in the file
 #  and should usually not be changed.

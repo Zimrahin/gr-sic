@@ -11,41 +11,42 @@ templates:
   make: ble.ble_packet_sink(${base_address}, ${preamble_threshold}, ${lfsr}, ${block_id})
 
 parameters:
--   id: base_address
-    label: Base Address
-    dtype: int
-    default: 0x12345678
-    tooltip: "Base address for the BLE device, used to identify packets"
--   id: preamble_threshold
-    label: Preamble Threshold
-    dtype: int
-    default: 4
--   id: lfsr
-    label: Whitening LFSR
-    dtype: int
-    default: 0x01
-    tooltip: "Initial LFSR value for whitening, used to de-whiten the packets"
--   id: block_id
-    label: Block ID
-    dtype: int
-    default: 0
-    hide: none
-    tooltip: "Unique integer ID for this block instance"
+- id: base_address
+  label: Base Address
+  dtype: int
+  default: 0x12345678
+  tooltip: "Base address for the BLE device, used to identify packets"
+- id: preamble_threshold
+  label: Preamble Threshold
+  dtype: int
+  default: 4
+  tooltip: "The maximum number of bit errors allowed in the preamble detection."
+- id: lfsr
+  label: Whitening LFSR
+  dtype: int
+  default: 0x01
+  tooltip: "Initial LFSR value for whitening, used to de-whiten the packets"
+- id: block_id
+  label: Block ID
+  dtype: int
+  default: 0
+  hide: none
+  tooltip: "Unique integer ID for this block instance"
 
 inputs:
--   label: in
-    domain: stream
-    dtype: float
-    vlen: 1
+- label: in
+  domain: stream
+  dtype: float
+  vlen: 1
 
 outputs:
--   label: out
-    domain: stream
-    dtype: byte
-    optional: true
--   id: pdu
-    domain: message
-    optional: true
+- label: out
+  domain: stream
+  dtype: byte
+  optional: true
+- id: pdu
+  domain: message
+  optional: true
 
 #  'file_format' specifies the version of the GRC yml format used in the file
 #  and should usually not be changed.

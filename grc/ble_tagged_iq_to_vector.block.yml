@@ -9,33 +9,33 @@ templates:
   make: ble.tagged_iq_to_vector(${pre_offset}, ${post_offset}, ${max_gap})
 
 parameters:
--   id: pre_offset
-    label: Pre Offset
-    dtype: int
-    default: 0
-    tooltip: "Number of samples to include before the tag in the output vector"
--   id: post_offset
-    label: Post Offset
-    dtype: int
-    default: 0
-    tooltip: "Number of samples to include after the tag in the output vector"
--   id: max_gap
-    label: Maximum Tag Gap
-    dtype: int
-    default: 20000
-    tooltip: "Maximum allowed gap between tagged samples in the input stream"
+- id: pre_offset
+  label: Pre Offset
+  dtype: int
+  default: 0
+  tooltip: "Number of samples to include before the tag in the output vector"
+- id: post_offset
+  label: Post Offset
+  dtype: int
+  default: 0
+  tooltip: "Number of samples to include after the tag in the output vector"
+- id: max_gap
+  label: Maximum Tag Gap
+  dtype: int
+  default: 20000
+  tooltip: "Maximum allowed gap between tagged samples in the input stream"
   
 inputs:
--   label: in
-    domain: stream
-    dtype: complex
-    vlen: 1
-    tooltip: "Input stream of tagged IQ samples"
+- label: in
+  domain: stream
+  dtype: complex
+  vlen: 1
+  tooltip: "Input stream of tagged IQ samples"
 
 outputs:
--   id: out
-    domain: message
-    optional: true
+- id: out
+  domain: message
+  optional: true
 
 #  'file_format' specifies the version of the GRC yml format used in the file
 #  and should usually not be changed.
