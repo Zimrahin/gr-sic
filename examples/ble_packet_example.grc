@@ -11,7 +11,7 @@ options:
     gen_linking: dynamic
     generate_options: qt_gui
     hier_block_src_path: '.:'
-    id: BLE_packet_example
+    id: ble_packet_example
     max_nouts: '0'
     output_language: python
     placement: (0,0)
@@ -22,7 +22,7 @@ options:
     run_options: prompt
     sizing_mode: fixed
     thread_safe_setters: ''
-    title: BLE_packet_example
+    title: ble_packet_example
     window_size: (1000,1000)
   states:
     bus_sink: false

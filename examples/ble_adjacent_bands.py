@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: GPL-3.0
 #
 # GNU Radio Python Flow Graph
-# Title: BLE_packet_example
+# Title: ble_adjacent_bands
 # GNU Radio version: v3.11.0.0git-843-g6b25c171
 
 from PyQt5 import Qt
@@ -16,6 +16,7 @@ import math
 from gnuradio import ble
 from gnuradio import blocks
 import pmt
+from gnuradio import blocks, gr
 from gnuradio import digital
 from gnuradio import filter
 from gnuradio.filter import firdes
@@ -32,12 +33,12 @@ import threading
 
 
 
-class BLE_packet_example(gr.top_block, Qt.QWidget):
+class ble_adjacent_bands(gr.top_block, Qt.QWidget):
 
     def __init__(self):
-        gr.top_block.__init__(self, "BLE_packet_example", catch_exceptions=True)
+        gr.top_block.__init__(self, "ble_adjacent_bands", catch_exceptions=True)
         Qt.QWidget.__init__(self)
-        self.setWindowTitle("BLE_packet_example")
+        self.setWindowTitle("ble_adjacent_bands")
         qtgui.util.check_set_qss()
         try:
             self.setWindowIcon(Qt.QIcon.fromTheme('gnuradio-grc'))
@@ -55,7 +56,7 @@ class BLE_packet_example(gr.top_block, Qt.QWidget):
         self.top_grid_layout = Qt.QGridLayout()
         self.top_layout.addLayout(self.top_grid_layout)
 
-        self.settings = Qt.QSettings("gnuradio/flowgraphs", "BLE_packet_example")
+        self.settings = Qt.QSettings("gnuradio/flowgraphs", "ble_adjacent_bands")
 
         try:
             geometry = self.settings.value("geometry")
@@ -69,12 +70,12 @@ class BLE_packet_example(gr.top_block, Qt.QWidget):
         # Variables
         ##################################################
         self.tuning_LPF_cutoff_kHz = tuning_LPF_cutoff_kHz = 1000
-        self.trigger_delay = trigger_delay = 200E-6
         self.samples_per_bit = samples_per_bit = 10
         self.samp_rate = samp_rate = int(10e6)
-        self.plot_N = plot_N = 16000
+        self.plot_N = plot_N = 20000
         self.fsk_deviation_hz = fsk_deviation_hz = int(250e3)
-        self.decimation = decimation = 1
+        self.freq_offset = freq_offset = int(1e6)
+        self.decimation = decimation = 4
 
         ##################################################
         # Blocks
@@ -87,6 +88,76 @@ class BLE_packet_example(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(0, 1):
             self.top_grid_layout.setColumnStretch(c, 1)
+        self.qtgui_waterfall_sink_x_1 = qtgui.waterfall_sink_c(
+            1024, #size
+            window.WIN_BLACKMAN_hARRIS, #wintype
+            0, #fc
+            samp_rate, #bw
+            "", #name
+            1, #number of inputs
+            None # parent
+        )
+        self.qtgui_waterfall_sink_x_1.set_update_time(0.10)
+        self.qtgui_waterfall_sink_x_1.enable_grid(False)
+        self.qtgui_waterfall_sink_x_1.enable_axis_labels(True)
+
+
+
+        labels = ['', '', '', '', '',
+                  '', '', '', '', '']
+        colors = [0, 0, 0, 0, 0,
+                  0, 0, 0, 0, 0]
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+                  1.0, 1.0, 1.0, 1.0, 1.0]
+
+        for i in range(1):
+            if len(labels[i]) == 0:
+                self.qtgui_waterfall_sink_x_1.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.qtgui_waterfall_sink_x_1.set_line_label(i, labels[i])
+            self.qtgui_waterfall_sink_x_1.set_color_map(i, colors[i])
+            self.qtgui_waterfall_sink_x_1.set_line_alpha(i, alphas[i])
+
+        self.qtgui_waterfall_sink_x_1.set_intensity_range(-140, 10)
+
+        self._qtgui_waterfall_sink_x_1_win = sip.wrapinstance(self.qtgui_waterfall_sink_x_1.qwidget(), Qt.QWidget)
+
+        self.top_layout.addWidget(self._qtgui_waterfall_sink_x_1_win)
+        self.qtgui_waterfall_sink_x_0 = qtgui.waterfall_sink_c(
+            2048, #size
+            window.WIN_BLACKMAN_hARRIS, #wintype
+            0, #fc
+            (samp_rate / decimation), #bw
+            "", #name
+            1, #number of inputs
+            None # parent
+        )
+        self.qtgui_waterfall_sink_x_0.set_update_time(0.10)
+        self.qtgui_waterfall_sink_x_0.enable_grid(False)
+        self.qtgui_waterfall_sink_x_0.enable_axis_labels(True)
+
+
+
+        labels = ['', '', '', '', '',
+                  '', '', '', '', '']
+        colors = [0, 0, 0, 0, 0,
+                  0, 0, 0, 0, 0]
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+                  1.0, 1.0, 1.0, 1.0, 1.0]
+
+        for i in range(1):
+            if len(labels[i]) == 0:
+                self.qtgui_waterfall_sink_x_0.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.qtgui_waterfall_sink_x_0.set_line_label(i, labels[i])
+            self.qtgui_waterfall_sink_x_0.set_color_map(i, colors[i])
+            self.qtgui_waterfall_sink_x_0.set_line_alpha(i, alphas[i])
+
+        self.qtgui_waterfall_sink_x_0.set_intensity_range(-140, 10)
+
+        self._qtgui_waterfall_sink_x_0_win = sip.wrapinstance(self.qtgui_waterfall_sink_x_0.qwidget(), Qt.QWidget)
+
+        self.top_layout.addWidget(self._qtgui_waterfall_sink_x_0_win)
         self.qtgui_time_sink_x_1 = qtgui.time_sink_f(
             (int( plot_N/ samples_per_bit)), #size
             int(samp_rate / samples_per_bit), #samp_rate
@@ -100,7 +171,7 @@ class BLE_packet_example(gr.top_block, Qt.QWidget):
         self.qtgui_time_sink_x_1.set_y_label('Amplitude', "")
 
         self.qtgui_time_sink_x_1.enable_tags(True)
-        self.qtgui_time_sink_x_1.set_trigger_mode(qtgui.TRIG_MODE_TAG, qtgui.TRIG_SLOPE_POS, 0.0, trigger_delay, 1, "Payload start")
+        self.qtgui_time_sink_x_1.set_trigger_mode(qtgui.TRIG_MODE_TAG, qtgui.TRIG_SLOPE_POS, 0.0, 200E-6, 1, "Payload start")
         self.qtgui_time_sink_x_1.enable_autoscale(False)
         self.qtgui_time_sink_x_1.enable_grid(False)
         self.qtgui_time_sink_x_1.enable_axis_labels(True)
@@ -139,57 +210,6 @@ class BLE_packet_example(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(0, 1):
             self.top_grid_layout.setColumnStretch(c, 1)
-        self.qtgui_time_sink_x_0 = qtgui.time_sink_c(
-            plot_N, #size
-            samp_rate, #samp_rate
-            "Testing Tag IQ Stream block", #name
-            1, #number of inputs
-            None # parent
-        )
-        self.qtgui_time_sink_x_0.set_update_time(0.10)
-        self.qtgui_time_sink_x_0.set_y_axis(-1, 1)
-
-        self.qtgui_time_sink_x_0.set_y_label('Amplitude', "")
-
-        self.qtgui_time_sink_x_0.enable_tags(True)
-        self.qtgui_time_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_TAG, qtgui.TRIG_SLOPE_POS, 0.0, trigger_delay, 0, "Payload start")
-        self.qtgui_time_sink_x_0.enable_autoscale(False)
-        self.qtgui_time_sink_x_0.enable_grid(False)
-        self.qtgui_time_sink_x_0.enable_axis_labels(True)
-        self.qtgui_time_sink_x_0.enable_control_panel(False)
-        self.qtgui_time_sink_x_0.enable_stem_plot(False)
-
-
-        labels = ['Signal 1', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
-            'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
-        widths = [1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        colors = ['blue', 'red', 'green', 'black', 'cyan',
-            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
-        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0, 1.0]
-        styles = [1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        markers = [-1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1]
-
-
-        for i in range(2):
-            if len(labels[i]) == 0:
-                if (i % 2 == 0):
-                    self.qtgui_time_sink_x_0.set_line_label(i, "Re{{Data {0}}}".format(i/2))
-                else:
-                    self.qtgui_time_sink_x_0.set_line_label(i, "Im{{Data {0}}}".format(i/2))
-            else:
-                self.qtgui_time_sink_x_0.set_line_label(i, labels[i])
-            self.qtgui_time_sink_x_0.set_line_width(i, widths[i])
-            self.qtgui_time_sink_x_0.set_line_color(i, colors[i])
-            self.qtgui_time_sink_x_0.set_line_style(i, styles[i])
-            self.qtgui_time_sink_x_0.set_line_marker(i, markers[i])
-            self.qtgui_time_sink_x_0.set_line_alpha(i, alphas[i])
-
-        self._qtgui_time_sink_x_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0.qwidget(), Qt.QWidget)
-        self.top_layout.addWidget(self._qtgui_time_sink_x_0_win)
         self.low_pass_filter_0_0 = filter.fir_filter_ccf(
             decimation,
             firdes.low_pass(
@@ -212,41 +232,37 @@ class BLE_packet_example(gr.top_block, Qt.QWidget):
             128,
             [])
         self.blocks_uchar_to_float_0_0_0_0 = blocks.uchar_to_float()
-        self.blocks_throttle2_0 = blocks.throttle( gr.sizeof_gr_complex*1, (samp_rate/2), True, 0 if "auto" == "auto" else max( int(float(0.1) * (samp_rate/2)) if "auto" == "time" else int(0.1), 1) )
-        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, '/home/diego/Documents/GNU_radio_OOT_modules/gr-ble/examples/data/BLE_124B.dat', True, 0, 0)
+        self.blocks_throttle2_0 = blocks.throttle( gr.sizeof_gr_complex*1, (samp_rate/400), True, 0 if "auto" == "auto" else max( int(float(0.1) * (samp_rate/400)) if "auto" == "time" else int(0.1), 1) )
+        self.blocks_multiply_xx_0 = blocks.multiply_vcc(1)
+        self.blocks_message_debug_0 = blocks.message_debug(True, gr.log_levels.info)
+        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, '/home/diego/Documents/SDR_projects/capture_nRF/data/new/BLE_BLE_2424MHz_2426MHz.dat', True, 0, 0)
         self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
-        self.blocks_add_xx_0 = blocks.add_vcc(1)
-        self.ble_tagged_iq_to_vector_0 = ble.tagged_iq_to_vector((int(trigger_delay * samp_rate)), (int(trigger_delay * samp_rate)), (128*8*8*samples_per_bit))
-        self.ble_tag_iq_stream_0 = ble.tag_iq_stream(samples_per_bit)
-        self.ble_plot_iq_from_pmt_0 = ble.plot_iq_from_pmt(int(samp_rate))
         self.ble_ble_packet_sink_0 = ble.ble_packet_sink(0x12345678, 0, 0x1, 0)
+        self.analog_simple_squelch_cc_0 = analog.simple_squelch_cc((-50), 1)
+        self.analog_sig_source_x_0 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, freq_offset, 1, 0, 0)
         self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(((samp_rate / decimation)/(2*math.pi*fsk_deviation_hz)))
-        self.analog_fastnoise_source_x_0 = analog.fastnoise_source_c(analog.GR_GAUSSIAN, 0.025, 0, 8192)
 
 
         ##################################################
         # Connections
         ##################################################
-        self.msg_connect((self.ble_ble_packet_sink_0, 'pdu'), (self.ble_plot_iq_from_pmt_0, 'pdu'))
-        self.msg_connect((self.ble_tagged_iq_to_vector_0, 'out'), (self.ble_plot_iq_from_pmt_0, 'iq'))
-        self.connect((self.analog_fastnoise_source_x_0, 0), (self.blocks_add_xx_0, 1))
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.digital_symbol_sync_xx_0, 0))
-        self.connect((self.ble_ble_packet_sink_0, 0), (self.ble_tag_iq_stream_0, 1))
+        self.connect((self.analog_sig_source_x_0, 0), (self.blocks_multiply_xx_0, 1))
+        self.connect((self.analog_simple_squelch_cc_0, 0), (self.low_pass_filter_0_0, 0))
+        self.connect((self.analog_simple_squelch_cc_0, 0), (self.qtgui_waterfall_sink_x_1, 0))
         self.connect((self.ble_ble_packet_sink_0, 0), (self.blocks_uchar_to_float_0_0_0_0, 0))
-        self.connect((self.ble_tag_iq_stream_0, 0), (self.ble_tagged_iq_to_vector_0, 0))
-        self.connect((self.ble_tag_iq_stream_0, 0), (self.qtgui_time_sink_x_0, 0))
-        self.connect((self.blocks_add_xx_0, 0), (self.ble_tag_iq_stream_0, 0))
-        self.connect((self.blocks_add_xx_0, 0), (self.low_pass_filter_0_0, 0))
         self.connect((self.blocks_file_source_0, 0), (self.blocks_throttle2_0, 0))
-        self.connect((self.blocks_throttle2_0, 0), (self.blocks_add_xx_0, 0))
+        self.connect((self.blocks_multiply_xx_0, 0), (self.analog_simple_squelch_cc_0, 0))
+        self.connect((self.blocks_throttle2_0, 0), (self.blocks_multiply_xx_0, 0))
         self.connect((self.blocks_uchar_to_float_0_0_0_0, 0), (self.qtgui_time_sink_x_1, 1))
         self.connect((self.digital_symbol_sync_xx_0, 0), (self.ble_ble_packet_sink_0, 0))
         self.connect((self.digital_symbol_sync_xx_0, 0), (self.qtgui_time_sink_x_1, 0))
         self.connect((self.low_pass_filter_0_0, 0), (self.analog_quadrature_demod_cf_0, 0))
+        self.connect((self.low_pass_filter_0_0, 0), (self.qtgui_waterfall_sink_x_0, 0))
 
 
     def closeEvent(self, event):
-        self.settings = Qt.QSettings("gnuradio/flowgraphs", "BLE_packet_example")
+        self.settings = Qt.QSettings("gnuradio/flowgraphs", "ble_adjacent_bands")
         self.settings.setValue("geometry", self.saveGeometry())
         self.stop()
         self.wait()
@@ -259,14 +275,6 @@ class BLE_packet_example(gr.top_block, Qt.QWidget):
     def set_tuning_LPF_cutoff_kHz(self, tuning_LPF_cutoff_kHz):
         self.tuning_LPF_cutoff_kHz = tuning_LPF_cutoff_kHz
         self.low_pass_filter_0_0.set_taps(firdes.low_pass(1, self.samp_rate, (self.tuning_LPF_cutoff_kHz*1000), (self.samp_rate/100), window.WIN_HAMMING, 6.76))
-
-    def get_trigger_delay(self):
-        return self.trigger_delay
-
-    def set_trigger_delay(self, trigger_delay):
-        self.trigger_delay = trigger_delay
-        self.qtgui_time_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_TAG, qtgui.TRIG_SLOPE_POS, 0.0, self.trigger_delay, 0, "Payload start")
-        self.qtgui_time_sink_x_1.set_trigger_mode(qtgui.TRIG_MODE_TAG, qtgui.TRIG_SLOPE_POS, 0.0, self.trigger_delay, 1, "Payload start")
 
     def get_samples_per_bit(self):
         return self.samples_per_bit
@@ -282,10 +290,12 @@ class BLE_packet_example(gr.top_block, Qt.QWidget):
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
         self.analog_quadrature_demod_cf_0.set_gain(((self.samp_rate / self.decimation)/(2*math.pi*self.fsk_deviation_hz)))
-        self.blocks_throttle2_0.set_sample_rate((self.samp_rate/2))
+        self.analog_sig_source_x_0.set_sampling_freq(self.samp_rate)
+        self.blocks_throttle2_0.set_sample_rate((self.samp_rate/400))
         self.low_pass_filter_0_0.set_taps(firdes.low_pass(1, self.samp_rate, (self.tuning_LPF_cutoff_kHz*1000), (self.samp_rate/100), window.WIN_HAMMING, 6.76))
-        self.qtgui_time_sink_x_0.set_samp_rate(self.samp_rate)
         self.qtgui_time_sink_x_1.set_samp_rate(int(self.samp_rate / self.samples_per_bit))
+        self.qtgui_waterfall_sink_x_0.set_frequency_range(0, (self.samp_rate / self.decimation))
+        self.qtgui_waterfall_sink_x_1.set_frequency_range(0, self.samp_rate)
 
     def get_plot_N(self):
         return self.plot_N
@@ -300,6 +310,13 @@ class BLE_packet_example(gr.top_block, Qt.QWidget):
         self.fsk_deviation_hz = fsk_deviation_hz
         self.analog_quadrature_demod_cf_0.set_gain(((self.samp_rate / self.decimation)/(2*math.pi*self.fsk_deviation_hz)))
 
+    def get_freq_offset(self):
+        return self.freq_offset
+
+    def set_freq_offset(self, freq_offset):
+        self.freq_offset = freq_offset
+        self.analog_sig_source_x_0.set_frequency(self.freq_offset)
+
     def get_decimation(self):
         return self.decimation
 
@@ -307,11 +324,12 @@ class BLE_packet_example(gr.top_block, Qt.QWidget):
         self.decimation = decimation
         self.analog_quadrature_demod_cf_0.set_gain(((self.samp_rate / self.decimation)/(2*math.pi*self.fsk_deviation_hz)))
         self.digital_symbol_sync_xx_0.set_sps((self.samples_per_bit / self.decimation))
+        self.qtgui_waterfall_sink_x_0.set_frequency_range(0, (self.samp_rate / self.decimation))
 
 
 
 
-def main(top_block_cls=BLE_packet_example, options=None):
+def main(top_block_cls=ble_adjacent_bands, options=None):
 
     qapp = Qt.QApplication(sys.argv)
 
