@@ -6,14 +6,23 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*
+ * References:
+ * - bastibl/gr-ieee802-15-4 (packet_sink.cc)
+ * - GNU Radio 802.15.4 En- and Decoding
+ * - CMOS RFIC Architectures for IEEE 802.15.4 Networks
+ */
+
 #include "ieee802154_packet_sink_impl.h"
 #include <gnuradio/io_signature.h>
+#include <volk/volk.h>
 
 namespace gr {
 namespace ble {
 
-#pragma message("set the following appropriately and remove this warning")
 using input_type = float;
+using output_type = uint8_t; // Optional output, sliced data
+
 ieee802154_packet_sink::sptr ieee802154_packet_sink::make(uint preamble_threshold,
                                                           uint block_id)
 {
@@ -21,31 +30,156 @@ ieee802154_packet_sink::sptr ieee802154_packet_sink::make(uint preamble_threshol
                                                                   block_id);
 }
 
-
 // Constructor
 ieee802154_packet_sink_impl::ieee802154_packet_sink_impl(uint preamble_threshold,
                                                          uint block_id)
     : gr::sync_block("ieee802154_packet_sink",
-                     gr::io_signature::make(
-                         1 /* min inputs */, 1 /* max inputs */, sizeof(input_type)),
-                     gr::io_signature::make(0, 0, 0))
+                     gr::io_signature::make(1, 1, sizeof(input_type)),
+                     gr::io_signature::make(0, 1, sizeof(output_type))),
+      d_threshold(preamble_threshold),
+      d_block_id(block_id)
 {
+    // Constants
+    d_chip_mask =
+        0x7FFFFFFE; // Ignore the first and last chips for differential MSK decoding
+
+    // Variables
+    d_packet_count = 0;
+
+    // Enter first FSM state
+    enter_search_preamble();
+
+    // PMT message output port
+    message_port_register_out(pmt::mp("pdu"));
 }
 
 // Destructor
 ieee802154_packet_sink_impl::~ieee802154_packet_sink_impl() {}
+
+// Slice float data into binary data
+uint8_t ieee802154_packet_sink_impl::slice(float data_in) { return data_in > 0 ? 1 : 0; }
+
+// Checks whether a given chip sequence matches the predefined constant channel mapping at
+// index nibble, with a tolerance of threshold errors
+bool ieee802154_packet_sink_impl::nibble_match(uint32_t chip_sequence,
+                                               uint8_t nibble,
+                                               uint threshold)
+{
+    uint32_t diff = (chip_sequence ^ d_chip_mapping_msk.at(nibble)) & d_chip_mask;
+    uint32_t nwrong = threshold + 1; // Value greater than the threshold
+    volk_32u_popcnt(&nwrong, diff);
+
+    return nwrong <= threshold;
+}
+
+// Finite State Machine methods
+void ieee802154_packet_sink_impl::enter_search_preamble()
+{
+    d_shift_reg = 0;
+    d_fill_buffer_count = 0;
+    d_preamble_nibble_count = 0;
+    d_chip_count = 0;
+    d_state = state::SEARCH_PREAMBLE;
+}
+void ieee802154_packet_sink_impl::enter_decode_length()
+{
+    std::cout << "We found a preamble!" << std::endl;
+    d_state = state::DECODE_LENGTH;
+}
+void ieee802154_packet_sink_impl::enter_decode_payload() {}
+void ieee802154_packet_sink_impl::enter_check_crc() {}
+void ieee802154_packet_sink_impl::process_search_preamble(uint8_t chip,
+                                                          uint64_t sample_index)
+{
+    d_shift_reg = (d_shift_reg << 1) | chip; // Shift in new chip
+
+    // Buffer yet to be filled
+    if (d_fill_buffer_count < d_chip_sequence_len) {
+        d_fill_buffer_count++;
+        return;
+    }
+    // Look for the first 32-chip sequence representing a 0x0 nibble
+    if (d_preamble_nibble_count == 0) {
+        if (nibble_match(d_shift_reg,
+                         d_preamble_sequence.at(d_preamble_nibble_count),
+                         d_threshold)) {
+            d_preamble_nibble_count++;
+        }
+        return;
+    }
+    // Start processing every 32-chip block
+    if (++d_chip_count < 32) {
+        return; // Still collecting chips to unpack a nibble
+    }
+    d_chip_count = 0; // Reset chip counter
+
+    if (!nibble_match(
+            d_shift_reg, d_preamble_sequence.at(d_preamble_nibble_count), d_threshold)) {
+        enter_search_preamble();
+        return; // The read chip sequence doesn't match the position in the preamble
+    }
+    // We found the entire preamble sequence
+    if (++d_preamble_nibble_count >= d_preamble_sequence.size()) {
+        enter_decode_length();
+    }
+}
+void ieee802154_packet_sink_impl::process_decode_length(uint8_t chip,
+                                                        uint64_t sample_index)
+{
+    (void)chip;
+    (void)sample_index;
+}
+void ieee802154_packet_sink_impl::process_decode_payload(uint8_t chip,
+                                                         uint64_t sample_index)
+{
+    (void)chip;
+    (void)sample_index;
+}
+void ieee802154_packet_sink_impl::process_check_crc(uint8_t chip, uint64_t sample_index)
+{
+    (void)chip;
+    (void)sample_index;
+}
 
 int ieee802154_packet_sink_impl::work(int noutput_items,
                                       gr_vector_const_void_star& input_items,
                                       gr_vector_void_star& output_items)
 {
     auto in = static_cast<const input_type*>(input_items[0]);
+    output_type* out = nullptr;
+    d_output_connected = output_items.size() > 0 && output_items[0] != nullptr;
+    if (d_output_connected) {
+        out = static_cast<output_type*>(output_items[0]);
+    }
 
-#pragma message("Implement the signal processing in your block and remove this warning")
-    // Do <+signal processing+>
+    for (int i = 0; i < noutput_items; i++) {
+        uint8_t rx_chip = slice(in[i]);
 
-    // Tell runtime system how many output items we produced.
-    return noutput_items;
+        if (out) {
+            out[i] = rx_chip; // Optional stream output: sliced data
+        }
+
+        uint64_t sample_index = nitems_read(0) + i;
+
+        switch (d_state) {
+        case state::SEARCH_PREAMBLE:
+            process_search_preamble(rx_chip, sample_index);
+            break;
+
+        case state::DECODE_LENGTH:
+            process_decode_length(rx_chip, sample_index);
+            break;
+
+        case state::DECODE_PAYLOAD:
+            process_decode_payload(rx_chip, sample_index);
+            break;
+
+        case state::CHECK_CRC:
+            process_check_crc(rx_chip, sample_index);
+            break;
+        }
+    }
+    return noutput_items; // Tell runtime system how many output items we produced.
 }
 
 } /* namespace ble */

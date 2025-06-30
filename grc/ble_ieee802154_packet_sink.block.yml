@@ -9,13 +9,13 @@ description: |
 
 templates:
   imports: from gnuradio import ble
-  make: ble.ieee802154_packet_sink(${preamble_threshold})
+  make: ble.ieee802154_packet_sink(${preamble_threshold}, ${block_id})
 
 parameters:
 - id: preamble_threshold
   label: Preamble Threshold
   dtype: int
-  default: 12
+  default: 5
   tooltip: "The maximum number of chip errors allowed in the preamble detection."
 - id: block_id
   label: Block ID
