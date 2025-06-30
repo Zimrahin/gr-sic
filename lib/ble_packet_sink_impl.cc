@@ -48,8 +48,10 @@ ble_packet_sink_impl::ble_packet_sink_impl(uint32_t base_address,
     d_num_preamble_bytes = 2; // Assume (S0 | LENGTH), received from an nRF52
 
     // Variables
-    d_state = state::SEARCH_PREAMBLE;
     d_packet_count = 0;
+
+    // Enter first FSM state
+    enter_search_preamble();
 
     // PMT message output port
     message_port_register_out(pmt::mp("pdu"));
