@@ -43,7 +43,7 @@ ble_packet_sink_impl::ble_packet_sink_impl(uint32_t base_address,
     d_access_code = generate_access_code(base_address);
     d_whitening_polynomial = 0x11;
     d_crc_polynomial = 0x00065B;
-    d_crc_mask = (~uint64_t(0)) >> (64 - d_crc_len * 8);
+    d_crc_mask = (~uint32_t(0)) >> (32 - d_crc_len * 8);
     d_crc_init = 0x00FFFF;
     d_num_preamble_bytes = 2; // Assume (S0 | LENGTH), received from an nRF52
 
@@ -219,6 +219,7 @@ void ble_packet_sink_impl::process_decode_payload(uint8_t bit, uint64_t sample_i
 
         if (++d_bytes_count == d_payload_len) {
             enter_check_crc();
+            return;
         }
     }
 }
