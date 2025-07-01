@@ -42,6 +42,7 @@ ieee802154_packet_sink_impl::ieee802154_packet_sink_impl(uint preamble_threshold
     // Constants
     d_chip_mask =
         0x7FFFFFFE; // Ignore the first and last chips for differential MSK decoding
+    d_crc_included = true; // CRC included in the payload by default
 
     // Variables
     d_packet_count = 0;
@@ -111,10 +112,16 @@ void ieee802154_packet_sink_impl::enter_decode_length()
     d_reg_byte = 0;
     d_nibble_count = 0;
     d_shift_reg = 0;
+    d_bytes_count = 0;
     d_state = state::DECODE_LENGTH;
 }
 void ieee802154_packet_sink_impl::enter_decode_payload()
 {
+    d_chip_count = 0;
+    d_reg_byte = 0;
+    d_nibble_count = 0;
+    d_entering_payload = true;
+    d_bytes_count = 0;
     d_state = state::DECODE_PAYLOAD;
 }
 void ieee802154_packet_sink_impl::enter_check_crc() { d_state = state::CHECK_CRC; }
@@ -163,31 +170,44 @@ void ieee802154_packet_sink_impl::process_decode_length(uint8_t chip,
     }
     d_chip_count = 0; // Reset chip counter
 
-    // Use threshold of 32 errors to simply return the closest match
-    uint8_t nibble = pack_chips_to_nibble(d_shift_reg, d_chip_sequence_len);
+    uint8_t nibble = pack_chips_to_nibble(d_shift_reg, d_threshold);
 
-    if (d_nibble_count == 0) {
-        d_reg_byte |= nibble;
-        d_nibble_count = 1;
+    if (nibble == 0xFF) {
+        enter_search_preamble(); // No match found, reset state machine
+        return;
+    }
 
-    } else if (d_nibble_count == 1) {
-        d_reg_byte |= (nibble << 4);
-        d_payload_len = d_reg_byte; // Unpack the LENGTH byte
+    d_reg_byte = (d_reg_byte >> 4) | (nibble << 4);
+
+    if (++d_nibble_count < 2) {
+        return; // Still collecting nibbles to unpack a byte
+    }
+    d_nibble_count = 0;
+    if (d_bytes_count < 1) {
+        d_payload_len = d_reg_byte;
 
         if (d_payload_len > d_max_payload_len) {
             // Invalid payload length, reset state machine
             enter_search_preamble();
             return;
         }
-        std::cout << static_cast<int>(d_payload_len) << std::endl;
-        enter_decode_payload();
+        if (++d_bytes_count == 1) {
+            enter_decode_payload();
+            return;
+        }
     }
 }
 void ieee802154_packet_sink_impl::process_decode_payload(uint8_t chip,
                                                          uint64_t sample_index)
 {
-    (void)chip;
-    (void)sample_index;
+    if (d_entering_payload && d_output_connected) {
+        // Add a tag for the start of the payload to the current sample index
+        d_sample_payload_index = sample_index;
+        pmt::pmt_t tag_value = pmt::make_tuple(pmt::from_uint64(d_packet_count),
+                                               pmt::from_uint64(d_payload_len));
+        add_item_tag(0, d_sample_payload_index, pmt::intern("Payload start"), tag_value);
+        d_entering_payload = false;
+    }
 }
 void ieee802154_packet_sink_impl::process_check_crc(uint8_t chip, uint64_t sample_index)
 {

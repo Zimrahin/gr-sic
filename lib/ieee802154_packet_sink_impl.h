@@ -88,6 +88,7 @@ private:
     uint d_threshold;     // Allowed chip errors in the preamble detection
     uint d_block_id;      // Block instance ID
     uint32_t d_chip_mask; // 32-bit mask for chip-sequence comparison
+    bool d_crc_included;  // Is CRC included in the payload?
 
     // Variables
     bool d_output_connected;  // Indicates if the stream output port is connected
@@ -99,6 +100,9 @@ private:
     uint64_t d_packet_count;  // Packet count for the current packet
     uint8_t d_payload_len;    // Length of the payload
     uint8_t d_reg_byte;       // Shift register for byte decoding
+    bool d_entering_payload;  // Indicates if we are entering the payload state
+    uint64_t d_sample_payload_index; // First sample index of the payload
+    uint8_t d_bytes_count;           // Number of bytes collected for the current packet
 };
 
 } // namespace ble

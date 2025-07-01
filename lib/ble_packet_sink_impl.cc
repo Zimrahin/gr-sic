@@ -208,7 +208,7 @@ void ble_packet_sink_impl::process_decode_payload(uint8_t bit, uint64_t sample_i
     uint8_t unwhitened_bit = whiten_bit(bit, d_lfsr, d_whitening_polynomial);
     compute_crc(unwhitened_bit, d_crc, d_crc_polynomial, d_crc_mask);
 
-    d_reg_byte = (d_reg_byte >> 1) | (unwhitened_bit << 7); // Shift in new bit from MSB
+    d_reg_byte = (d_reg_byte >> 1) | (unwhitened_bit << 7); // Shift in new bit
 
     if (++d_bits_count < 8) {
         return; // Still collecting bits to unpack a byte
