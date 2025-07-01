@@ -65,11 +65,32 @@ bool ieee802154_packet_sink_impl::nibble_match(uint32_t chip_sequence,
                                                uint8_t nibble,
                                                uint threshold)
 {
+    uint32_t nwrong;
     uint32_t diff = (chip_sequence ^ d_chip_mapping_msk.at(nibble)) & d_chip_mask;
-    uint32_t nwrong = threshold + 1; // Value greater than the threshold
     volk_32u_popcnt(&nwrong, diff);
 
     return nwrong <= threshold;
+}
+
+// Pack 32 chips into a nibble
+uint8_t ieee802154_packet_sink_impl::pack_chips_to_nibble(uint32_t chip_sequence,
+                                                          uint threshold)
+{
+    uint8_t best_match = 0xFF;
+    uint min_threshold = threshold;
+
+    for (uint8_t nibble = 0; nibble < d_chip_mapping_msk.size(); nibble++) {
+        uint32_t nwrong;
+        uint32_t diff = (chip_sequence ^ d_chip_mapping_msk.at(nibble)) & d_chip_mask;
+        volk_32u_popcnt(&nwrong, diff);
+
+        if (nwrong <= min_threshold) {
+            best_match = nibble;
+            min_threshold = nwrong;
+        }
+    }
+
+    return best_match; // Return the best match nibble (0xFF if no match found)
 }
 
 // Finite State Machine methods
@@ -79,20 +100,28 @@ void ieee802154_packet_sink_impl::enter_search_preamble()
         d_shift_reg = 0;
         d_fill_buffer_count = 0;
     }
-    d_preamble_nibble_count = 0;
+    d_nibble_count = 0;
     d_chip_count = 0;
     d_state = state::SEARCH_PREAMBLE;
 }
 void ieee802154_packet_sink_impl::enter_decode_length()
 {
-    std::cout << "We found a preamble!" << std::endl;
+    d_chip_count = 0;
+    d_payload_len = 0;
+    d_reg_byte = 0;
+    d_nibble_count = 0;
+    d_shift_reg = 0;
     d_state = state::DECODE_LENGTH;
 }
-void ieee802154_packet_sink_impl::enter_decode_payload() {}
-void ieee802154_packet_sink_impl::enter_check_crc() {}
+void ieee802154_packet_sink_impl::enter_decode_payload()
+{
+    d_state = state::DECODE_PAYLOAD;
+}
+void ieee802154_packet_sink_impl::enter_check_crc() { d_state = state::CHECK_CRC; }
 void ieee802154_packet_sink_impl::process_search_preamble(uint8_t chip,
                                                           uint64_t sample_index)
 {
+    (void)sample_index;
     d_shift_reg = (d_shift_reg << 1) | chip; // Shift in new chip
 
     // Buffer yet to be filled
@@ -101,11 +130,10 @@ void ieee802154_packet_sink_impl::process_search_preamble(uint8_t chip,
         return;
     }
     // Look for the first 32-chip sequence representing a 0x0 nibble
-    if (d_preamble_nibble_count == 0) {
-        if (nibble_match(d_shift_reg,
-                         d_preamble_sequence.at(d_preamble_nibble_count),
-                         d_threshold)) {
-            d_preamble_nibble_count++;
+    if (d_nibble_count == 0) {
+        if (nibble_match(
+                d_shift_reg, d_preamble_sequence.at(d_nibble_count), d_threshold)) {
+            d_nibble_count++;
         }
         return;
     }
@@ -115,21 +143,45 @@ void ieee802154_packet_sink_impl::process_search_preamble(uint8_t chip,
     }
     d_chip_count = 0; // Reset chip counter
 
-    if (!nibble_match(
-            d_shift_reg, d_preamble_sequence.at(d_preamble_nibble_count), d_threshold)) {
+    if (!nibble_match(d_shift_reg, d_preamble_sequence.at(d_nibble_count), d_threshold)) {
         enter_search_preamble();
         return; // The read chip sequence doesn't match the position in the preamble
     }
     // We found the entire preamble sequence
-    if (++d_preamble_nibble_count >= d_preamble_sequence.size()) {
+    if (++d_nibble_count >= d_preamble_sequence.size()) {
         enter_decode_length();
     }
 }
 void ieee802154_packet_sink_impl::process_decode_length(uint8_t chip,
                                                         uint64_t sample_index)
 {
-    (void)chip;
-    (void)sample_index;
+    d_shift_reg = (d_shift_reg << 1) | chip; // Shift in new chip
+
+    // Start processing every 32-chip block
+    if (++d_chip_count < 32) {
+        return; // Still collecting chips to unpack a nibble
+    }
+    d_chip_count = 0; // Reset chip counter
+
+    // Use threshold of 32 errors to simply return the closest match
+    uint8_t nibble = pack_chips_to_nibble(d_shift_reg, d_chip_sequence_len);
+
+    if (d_nibble_count == 0) {
+        d_reg_byte |= nibble;
+        d_nibble_count = 1;
+
+    } else if (d_nibble_count == 1) {
+        d_reg_byte |= (nibble << 4);
+        d_payload_len = d_reg_byte; // Unpack the LENGTH byte
+
+        if (d_payload_len > d_max_payload_len) {
+            // Invalid payload length, reset state machine
+            enter_search_preamble();
+            return;
+        }
+        std::cout << static_cast<int>(d_payload_len) << std::endl;
+        enter_decode_payload();
+    }
 }
 void ieee802154_packet_sink_impl::process_decode_payload(uint8_t chip,
                                                          uint64_t sample_index)

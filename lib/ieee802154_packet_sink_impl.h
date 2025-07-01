@@ -77,7 +77,8 @@ private:
                       uint threshold); // Checks whether a given chip sequence matches the
                                        // predefined constant channel mapping at index
                                        // nibble, with a tolerance of threshold errors
-
+    uint8_t pack_chips_to_nibble(uint32_t chip_sequence,
+                                 uint threshold); // Pack 32 chips into a nibble
 
     // Constants
     static const uint8_t d_max_payload_len =
@@ -89,13 +90,15 @@ private:
     uint32_t d_chip_mask; // 32-bit mask for chip-sequence comparison
 
     // Variables
-    bool d_output_connected;      // Indicates if the stream output port is connected
-    uint32_t d_shift_reg;         // 32-bit shift register for storing chips
-    uint d_fill_buffer_count;     // Ensures the shift register is filled before comparing
-    uint d_preamble_nibble_count; // Nibbles (32-chip sequences) we have found
-                                  // in the preamble
-    uint8_t d_chip_count;         // Chips we have collected within a 32-chip sequence
-    uint64_t d_packet_count;      // Packet count for the current packet
+    bool d_output_connected;  // Indicates if the stream output port is connected
+    uint32_t d_shift_reg;     // 32-bit shift register for storing chips
+    uint d_fill_buffer_count; // Ensures the shift register is filled before comparing
+    uint d_nibble_count;      // Nibbles (32-chip sequences) we have found
+                              // in the preamble
+    uint8_t d_chip_count;     // Chips we have collected within a 32-chip sequence
+    uint64_t d_packet_count;  // Packet count for the current packet
+    uint8_t d_payload_len;    // Length of the payload
+    uint8_t d_reg_byte;       // Shift register for byte decoding
 };
 
 } // namespace ble
