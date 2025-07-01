@@ -32,10 +32,11 @@ public:
      * \param preamble_threshold The maximum number of chip errors allowed in the preamble
      * detection. If the number of errors exceeds this threshold, the preamble is not
      * detected.
+     * \param crc_included If true, the CRC is included in the payload.
      * \param block_id An identifier for the block instance, used in the output message
      * metadata.
      */
-    static sptr make(uint preamble_threshold, uint block_id);
+    static sptr make(uint preamble_threshold, bool crc_included, uint block_id);
 };
 
 } // namespace ble

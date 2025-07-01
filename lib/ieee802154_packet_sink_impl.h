@@ -24,7 +24,9 @@ namespace ble {
 class ieee802154_packet_sink_impl : public ieee802154_packet_sink
 {
 public:
-    ieee802154_packet_sink_impl(uint preamble_threshold, uint block_id);
+    ieee802154_packet_sink_impl(uint preamble_threshold,
+                                bool crc_included,
+                                uint block_id);
     ~ieee802154_packet_sink_impl();
 
     // Where all the action really happens
@@ -86,9 +88,9 @@ private:
     static const uint d_crc_len = 2; // CRC length in bytes
     static const uint8_t d_chip_sequence_len = 32; // 32-chip sequences for IEEE 802.15.4
     uint d_threshold;     // Allowed chip errors in the preamble detection
+    bool d_crc_included;  // Is CRC included in the payload?
     uint d_block_id;      // Block instance ID
     uint32_t d_chip_mask; // 32-bit mask for chip-sequence comparison
-    bool d_crc_included;  // Is CRC included in the payload?
 
     // Variables
     bool d_output_connected;  // Indicates if the stream output port is connected

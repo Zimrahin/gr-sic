@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(ieee802154_packet_sink.h) */
-/* BINDTOOL_HEADER_FILE_HASH(bdc1e526406f59e67fdbb3f1fefc2f25)                     */
+/* BINDTOOL_HEADER_FILE_HASH(2a694d43aa9cda11fa6f6d8a096619fc)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -42,6 +42,7 @@ void bind_ieee802154_packet_sink(py::module& m)
 
         .def(py::init(&ieee802154_packet_sink::make),
              py::arg("preamble_threshold"),
+             py::arg("crc_included"),
              py::arg("block_id"),
              D(ieee802154_packet_sink, make))
 

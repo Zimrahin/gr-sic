@@ -23,11 +23,11 @@ namespace ble {
 using input_type = float;
 using output_type = uint8_t; // Optional output, sliced data
 
-ieee802154_packet_sink::sptr ieee802154_packet_sink::make(uint preamble_threshold,
-                                                          uint block_id)
+ieee802154_packet_sink::sptr
+ieee802154_packet_sink::make(uint preamble_threshold, bool crc_included, uint block_id)
 {
-    return gnuradio::make_block_sptr<ieee802154_packet_sink_impl>(preamble_threshold,
-                                                                  block_id);
+    return gnuradio::make_block_sptr<ieee802154_packet_sink_impl>(
+        preamble_threshold, crc_included, block_id);
 }
 
 // Constructor
@@ -37,12 +37,12 @@ ieee802154_packet_sink_impl::ieee802154_packet_sink_impl(uint preamble_threshold
                      gr::io_signature::make(1, 1, sizeof(input_type)),
                      gr::io_signature::make(0, 1, sizeof(output_type))),
       d_threshold(preamble_threshold),
+      d_crc_included(crc_included),
       d_block_id(block_id)
 {
     // Constants
     d_chip_mask =
         0x7FFFFFFE; // Ignore the first and last chips for differential MSK decoding
-    d_crc_included = true; // CRC included in the payload by default
 
     // Variables
     d_packet_count = 0;
@@ -184,7 +184,7 @@ void ieee802154_packet_sink_impl::process_decode_length(uint8_t chip,
     }
     d_nibble_count = 0;
     if (d_bytes_count < 1) {
-        d_payload_len = d_reg_byte;
+        d_payload_len = d_crc_included ? d_reg_byte - d_crc_len : d_reg_byte;
 
         if (d_payload_len > d_max_payload_len) {
             // Invalid payload length, reset state machine
