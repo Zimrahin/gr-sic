@@ -254,11 +254,11 @@ void ble_packet_sink_impl::process_check_crc(uint8_t bit, uint64_t sample_index)
 
         // Optional output stream tag
         if (d_output_connected) {
-            pmt::pmt_t tag_value = pmt::make_tuple(pmt::from_uint64(d_packet_count++),
-                                                   pmt::from_bool(crc_ok));
+            pmt::pmt_t tag_value =
+                pmt::make_tuple(pmt::from_uint64(d_packet_count), pmt::from_bool(crc_ok));
             add_item_tag(0, sample_index, pmt::intern("Packet end"), tag_value);
         }
-
+        d_packet_count++;
         enter_search_preamble();
     }
 }
