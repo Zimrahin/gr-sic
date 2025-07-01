@@ -73,7 +73,9 @@ private:
     void process_check_crc(uint8_t chip, uint64_t sample_index);
 
     // Helper functions
-    uint8_t slice(float data_in); // Slice float data into binary data
+    template <typename T>
+    T reverse_bits(T unsigned_integer); // Reverse bits in an unsigned integer
+    uint8_t slice(float data_in);       // Slice float data into binary data
     bool nibble_match(uint32_t chip_sequence,
                       uint8_t nibble,
                       uint threshold); // Checks whether a given chip sequence matches the
@@ -81,16 +83,29 @@ private:
                                        // nibble, with a tolerance of threshold errors
     uint8_t pack_chips_to_nibble(uint32_t chip_sequence,
                                  uint threshold); // Pack 32 chips into a nibble
+    void compute_crc(uint8_t data_bit,
+                     uint32_t& crc,
+                     uint32_t polynomial,
+                     uint32_t mask); // Compute CRC from a bit
+    void compute_crc_byte(uint8_t data_byte,
+                          uint32_t& crc,
+                          uint32_t polynomial,
+                          uint32_t mask); // Compute CRC from a byte
+    void output_pdu(uint64_t sample_index,
+                    bool crc_ok); // Output PDU with metadata and payload
 
     // Constants
     static const uint8_t d_max_payload_len =
         127;                         // Maximum payload length in bytes (including CRC)
     static const uint d_crc_len = 2; // CRC length in bytes
     static const uint8_t d_chip_sequence_len = 32; // 32-chip sequences for IEEE 802.15.4
-    uint d_threshold;     // Allowed chip errors in the preamble detection
-    bool d_crc_included;  // Is CRC included in the payload?
-    uint d_block_id;      // Block instance ID
-    uint32_t d_chip_mask; // 32-bit mask for chip-sequence comparison
+    uint d_threshold;          // Allowed chip errors in the preamble detection
+    bool d_crc_included;       // Is CRC included in the payload?
+    uint d_block_id;           // Block instance ID
+    uint32_t d_chip_mask;      // 32-bit mask for chip-sequence comparison
+    uint32_t d_crc_mask;       // Mask for CRC computation
+    uint32_t d_crc_polynomial; // Polynomial for CRC computation
+    uint32_t d_crc_init;       // Initial value for CRC computation
 
     // Variables
     bool d_output_connected;  // Indicates if the stream output port is connected
@@ -106,6 +121,8 @@ private:
     bool d_entering_payload;         // Indicates if we are entering the payload state
     uint64_t d_sample_payload_index; // First sample index of the payload
     uint8_t d_bytes_count;           // Number of bytes collected for the current packet
+    uint32_t d_crc_computed;         // Buffer to store computed CRC
+    uint32_t d_crc_received;         // Buffer to store received CRC
 };
 
 } // namespace ble
