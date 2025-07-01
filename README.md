@@ -1,5 +1,5 @@
-# gr-ble
-A GNU Radio out-of-tree (OOT) module implementing the physical layer of Bluetooth Low Energy (BLE).
+# gr-sic
+A GNU Radio out-of-tree (OOT) module implementing Successive Interference Cancellation at the physical layer between Bluetooth Low Energy (BLE) and IEEE 802.15.4.
 
 > **Work in Progress**  
 > This project is under development.
