@@ -83,6 +83,7 @@ private:
     std::array<uint8_t, d_max_payload_len> d_payload; // Payload buffer
     uint64_t d_sample_payload_index;                  // First sample index of the payload
     uint64_t d_packet_count; // Packet count for the current packet
+    bool d_entering_payload; // Indicates if we are entering the payload state
 };
 
 } // namespace ble

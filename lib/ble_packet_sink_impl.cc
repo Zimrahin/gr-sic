@@ -147,6 +147,7 @@ void ble_packet_sink_impl::enter_decode_payload()
     d_reg_byte = 0;
     d_bits_count = 0;
     d_bytes_count = 0;
+    d_entering_payload = true;
     d_state = state::DECODE_PAYLOAD;
 }
 void ble_packet_sink_impl::enter_check_crc()
@@ -157,6 +158,7 @@ void ble_packet_sink_impl::enter_check_crc()
 }
 void ble_packet_sink_impl::process_search_preamble(uint8_t bit, uint64_t sample_index)
 {
+    (void)sample_index;
     d_shift_reg = (d_shift_reg << 1) | bit; // Shift in new bit
 
     // Buffer yet to be filled
@@ -170,7 +172,6 @@ void ble_packet_sink_impl::process_search_preamble(uint8_t bit, uint64_t sample_
     volk_64u_popcnt(&nwrong, diff);
 
     if (nwrong <= d_threshold) {
-        d_sample_payload_index = sample_index + 8 * d_num_preamble_bytes + 1;
         enter_decode_length();
     }
 }
@@ -191,17 +192,19 @@ void ble_packet_sink_impl::process_decode_length(uint8_t bit, uint64_t sample_in
     }
     d_payload_len = d_reg_byte; // Unpack the LENGTH byte
 
-    if (d_output_connected) {
-        pmt::pmt_t tag_value = pmt::make_tuple(pmt::from_uint64(d_packet_count),
-                                               pmt::from_uint64(d_payload_len));
-        add_item_tag(0, d_sample_payload_index, pmt::intern("Payload start"), tag_value);
-    }
-
     enter_decode_payload();
 }
 void ble_packet_sink_impl::process_decode_payload(uint8_t bit, uint64_t sample_index)
 {
-    (void)sample_index;
+    if (d_entering_payload && d_output_connected) {
+        // Add a tag for the start of the payload to the current sample index
+        d_sample_payload_index = sample_index;
+        pmt::pmt_t tag_value = pmt::make_tuple(pmt::from_uint64(d_packet_count),
+                                               pmt::from_uint64(d_payload_len));
+        add_item_tag(0, d_sample_payload_index, pmt::intern("Payload start"), tag_value);
+        d_entering_payload = false;
+    }
+
     uint8_t unwhitened_bit = whiten_bit(bit, d_lfsr, d_whitening_polynomial);
     compute_crc(unwhitened_bit, d_crc, d_crc_polynomial, d_crc_mask);
 
