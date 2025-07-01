@@ -9,8 +9,6 @@
 #include "ble_packet_sink_impl.h"
 #include <gnuradio/io_signature.h>
 #include <volk/volk.h>
-#include <iomanip>
-#include <sstream>
 
 namespace gr {
 namespace ble {
@@ -45,13 +43,15 @@ ble_packet_sink_impl::ble_packet_sink_impl(uint32_t base_address,
     d_access_code = generate_access_code(base_address);
     d_whitening_polynomial = 0x11;
     d_crc_polynomial = 0x00065B;
-    d_crc_mask = (~uint64_t(0)) >> (64 - CRC_LEN * 8);
+    d_crc_mask = (~uint32_t(0)) >> (32 - d_crc_len * 8);
     d_crc_init = 0x00FFFF;
     d_num_preamble_bytes = 2; // Assume (S0 | LENGTH), received from an nRF52
 
     // Variables
-    d_state = state::SEARCH_PREAMBLE;
     d_packet_count = 0;
+
+    // Enter first FSM state
+    enter_search_preamble();
 
     // PMT message output port
     message_port_register_out(pmt::mp("pdu"));
@@ -115,7 +115,7 @@ void ble_packet_sink_impl::compute_crc(uint8_t data_bit,
                                        uint32_t polynomial,
                                        uint32_t mask)
 {
-    uint crc_len_bits = 8 * CRC_LEN;
+    uint crc_len_bits = 8 * d_crc_len;
     crc ^= data_bit << (crc_len_bits - 1);
     if (crc & (1 << (crc_len_bits - 1))) {
         crc = ((crc << 1) ^ polynomial) & mask; // Apply feedback
@@ -144,10 +144,10 @@ void ble_packet_sink_impl::enter_decode_length()
 }
 void ble_packet_sink_impl::enter_decode_payload()
 {
-    // std::fill(d_payload.begin(), d_payload.end(), 0); // Clear payload buffer
     d_reg_byte = 0;
     d_bits_count = 0;
     d_bytes_count = 0;
+    d_entering_payload = true;
     d_state = state::DECODE_PAYLOAD;
 }
 void ble_packet_sink_impl::enter_check_crc()
@@ -158,6 +158,7 @@ void ble_packet_sink_impl::enter_check_crc()
 }
 void ble_packet_sink_impl::process_search_preamble(uint8_t bit, uint64_t sample_index)
 {
+    (void)sample_index;
     d_shift_reg = (d_shift_reg << 1) | bit; // Shift in new bit
 
     // Buffer yet to be filled
@@ -171,7 +172,6 @@ void ble_packet_sink_impl::process_search_preamble(uint8_t bit, uint64_t sample_
     volk_64u_popcnt(&nwrong, diff);
 
     if (nwrong <= d_threshold) {
-        d_sample_payload_index = sample_index + 8 * d_num_preamble_bytes + 1;
         enter_decode_length();
     }
 }
@@ -192,21 +192,23 @@ void ble_packet_sink_impl::process_decode_length(uint8_t bit, uint64_t sample_in
     }
     d_payload_len = d_reg_byte; // Unpack the LENGTH byte
 
-    if (d_output_connected) {
-        pmt::pmt_t tag_value = pmt::make_tuple(pmt::from_uint64(d_packet_count),
-                                               pmt::from_uint64(d_payload_len));
-        add_item_tag(0, d_sample_payload_index, pmt::intern("Payload start"), tag_value);
-    }
-
     enter_decode_payload();
 }
 void ble_packet_sink_impl::process_decode_payload(uint8_t bit, uint64_t sample_index)
 {
-    (void)sample_index;
+    if (d_entering_payload && d_output_connected) {
+        // Add a tag for the start of the payload to the current sample index
+        d_sample_payload_index = sample_index;
+        pmt::pmt_t tag_value = pmt::make_tuple(pmt::from_uint64(d_packet_count),
+                                               pmt::from_uint64(d_payload_len));
+        add_item_tag(0, d_sample_payload_index, pmt::intern("Payload start"), tag_value);
+        d_entering_payload = false;
+    }
+
     uint8_t unwhitened_bit = whiten_bit(bit, d_lfsr, d_whitening_polynomial);
     compute_crc(unwhitened_bit, d_crc, d_crc_polynomial, d_crc_mask);
 
-    d_reg_byte = (d_reg_byte >> 1) | (unwhitened_bit << 7); // Shift in new bit from MSB
+    d_reg_byte = (d_reg_byte >> 1) | (unwhitened_bit << 7); // Shift in new bit
 
     if (++d_bits_count < 8) {
         return; // Still collecting bits to unpack a byte
@@ -217,20 +219,20 @@ void ble_packet_sink_impl::process_decode_payload(uint8_t bit, uint64_t sample_i
 
         if (++d_bytes_count == d_payload_len) {
             enter_check_crc();
+            return;
         }
     }
 }
 void ble_packet_sink_impl::process_check_crc(uint8_t bit, uint64_t sample_index)
 {
-    (void)sample_index;
     uint8_t unwhitened_bit = whiten_bit(bit, d_lfsr, d_whitening_polynomial);
     d_shift_reg = (d_shift_reg << 1) | unwhitened_bit; // Shift in new bit
 
     // Buffer yet to be filled
-    if (++d_fill_buffer_count < CRC_LEN * 8) {
+    if (++d_fill_buffer_count < d_crc_len * 8) {
         return;
     }
-    if (d_fill_buffer_count == CRC_LEN * 8) {
+    if (d_fill_buffer_count == d_crc_len * 8) {
         bool crc_ok = (d_shift_reg == d_crc) ? true : false;
 
         // Prepare PMT output message
@@ -245,18 +247,18 @@ void ble_packet_sink_impl::process_check_crc(uint8_t bit, uint64_t sample_index)
                              pmt::mp("CRC check"),
                              pmt::from_bool(crc_ok)); // CRC check prints #t if ok
         meta = pmt::dict_add(meta,
-                             pmt::mp("Payload start sample"),
-                             pmt::from_uint64(d_sample_payload_index));
+                             pmt::mp("Payload start"),
+                             pmt::from_uint64(d_sample_payload_index)); // Start index
         pmt::pmt_t payload = pmt::make_blob(d_payload.data(), d_payload_len);
         message_port_pub(pmt::mp("pdu"), pmt::cons(meta, payload));
 
         // Optional output stream tag
         if (d_output_connected) {
-            pmt::pmt_t tag_value = pmt::make_tuple(pmt::from_uint64(d_packet_count++),
-                                                   pmt::from_bool(crc_ok));
+            pmt::pmt_t tag_value =
+                pmt::make_tuple(pmt::from_uint64(d_packet_count), pmt::from_bool(crc_ok));
             add_item_tag(0, sample_index, pmt::intern("Packet end"), tag_value);
         }
-
+        d_packet_count++;
         enter_search_preamble();
     }
 }
@@ -273,16 +275,14 @@ int ble_packet_sink_impl::work(int noutput_items,
         out = static_cast<output_type*>(output_items[0]);
     }
 
-    uint64_t sample_count = nitems_read(0);
-
     for (int i = 0; i < noutput_items; i++) {
         uint8_t rx_bit = slice(in[i]);
 
         if (out) {
-            out[i] = rx_bit; // Optional output: sliced data
+            out[i] = rx_bit; // Optional stream output: sliced data
         }
 
-        uint64_t sample_index = sample_count + i;
+        uint64_t sample_index = nitems_read(0) + i;
 
         switch (d_state) {
         case state::SEARCH_PREAMBLE:

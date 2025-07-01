@@ -1,24 +1,22 @@
-id: ble_ble_packet_sink
-label: BLE Packet Sink
+id: ble_ieee802154_packet_sink
+label: IEEE 802.15.4 Packet Sink
 category: '[ble]'
 
 templates:
   imports: from gnuradio import ble
-  make: ble.ble_packet_sink(${base_address}, ${preamble_threshold}, ${lfsr}, ${block_id})
+  make: ble.ieee802154_packet_sink(${preamble_threshold}, ${crc_included}, ${block_id})
 
 parameters:
-- id: base_address
-  label: Base Address
-  dtype: int
-  default: 0x12345678
 - id: preamble_threshold
   label: Preamble Threshold
   dtype: int
-  default: 4
-- id: lfsr
-  label: Whitening LFSR
-  dtype: int
-  default: 0x01
+  default: 5
+- id: crc_included
+  label: CRC Included
+  dtype: enum
+  options: ['True', 'False']
+  option_labels: ['Yes', 'No']
+  default: 'True'
 - id: block_id
   label: Block ID
   dtype: int

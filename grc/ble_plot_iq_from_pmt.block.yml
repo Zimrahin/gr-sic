@@ -7,26 +7,22 @@ templates:
   make: ble.plot_iq_from_pmt(${sample_rate})
 
 parameters:
--   id: sample_rate
-    label: Sample Rate
-    dtype: int
-    default: 1
-    tooltip: "Sample rate of the IQ data in Hz"
--   id: max_queue_size
-    label: Max Queue Size
-    dtype: int
-    default: 10
-    tooltip: "Maximum number of IQ arrays to queue before dropping new ones"
+- id: sample_rate
+  label: Sample Rate
+  dtype: int
+  default: 1
+- id: max_queue_size
+  label: Max Queue Size
+  dtype: int
+  default: 10
 
 inputs:
--   label: iq
-    domain: message
-    dtype: pmt
-    tooltip: "Input stream of PMT messages containing IQ data"
--   label: pdu
-    domain: message
-    dtype: pmt
-    tooltip: "Input stream of PMT messages containing Payload"
+- label: iq
+  domain: message
+  dtype: pmt
+- label: pdu
+  domain: message
+  dtype: pmt
 
 outputs: []
 

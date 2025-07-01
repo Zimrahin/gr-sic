@@ -24,6 +24,7 @@ namespace py = pybind11;
 void bind_ble_packet_sink(py::module& m);
 void bind_tag_iq_stream(py::module& m);
     void bind_tagged_iq_to_vector(py::module& m);
+    void bind_ieee802154_packet_sink(py::module& m);
 // ) END BINDING_FUNCTION_PROTOTYPES
 
 
@@ -55,5 +56,6 @@ PYBIND11_MODULE(ble_python, m)
     bind_ble_packet_sink(m);
     bind_tag_iq_stream(m);
     bind_tagged_iq_to_vector(m);
+    bind_ieee802154_packet_sink(m);
     // ) END BINDING_FUNCTION_CALLS
 }

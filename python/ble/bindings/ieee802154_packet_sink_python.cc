@@ -13,8 +13,8 @@
 /* If manual edits are made, the following tags should be modified accordingly.    */
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
-/* BINDTOOL_HEADER_FILE(tagged_iq_to_vector.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(5a008e986242498f14bcb813f9fe12f6)                     */
+/* BINDTOOL_HEADER_FILE(ieee802154_packet_sink.h) */
+/* BINDTOOL_HEADER_FILE_HASH(2a694d43aa9cda11fa6f6d8a096619fc)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -23,28 +23,28 @@
 
 namespace py = pybind11;
 
-#include <gnuradio/ble/tagged_iq_to_vector.h>
+#include <gnuradio/ble/ieee802154_packet_sink.h>
 // pydoc.h is automatically generated in the build directory
-#include <tagged_iq_to_vector_pydoc.h>
+#include <ieee802154_packet_sink_pydoc.h>
 
-void bind_tagged_iq_to_vector(py::module& m)
+void bind_ieee802154_packet_sink(py::module& m)
 {
 
-    using tagged_iq_to_vector = ::gr::ble::tagged_iq_to_vector;
+    using ieee802154_packet_sink = ::gr::ble::ieee802154_packet_sink;
 
 
-    py::class_<tagged_iq_to_vector,
+    py::class_<ieee802154_packet_sink,
                gr::sync_block,
                gr::block,
                gr::basic_block,
-               std::shared_ptr<tagged_iq_to_vector>>(
-        m, "tagged_iq_to_vector", D(tagged_iq_to_vector))
+               std::shared_ptr<ieee802154_packet_sink>>(
+        m, "ieee802154_packet_sink", D(ieee802154_packet_sink))
 
-        .def(py::init(&tagged_iq_to_vector::make),
-             py::arg("pre_offset"),
-             py::arg("post_offset"),
-             py::arg("max_gap"),
-             D(tagged_iq_to_vector, make))
+        .def(py::init(&ieee802154_packet_sink::make),
+             py::arg("preamble_threshold"),
+             py::arg("crc_included"),
+             py::arg("block_id"),
+             D(ieee802154_packet_sink, make))
 
 
         ;
