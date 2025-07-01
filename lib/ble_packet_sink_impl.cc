@@ -224,7 +224,6 @@ void ble_packet_sink_impl::process_decode_payload(uint8_t bit, uint64_t sample_i
 }
 void ble_packet_sink_impl::process_check_crc(uint8_t bit, uint64_t sample_index)
 {
-    (void)sample_index;
     uint8_t unwhitened_bit = whiten_bit(bit, d_lfsr, d_whitening_polynomial);
     d_shift_reg = (d_shift_reg << 1) | unwhitened_bit; // Shift in new bit
 
