@@ -101,8 +101,9 @@ private:
     uint8_t d_chip_count;     // Chips we have collected within a 32-chip sequence
     uint64_t d_packet_count;  // Packet count for the current packet
     uint8_t d_payload_len;    // Length of the payload
-    uint8_t d_reg_byte;       // Shift register for byte decoding
-    bool d_entering_payload;  // Indicates if we are entering the payload state
+    std::array<uint8_t, d_max_payload_len> d_payload; // Payload buffer
+    uint8_t d_reg_byte;                               // Shift register for byte decoding
+    bool d_entering_payload;         // Indicates if we are entering the payload state
     uint64_t d_sample_payload_index; // First sample index of the payload
     uint8_t d_bytes_count;           // Number of bytes collected for the current packet
 };

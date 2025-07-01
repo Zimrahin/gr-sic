@@ -208,6 +208,31 @@ void ieee802154_packet_sink_impl::process_decode_payload(uint8_t chip,
         add_item_tag(0, d_sample_payload_index, pmt::intern("Payload start"), tag_value);
         d_entering_payload = false;
     }
+
+    d_shift_reg = (d_shift_reg << 1) | chip; // Shift in new chip
+
+    // Start processing every 32-chip block
+    if (++d_chip_count < 32) {
+        return; // Still collecting chips to unpack a nibble
+    }
+    d_chip_count = 0; // Reset chip counter
+
+    // Use threshold of 32 errors. Simply get closest match
+    uint8_t nibble = pack_chips_to_nibble(d_shift_reg, d_chip_sequence_len);
+    d_reg_byte = (d_reg_byte >> 4) | (nibble << 4);
+
+    if (++d_nibble_count < 2) {
+        return; // Still collecting nibbles to unpack a byte
+    }
+    d_nibble_count = 0;
+    if (d_bytes_count < d_payload_len) {
+        d_payload[d_bytes_count] = d_reg_byte;
+
+        if (++d_bytes_count == d_payload_len) {
+            enter_check_crc();
+            return;
+        }
+    }
 }
 void ieee802154_packet_sink_impl::process_check_crc(uint8_t chip, uint64_t sample_index)
 {
