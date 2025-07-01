@@ -1,20 +1,17 @@
-title: The BLE OOT Module
+title: The SIC OOT Module
 version: 1.0
-brief: Short description of gr-ble
+brief: Successive Interference Cancellation at the physical layer between Bluetooth Low Energy (BLE) and IEEE 802.15.4.
 tags: # Tags are arbitrary, but look at CGRAN what other authors are using
-  - sdr
+  - SDR, BLE, IEEE 802.15.4, SIC, GNU Radio
 author:
-  - Author Name <authors@email.address>
+  - Diego Badillo-San-Juan <diego.badillo-san-juan@inria.fr>
 copyright_owner:
-  - Copyright Owner 1
+  - Inria
 license:
 gr_supported_version:
   - 3.X
-repo: # Put the URL of the repository here
+repo: https://github.com/Zimrahin/gr-sic
 website: # If you have a separate project website, put it here
 #icon: # Put a URL to a square image here that will be used as an icon
-description: |-
-  A longer, multi-line description of gr-ble.
-  You may use some *basic* Markdown here.
-  If left empty, it will try to find a README file instead.
+description:
 file_format: 1

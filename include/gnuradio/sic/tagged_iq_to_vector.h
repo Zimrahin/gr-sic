@@ -6,21 +6,21 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#ifndef INCLUDED_BLE_TAGGED_IQ_TO_VECTOR_H
-#define INCLUDED_BLE_TAGGED_IQ_TO_VECTOR_H
+#ifndef INCLUDED_SIC_TAGGED_IQ_TO_VECTOR_H
+#define INCLUDED_SIC_TAGGED_IQ_TO_VECTOR_H
 
-#include <gnuradio/ble/api.h>
+#include <gnuradio/sic/api.h>
 #include <gnuradio/sync_block.h>
 
 namespace gr {
-namespace ble {
+namespace sic {
 
 /*!
- * \brief
- * \ingroup ble
+ * \brief Tagged IQ to Vector
+ * \ingroup sic
  *
  */
-class BLE_API tagged_iq_to_vector : virtual public gr::sync_block
+class SIC_API tagged_iq_to_vector : virtual public gr::sync_block
 {
 public:
     typedef std::shared_ptr<tagged_iq_to_vector> sptr;
@@ -40,7 +40,7 @@ public:
     static sptr make(uint64_t pre_offset, uint64_t post_offset, uint64_t max_gap);
 };
 
-} // namespace ble
+} // namespace sic
 } // namespace gr
 
-#endif /* INCLUDED_BLE_TAGGED_IQ_TO_VECTOR_H */
+#endif /* INCLUDED_SIC_TAGGED_IQ_TO_VECTOR_H */

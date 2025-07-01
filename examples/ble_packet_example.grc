@@ -162,25 +162,6 @@ blocks:
     coordinate: [752, 272.0]
     rotation: 0
     state: enabled
-- name: ble_ble_packet_sink_0
-  id: ble_ble_packet_sink
-  parameters:
-    affinity: ''
-    alias: ''
-    base_address: '0x12345678'
-    block_id: '0'
-    comment: ''
-    lfsr: '0x1'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    preamble_threshold: '0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [320, 680.0]
-    rotation: 0
-    state: enabled
 - name: ble_plot_iq_from_pmt_0
   id: ble_plot_iq_from_pmt
   parameters:
@@ -724,6 +705,25 @@ blocks:
     coordinate: [816, 128.0]
     rotation: 0
     state: disabled
+- name: sic_ble_packet_sink_0
+  id: sic_ble_packet_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    base_address: '0x12345678'
+    block_id: '0'
+    comment: ''
+    lfsr: '0x1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    preamble_threshold: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [320, 680.0]
+    rotation: 0
+    state: enabled
 - name: virtual_sink_0
   id: virtual_sink
   parameters:
@@ -755,10 +755,6 @@ connections:
 - [analog_fastnoise_source_x_0, '0', blocks_add_xx_0, '1']
 - [analog_quadrature_demod_cf_0, '0', digital_symbol_sync_xx_0, '0']
 - [analog_quadrature_demod_cf_0, '0', qtgui_time_sink_x_1_0, '0']
-- [ble_ble_packet_sink_0, '0', ble_tag_iq_stream_0, '1']
-- [ble_ble_packet_sink_0, '0', blocks_uchar_to_float_0_0_0_0, '0']
-- [ble_ble_packet_sink_0, pdu, ble_plot_iq_from_pmt_0, pdu]
-- [ble_ble_packet_sink_0, pdu, blocks_message_debug_0, print]
 - [ble_tag_iq_stream_0, '0', ble_tagged_iq_to_vector_0, '0']
 - [ble_tag_iq_stream_0, '0', qtgui_time_sink_x_0, '0']
 - [ble_tagged_iq_to_vector_0, out, ble_plot_iq_from_pmt_0, iq]
@@ -770,8 +766,12 @@ connections:
 - [digital_symbol_sync_xx_0, '0', virtual_sink_0, '0']
 - [low_pass_filter_0_0, '0', analog_quadrature_demod_cf_0, '0']
 - [low_pass_filter_0_0, '0', qtgui_waterfall_sink_x_0, '0']
-- [virtual_source_0, '0', ble_ble_packet_sink_0, '0']
+- [sic_ble_packet_sink_0, '0', ble_tag_iq_stream_0, '1']
+- [sic_ble_packet_sink_0, '0', blocks_uchar_to_float_0_0_0_0, '0']
+- [sic_ble_packet_sink_0, pdu, ble_plot_iq_from_pmt_0, pdu]
+- [sic_ble_packet_sink_0, pdu, blocks_message_debug_0, print]
 - [virtual_source_0, '0', qtgui_time_sink_x_1, '0']
+- [virtual_source_0, '0', sic_ble_packet_sink_0, '0']
 
 metadata:
   file_format: 1

@@ -1,10 +1,10 @@
 id: ble_tagged_iq_to_vector
 label: Tagged IQ to Vector
-category: '[ble]'
+category: '[sic]'
 
 templates:
-  imports: from gnuradio import ble
-  make: ble.tagged_iq_to_vector(${pre_offset}, ${post_offset}, ${max_gap})
+  imports: from gnuradio import sic
+  make: sic.tagged_iq_to_vector(${pre_offset}, ${post_offset}, ${max_gap})
 
 parameters:
 - id: pre_offset

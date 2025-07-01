@@ -10,7 +10,7 @@
 #include <gnuradio/io_signature.h>
 
 namespace gr {
-namespace ble {
+namespace sic {
 
 using input_type_0 = gr_complex;
 using input_type_1 = uint8_t;
@@ -85,5 +85,5 @@ int tag_iq_stream_impl::general_work(int noutput_items,
     return noutput_items; // Tell runtime system how many output items we produced.
 }
 
-} /* namespace ble */
+} /* namespace sic */
 } /* namespace gr */

@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(tagged_iq_to_vector.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(5a008e986242498f14bcb813f9fe12f6)                     */
+/* BINDTOOL_HEADER_FILE_HASH(c30ae02277949b4055c3fb8927fcc850)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -23,14 +23,14 @@
 
 namespace py = pybind11;
 
-#include <gnuradio/ble/tagged_iq_to_vector.h>
+#include <gnuradio/sic/tagged_iq_to_vector.h>
 // pydoc.h is automatically generated in the build directory
 #include <tagged_iq_to_vector_pydoc.h>
 
 void bind_tagged_iq_to_vector(py::module& m)
 {
 
-    using tagged_iq_to_vector = ::gr::ble::tagged_iq_to_vector;
+    using tagged_iq_to_vector = ::gr::sic::tagged_iq_to_vector;
 
 
     py::class_<tagged_iq_to_vector,

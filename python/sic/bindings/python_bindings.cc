@@ -21,10 +21,10 @@ namespace py = pybind11;
 // Please do not delete
 /**************************************/
 // BINDING_FUNCTION_PROTOTYPES(
-void bind_ble_packet_sink(py::module& m);
-void bind_tag_iq_stream(py::module& m);
-    void bind_tagged_iq_to_vector(py::module& m);
+    void bind_ble_packet_sink(py::module& m);
     void bind_ieee802154_packet_sink(py::module& m);
+    void bind_tag_iq_stream(py::module& m);
+    void bind_tagged_iq_to_vector(py::module& m);
 // ) END BINDING_FUNCTION_PROTOTYPES
 
 
@@ -38,7 +38,7 @@ void* init_numpy()
     return NULL;
 }
 
-PYBIND11_MODULE(ble_python, m)
+PYBIND11_MODULE(sic_python, m)
 {
     // Initialize the numpy C API
     // (otherwise we will see segmentation faults)
@@ -54,8 +54,8 @@ PYBIND11_MODULE(ble_python, m)
     /**************************************/
     // BINDING_FUNCTION_CALLS(
     bind_ble_packet_sink(m);
+    bind_ieee802154_packet_sink(m);
     bind_tag_iq_stream(m);
     bind_tagged_iq_to_vector(m);
-    bind_ieee802154_packet_sink(m);
     // ) END BINDING_FUNCTION_CALLS
 }

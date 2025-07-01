@@ -6,13 +6,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#ifndef INCLUDED_BLE_BLE_PACKET_SINK_IMPL_H
-#define INCLUDED_BLE_BLE_PACKET_SINK_IMPL_H
+#ifndef INCLUDED_SIC_BLE_PACKET_SINK_IMPL_H
+#define INCLUDED_SIC_BLE_PACKET_SINK_IMPL_H
 
-#include <gnuradio/ble/ble_packet_sink.h>
+#include <gnuradio/sic/ble_packet_sink.h>
 
 namespace gr {
-namespace ble {
+namespace sic {
 
 class ble_packet_sink_impl : public ble_packet_sink
 {
@@ -86,7 +86,7 @@ private:
     bool d_entering_payload; // Indicates if we are entering the payload state
 };
 
-} // namespace ble
+} // namespace sic
 } // namespace gr
 
-#endif // INCLUDED_BLE_BLE_PACKET_SINK_IMPL_H
+#endif /* INCLUDED_SIC_BLE_PACKET_SINK_IMPL_H */
