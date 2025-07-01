@@ -75,8 +75,10 @@ bool ieee802154_packet_sink_impl::nibble_match(uint32_t chip_sequence,
 // Finite State Machine methods
 void ieee802154_packet_sink_impl::enter_search_preamble()
 {
-    d_shift_reg = 0;
-    d_fill_buffer_count = 0;
+    if (d_state != state::SEARCH_PREAMBLE) {
+        d_shift_reg = 0;
+        d_fill_buffer_count = 0;
+    }
     d_preamble_nibble_count = 0;
     d_chip_count = 0;
     d_state = state::SEARCH_PREAMBLE;

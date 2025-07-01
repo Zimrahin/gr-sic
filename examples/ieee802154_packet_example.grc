@@ -139,7 +139,7 @@ blocks:
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    preamble_threshold: '5'
+    preamble_threshold: '7'
   states:
     bus_sink: false
     bus_source: false
@@ -288,7 +288,7 @@ blocks:
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    th: '10'
+    th: '5'
   states:
     bus_sink: false
     bus_source: false

@@ -166,7 +166,7 @@ class ieee802154_packet_example(gr.top_block, Qt.QWidget):
         self.blocks_sub_xx_0 = blocks.sub_ff(1)
         self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, '/home/diego/Documents/SDR_projects/capture_nRF/data/new/802154_0dBm.dat', False, 0, 0)
         self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
-        self.ble_ieee802154_packet_sink_0 = ble.ieee802154_packet_sink(5, 0)
+        self.ble_ieee802154_packet_sink_0 = ble.ieee802154_packet_sink(7, 0)
         self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(((samp_rate / decimation)/(2*math.pi*fsk_deviation_hz)))
 
 
