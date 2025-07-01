@@ -1,1 +1,1 @@
-install(FILES DESTINATION share/gnuradio/examples/ble)
+install(FILES DESTINATION share/gnuradio/examples/sic)

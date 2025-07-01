@@ -7,7 +7,7 @@
  *
  */
 #include "pydoc_macros.h"
-#define D(...) DOC(gr, ble, __VA_ARGS__)
+#define D(...) DOC(gr, sic, __VA_ARGS__)
 /*
   This file contains placeholders for docstrings for the Python bindings.
   Do not edit! These were automatically extracted during the binding process
@@ -15,10 +15,10 @@
  */
 
 
-static const char* __doc_gr_ble_ble_packet_sink = R"doc()doc";
+static const char* __doc_gr_sic_tagged_iq_to_vector = R"doc()doc";
 
 
-static const char* __doc_gr_ble_ble_packet_sink_ble_packet_sink_0 = R"doc()doc";
+static const char* __doc_gr_sic_tagged_iq_to_vector_tagged_iq_to_vector_0 = R"doc()doc";
 
 
-static const char* __doc_gr_ble_ble_packet_sink_make = R"doc()doc";
+static const char* __doc_gr_sic_tagged_iq_to_vector_make = R"doc()doc";

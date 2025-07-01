@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(ieee802154_packet_sink.h) */
-/* BINDTOOL_HEADER_FILE_HASH(2a694d43aa9cda11fa6f6d8a096619fc)                     */
+/* BINDTOOL_HEADER_FILE_HASH(e3c021a3c88c2fa2887a2f87d080ef7f)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -23,14 +23,14 @@
 
 namespace py = pybind11;
 
-#include <gnuradio/ble/ieee802154_packet_sink.h>
+#include <gnuradio/sic/ieee802154_packet_sink.h>
 // pydoc.h is automatically generated in the build directory
 #include <ieee802154_packet_sink_pydoc.h>
 
 void bind_ieee802154_packet_sink(py::module& m)
 {
 
-    using ieee802154_packet_sink = ::gr::ble::ieee802154_packet_sink;
+    using ieee802154_packet_sink = ::gr::sic::ieee802154_packet_sink;
 
 
     py::class_<ieee802154_packet_sink,

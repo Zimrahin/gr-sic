@@ -6,21 +6,21 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#ifndef INCLUDED_BLE_IEEE802154_PACKET_SINK_H
-#define INCLUDED_BLE_IEEE802154_PACKET_SINK_H
+#ifndef INCLUDED_SIC_IEEE802154_PACKET_SINK_H
+#define INCLUDED_SIC_IEEE802154_PACKET_SINK_H
 
-#include <gnuradio/ble/api.h>
+#include <gnuradio/sic/api.h>
 #include <gnuradio/sync_block.h>
 
 namespace gr {
-namespace ble {
+namespace sic {
 
 /*!
- * \brief
- * \ingroup ble
+ * \brief IEEE 802.15.4 Packet Sink
+ * \ingroup sic
  *
  */
-class BLE_API ieee802154_packet_sink : virtual public gr::sync_block
+class SIC_API ieee802154_packet_sink : virtual public gr::sync_block
 {
 public:
     typedef std::shared_ptr<ieee802154_packet_sink> sptr;
@@ -39,7 +39,7 @@ public:
     static sptr make(uint preamble_threshold, bool crc_included, uint block_id);
 };
 
-} // namespace ble
+} // namespace sic
 } // namespace gr
 
-#endif /* INCLUDED_BLE_IEEE802154_PACKET_SINK_H */
+#endif /* INCLUDED_SIC_IEEE802154_PACKET_SINK_H */

@@ -6,21 +6,21 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#ifndef INCLUDED_BLE_TAG_IQ_STREAM_H
-#define INCLUDED_BLE_TAG_IQ_STREAM_H
+#ifndef INCLUDED_SIC_TAG_IQ_STREAM_H
+#define INCLUDED_SIC_TAG_IQ_STREAM_H
 
-#include <gnuradio/ble/api.h>
 #include <gnuradio/block.h>
+#include <gnuradio/sic/api.h>
 
 namespace gr {
-namespace ble {
+namespace sic {
 
 /*!
- * \brief
- * \ingroup ble
+ * \brief Tag IQ Stream
+ * \ingroup sic
  *
  */
-class BLE_API tag_iq_stream : virtual public gr::block
+class SIC_API tag_iq_stream : virtual public gr::block
 {
 public:
     typedef std::shared_ptr<tag_iq_stream> sptr;
@@ -36,7 +36,7 @@ public:
     static sptr make(uint sps);
 };
 
-} // namespace ble
+} // namespace sic
 } // namespace gr
 
-#endif /* INCLUDED_BLE_TAG_IQ_STREAM_H */
+#endif /* INCLUDED_SIC_TAG_IQ_STREAM_H */

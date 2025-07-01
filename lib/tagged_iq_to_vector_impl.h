@@ -6,13 +6,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#ifndef INCLUDED_BLE_TAGGED_IQ_TO_VECTOR_IMPL_H
-#define INCLUDED_BLE_TAGGED_IQ_TO_VECTOR_IMPL_H
+#ifndef INCLUDED_SIC_TAGGED_IQ_TO_VECTOR_IMPL_H
+#define INCLUDED_SIC_TAGGED_IQ_TO_VECTOR_IMPL_H
 
-#include <gnuradio/ble/tagged_iq_to_vector.h>
+#include <gnuradio/sic/tagged_iq_to_vector.h>
 
 namespace gr {
-namespace ble {
+namespace sic {
 
 class tagged_iq_to_vector_impl : public tagged_iq_to_vector
 {
@@ -50,7 +50,7 @@ private:
     std::list<request_t> d_pending_requests;
 };
 
-} // namespace ble
+} // namespace sic
 } // namespace gr
 
-#endif /* INCLUDED_BLE_TAGGED_IQ_TO_VECTOR_IMPL_H */
+#endif /* INCLUDED_SIC_TAGGED_IQ_TO_VECTOR_IMPL_H */

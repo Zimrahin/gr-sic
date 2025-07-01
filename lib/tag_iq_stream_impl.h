@@ -6,13 +6,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#ifndef INCLUDED_BLE_TAG_IQ_STREAM_IMPL_H
-#define INCLUDED_BLE_TAG_IQ_STREAM_IMPL_H
 
-#include <gnuradio/ble/tag_iq_stream.h>
+#ifndef INCLUDED_SIC_TAG_IQ_STREAM_IMPL_H
+#define INCLUDED_SIC_TAG_IQ_STREAM_IMPL_H
+
+#include <gnuradio/sic/tag_iq_stream.h>
 
 namespace gr {
-namespace ble {
+namespace sic {
 
 class tag_iq_stream_impl : public tag_iq_stream
 {
@@ -32,7 +33,7 @@ private:
     uint d_sps; // Samples per symbol
 };
 
-} // namespace ble
+} // namespace sic
 } // namespace gr
 
-#endif /* INCLUDED_BLE_TAG_IQ_STREAM_IMPL_H */
+#endif /* INCLUDED_SIC_TAG_IQ_STREAM_IMPL_H */

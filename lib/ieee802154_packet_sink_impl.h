@@ -13,13 +13,13 @@
  * - CMOS RFIC Architectures for IEEE 802.15.4 Networks
  */
 
-#ifndef INCLUDED_BLE_IEEE802154_PACKET_SINK_IMPL_H
-#define INCLUDED_BLE_IEEE802154_PACKET_SINK_IMPL_H
+#ifndef INCLUDED_SIC_IEEE802154_PACKET_SINK_IMPL_H
+#define INCLUDED_SIC_IEEE802154_PACKET_SINK_IMPL_H
 
-#include <gnuradio/ble/ieee802154_packet_sink.h>
+#include <gnuradio/sic/ieee802154_packet_sink.h>
 
 namespace gr {
-namespace ble {
+namespace sic {
 
 class ieee802154_packet_sink_impl : public ieee802154_packet_sink
 {
@@ -125,7 +125,7 @@ private:
     uint32_t d_crc_received;         // Buffer to store received CRC
 };
 
-} // namespace ble
+} // namespace sic
 } // namespace gr
 
-#endif /* INCLUDED_BLE_IEEE802154_PACKET_SINK_IMPL_H */
+#endif /* INCLUDED_SIC_IEEE802154_PACKET_SINK_IMPL_H */

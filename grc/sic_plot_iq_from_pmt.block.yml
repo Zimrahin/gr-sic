@@ -1,10 +1,10 @@
 id: ble_plot_iq_from_pmt
 label: Plot IQ from PMT
-category: '[ble]'
+category: '[sic]'
 
 templates:
-  imports: from gnuradio import ble
-  make: ble.plot_iq_from_pmt(${sample_rate})
+  imports: from gnuradio import sic
+  make: sic.plot_iq_from_pmt(${sample_rate})
 
 parameters:
 - id: sample_rate

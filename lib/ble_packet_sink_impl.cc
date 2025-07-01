@@ -11,7 +11,7 @@
 #include <volk/volk.h>
 
 namespace gr {
-namespace ble {
+namespace sic {
 
 using input_type = float;
 using output_type = uint8_t; // Optional output, sliced data
@@ -306,5 +306,5 @@ int ble_packet_sink_impl::work(int noutput_items,
 }
 
 
-} // namespace ble
+} // namespace sic
 } // namespace gr

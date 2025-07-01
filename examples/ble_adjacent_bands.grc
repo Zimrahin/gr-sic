@@ -177,25 +177,6 @@ blocks:
     coordinate: [32, 344.0]
     rotation: 0
     state: enabled
-- name: ble_ble_packet_sink_0
-  id: ble_ble_packet_sink
-  parameters:
-    affinity: ''
-    alias: ''
-    base_address: '0x12345678'
-    block_id: '0'
-    comment: ''
-    lfsr: '0x1'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    preamble_threshold: '0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [280, 568.0]
-    rotation: 0
-    state: enabled
 - name: blocks_file_source_0
   id: blocks_file_source
   parameters:
@@ -654,6 +635,25 @@ blocks:
     coordinate: [512, 408.0]
     rotation: 0
     state: enabled
+- name: sic_ble_packet_sink_0
+  id: sic_ble_packet_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    base_address: '0x12345678'
+    block_id: '0'
+    comment: ''
+    lfsr: '0x1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    preamble_threshold: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [280, 568.0]
+    rotation: 0
+    state: enabled
 - name: virtual_sink_0
   id: virtual_sink
   parameters:
@@ -685,8 +685,6 @@ connections:
 - [analog_quadrature_demod_cf_0, '0', digital_symbol_sync_xx_0, '0']
 - [analog_quadrature_demod_cf_0, '0', qtgui_time_sink_x_1_0, '0']
 - [analog_sig_source_x_0, '0', blocks_multiply_xx_0, '1']
-- [ble_ble_packet_sink_0, '0', blocks_uchar_to_float_0_0_0_0, '0']
-- [ble_ble_packet_sink_0, pdu, blocks_message_debug_0, print]
 - [blocks_file_source_0, '0', blocks_throttle2_0, '0']
 - [blocks_multiply_xx_0, '0', low_pass_filter_0_0, '0']
 - [blocks_multiply_xx_0, '0', qtgui_waterfall_sink_x_1, '0']
@@ -695,8 +693,10 @@ connections:
 - [digital_symbol_sync_xx_0, '0', virtual_sink_0, '0']
 - [low_pass_filter_0_0, '0', analog_quadrature_demod_cf_0, '0']
 - [low_pass_filter_0_0, '0', qtgui_waterfall_sink_x_0, '0']
-- [virtual_source_0, '0', ble_ble_packet_sink_0, '0']
+- [sic_ble_packet_sink_0, '0', blocks_uchar_to_float_0_0_0_0, '0']
+- [sic_ble_packet_sink_0, pdu, blocks_message_debug_0, print]
 - [virtual_source_0, '0', qtgui_time_sink_x_1, '0']
+- [virtual_source_0, '0', sic_ble_packet_sink_0, '0']
 
 metadata:
   file_format: 1

@@ -10,7 +10,7 @@
 #include <gnuradio/io_signature.h>
 
 namespace gr {
-namespace ble {
+namespace sic {
 
 using input_type = gr_complex;
 
@@ -153,5 +153,5 @@ int tagged_iq_to_vector_impl::work(int noutput_items,
     return noutput_items; // Tell runtime system how many output items we produced
 }
 
-} /* namespace ble */
+} /* namespace sic */
 } /* namespace gr */
