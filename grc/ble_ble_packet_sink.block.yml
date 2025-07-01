@@ -1,10 +1,6 @@
 id: ble_ble_packet_sink
 label: BLE Packet Sink
 category: '[ble]'
-description: |
-  This block detects BLE packets in hard-decision bitstreams and publishes them as PDUs.
-  It searches for the preamble based on the base address and preamble threshold.
-  Detected packets are de-whitened and CRC checked.
 
 templates:
   imports: from gnuradio import ble
@@ -15,23 +11,19 @@ parameters:
   label: Base Address
   dtype: int
   default: 0x12345678
-  tooltip: "Base address for the BLE device, used to identify packets"
 - id: preamble_threshold
   label: Preamble Threshold
   dtype: int
   default: 4
-  tooltip: "The maximum number of bit errors allowed in the preamble detection."
 - id: lfsr
   label: Whitening LFSR
   dtype: int
   default: 0x01
-  tooltip: "Initial LFSR value for whitening, used to de-whiten the packets"
 - id: block_id
   label: Block ID
   dtype: int
   default: 0
   hide: none
-  tooltip: "Unique integer ID for this block instance"
 
 inputs:
 - label: in

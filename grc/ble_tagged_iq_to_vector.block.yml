@@ -1,8 +1,6 @@
 id: ble_tagged_iq_to_vector
 label: Tagged IQ to Vector
 category: '[ble]'
-description: |
-  This block converts tagged IQ data into PMT vectors for further processing.
 
 templates:
   imports: from gnuradio import ble
@@ -13,24 +11,20 @@ parameters:
   label: Pre Offset
   dtype: int
   default: 0
-  tooltip: "Number of samples to include before the tag in the output vector"
 - id: post_offset
   label: Post Offset
   dtype: int
   default: 0
-  tooltip: "Number of samples to include after the tag in the output vector"
 - id: max_gap
   label: Maximum Tag Gap
   dtype: int
   default: 20000
-  tooltip: "Maximum allowed gap between tagged samples in the input stream"
   
 inputs:
 - label: in
   domain: stream
   dtype: complex
   vlen: 1
-  tooltip: "Input stream of tagged IQ samples"
 
 outputs:
 - id: out

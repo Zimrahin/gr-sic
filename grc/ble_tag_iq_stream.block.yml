@@ -1,9 +1,6 @@
 id: ble_tag_iq_stream
 label: Tag IQ Stream
 category: '[ble]'
-description: |
-  This block tags an IQ stream with a symbol stream coming from the demodulation of the input IQ stream.
-  Tagging packets in the IQ stream allows for post-processing of the IQ data, such as Successive Interference Cancellation (SIC).
 
 templates:
   imports: from gnuradio import ble
