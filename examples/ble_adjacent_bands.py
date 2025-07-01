@@ -16,7 +16,6 @@ import math
 from gnuradio import ble
 from gnuradio import blocks
 import pmt
-from gnuradio import blocks, gr
 from gnuradio import digital
 from gnuradio import filter
 from gnuradio.filter import firdes
@@ -70,6 +69,7 @@ class ble_adjacent_bands(gr.top_block, Qt.QWidget):
         # Variables
         ##################################################
         self.tuning_LPF_cutoff_kHz = tuning_LPF_cutoff_kHz = 1000
+        self.trigger_delay = trigger_delay = 200E-6
         self.samples_per_bit = samples_per_bit = 10
         self.samp_rate = samp_rate = int(10e6)
         self.plot_N = plot_N = 20000
@@ -171,7 +171,7 @@ class ble_adjacent_bands(gr.top_block, Qt.QWidget):
         self.qtgui_time_sink_x_1.set_y_label('Amplitude', "")
 
         self.qtgui_time_sink_x_1.enable_tags(True)
-        self.qtgui_time_sink_x_1.set_trigger_mode(qtgui.TRIG_MODE_TAG, qtgui.TRIG_SLOPE_POS, 0.0, 200E-6, 1, "Payload start")
+        self.qtgui_time_sink_x_1.set_trigger_mode(qtgui.TRIG_MODE_TAG, qtgui.TRIG_SLOPE_POS, 0.0, trigger_delay, 1, "Payload start")
         self.qtgui_time_sink_x_1.enable_autoscale(False)
         self.qtgui_time_sink_x_1.enable_grid(False)
         self.qtgui_time_sink_x_1.enable_axis_labels(True)
@@ -234,7 +234,6 @@ class ble_adjacent_bands(gr.top_block, Qt.QWidget):
         self.blocks_uchar_to_float_0_0_0_0 = blocks.uchar_to_float()
         self.blocks_throttle2_0 = blocks.throttle( gr.sizeof_gr_complex*1, (samp_rate/400), True, 0 if "auto" == "auto" else max( int(float(0.1) * (samp_rate/400)) if "auto" == "time" else int(0.1), 1) )
         self.blocks_multiply_xx_0 = blocks.multiply_vcc(1)
-        self.blocks_message_debug_0 = blocks.message_debug(True, gr.log_levels.info)
         self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, '/home/diego/Documents/SDR_projects/capture_nRF/data/new/BLE_BLE_2424MHz_2426MHz.dat', True, 0, 0)
         self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
         self.ble_ble_packet_sink_0 = ble.ble_packet_sink(0x12345678, 0, 0x1, 0)
@@ -273,6 +272,13 @@ class ble_adjacent_bands(gr.top_block, Qt.QWidget):
     def set_tuning_LPF_cutoff_kHz(self, tuning_LPF_cutoff_kHz):
         self.tuning_LPF_cutoff_kHz = tuning_LPF_cutoff_kHz
         self.low_pass_filter_0_0.set_taps(firdes.low_pass(1, self.samp_rate, (self.tuning_LPF_cutoff_kHz*1000), (self.samp_rate/100), window.WIN_HAMMING, 6.76))
+
+    def get_trigger_delay(self):
+        return self.trigger_delay
+
+    def set_trigger_delay(self, trigger_delay):
+        self.trigger_delay = trigger_delay
+        self.qtgui_time_sink_x_1.set_trigger_mode(qtgui.TRIG_MODE_TAG, qtgui.TRIG_SLOPE_POS, 0.0, self.trigger_delay, 1, "Payload start")
 
     def get_samples_per_bit(self):
         return self.samples_per_bit

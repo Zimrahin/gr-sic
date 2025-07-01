@@ -69,6 +69,7 @@ class ieee802154_packet_example(gr.top_block, Qt.QWidget):
         # Variables
         ##################################################
         self.tuning_LPF_cutoff_kHz = tuning_LPF_cutoff_kHz = 2000
+        self.trigger_delay = trigger_delay = 500E-6
         self.samples_per_chip = samples_per_chip = 5
         self.samp_rate = samp_rate = int(10e6)
         self.plot_N = plot_N = 40000
@@ -100,7 +101,7 @@ class ieee802154_packet_example(gr.top_block, Qt.QWidget):
         self.qtgui_time_sink_x_1.set_y_label('Amplitude', "")
 
         self.qtgui_time_sink_x_1.enable_tags(True)
-        self.qtgui_time_sink_x_1.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
+        self.qtgui_time_sink_x_1.set_trigger_mode(qtgui.TRIG_MODE_TAG, qtgui.TRIG_SLOPE_POS, 0.0, trigger_delay, 1, "Payload start")
         self.qtgui_time_sink_x_1.enable_autoscale(False)
         self.qtgui_time_sink_x_1.enable_grid(False)
         self.qtgui_time_sink_x_1.enable_axis_labels(True)
@@ -139,6 +140,57 @@ class ieee802154_packet_example(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(0, 1):
             self.top_grid_layout.setColumnStretch(c, 1)
+        self.qtgui_time_sink_x_0 = qtgui.time_sink_c(
+            plot_N, #size
+            samp_rate, #samp_rate
+            "Testing Tag IQ Stream block", #name
+            1, #number of inputs
+            None # parent
+        )
+        self.qtgui_time_sink_x_0.set_update_time(0.10)
+        self.qtgui_time_sink_x_0.set_y_axis(-1, 1)
+
+        self.qtgui_time_sink_x_0.set_y_label('Amplitude', "")
+
+        self.qtgui_time_sink_x_0.enable_tags(True)
+        self.qtgui_time_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_TAG, qtgui.TRIG_SLOPE_POS, 0.0, trigger_delay, 0, "Payload start")
+        self.qtgui_time_sink_x_0.enable_autoscale(False)
+        self.qtgui_time_sink_x_0.enable_grid(False)
+        self.qtgui_time_sink_x_0.enable_axis_labels(True)
+        self.qtgui_time_sink_x_0.enable_control_panel(False)
+        self.qtgui_time_sink_x_0.enable_stem_plot(False)
+
+
+        labels = ['Signal 1', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
+            'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ['blue', 'red', 'green', 'black', 'cyan',
+            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+        styles = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        markers = [-1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1]
+
+
+        for i in range(2):
+            if len(labels[i]) == 0:
+                if (i % 2 == 0):
+                    self.qtgui_time_sink_x_0.set_line_label(i, "Re{{Data {0}}}".format(i/2))
+                else:
+                    self.qtgui_time_sink_x_0.set_line_label(i, "Im{{Data {0}}}".format(i/2))
+            else:
+                self.qtgui_time_sink_x_0.set_line_label(i, labels[i])
+            self.qtgui_time_sink_x_0.set_line_width(i, widths[i])
+            self.qtgui_time_sink_x_0.set_line_color(i, colors[i])
+            self.qtgui_time_sink_x_0.set_line_style(i, styles[i])
+            self.qtgui_time_sink_x_0.set_line_marker(i, markers[i])
+            self.qtgui_time_sink_x_0.set_line_alpha(i, alphas[i])
+
+        self._qtgui_time_sink_x_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0.qwidget(), Qt.QWidget)
+        self.top_layout.addWidget(self._qtgui_time_sink_x_0_win)
         self.low_pass_filter_0_0 = filter.fir_filter_ccf(
             decimation,
             firdes.low_pass(
@@ -160,28 +212,39 @@ class ieee802154_packet_example(gr.top_block, Qt.QWidget):
             digital.IR_MMSE_8TAP,
             128,
             [])
-        self.digital_binary_slicer_fb_0 = digital.binary_slicer_fb()
         self.blocks_uchar_to_float_0_0_0 = blocks.uchar_to_float()
-        self.blocks_throttle2_0 = blocks.throttle( gr.sizeof_gr_complex*1, (samp_rate/400), True, 0 if "auto" == "auto" else max( int(float(0.1) * (samp_rate/400)) if "auto" == "time" else int(0.1), 1) )
+        self.blocks_throttle2_0 = blocks.throttle( gr.sizeof_gr_complex*1, (samp_rate/100), True, 0 if "auto" == "auto" else max( int(float(0.1) * (samp_rate/100)) if "auto" == "time" else int(0.1), 1) )
         self.blocks_sub_xx_0 = blocks.sub_ff(1)
-        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, '/home/diego/Documents/SDR_projects/capture_nRF/data/new/802154_0dBm.dat', False, 0, 0)
+        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, '/home/diego/Documents/SDR_projects/capture_nRF/data/new/802154_0dBm.dat', True, 0, 0)
         self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
-        self.ble_ieee802154_packet_sink_0 = ble.ieee802154_packet_sink(7, 0)
+        self.blocks_add_xx_0 = blocks.add_vcc(1)
+        self.ble_tagged_iq_to_vector_0 = ble.tagged_iq_to_vector((int(trigger_delay * samp_rate)), (int(trigger_delay * samp_rate)), (128*8*8*samples_per_chip))
+        self.ble_tag_iq_stream_0 = ble.tag_iq_stream(samples_per_chip)
+        self.ble_plot_iq_from_pmt_0_0 = ble.plot_iq_from_pmt(int(samp_rate))
+        self.ble_ieee802154_packet_sink_0 = ble.ieee802154_packet_sink(7, True, 0)
         self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(((samp_rate / decimation)/(2*math.pi*fsk_deviation_hz)))
+        self.analog_fastnoise_source_x_0 = analog.fastnoise_source_c(analog.GR_GAUSSIAN, 0.025, 0, 8192)
 
 
         ##################################################
         # Connections
         ##################################################
+        self.msg_connect((self.ble_ieee802154_packet_sink_0, 'pdu'), (self.ble_plot_iq_from_pmt_0_0, 'pdu'))
+        self.msg_connect((self.ble_tagged_iq_to_vector_0, 'out'), (self.ble_plot_iq_from_pmt_0_0, 'iq'))
+        self.connect((self.analog_fastnoise_source_x_0, 0), (self.blocks_add_xx_0, 1))
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.blocks_sub_xx_0, 0))
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.single_pole_iir_filter_xx_0, 0))
+        self.connect((self.ble_ieee802154_packet_sink_0, 0), (self.ble_tag_iq_stream_0, 1))
+        self.connect((self.ble_ieee802154_packet_sink_0, 0), (self.blocks_uchar_to_float_0_0_0, 0))
+        self.connect((self.ble_tag_iq_stream_0, 0), (self.ble_tagged_iq_to_vector_0, 0))
+        self.connect((self.ble_tag_iq_stream_0, 0), (self.qtgui_time_sink_x_0, 0))
+        self.connect((self.blocks_add_xx_0, 0), (self.ble_tag_iq_stream_0, 0))
+        self.connect((self.blocks_add_xx_0, 0), (self.low_pass_filter_0_0, 0))
         self.connect((self.blocks_file_source_0, 0), (self.blocks_throttle2_0, 0))
         self.connect((self.blocks_sub_xx_0, 0), (self.digital_symbol_sync_xx_0, 0))
-        self.connect((self.blocks_throttle2_0, 0), (self.low_pass_filter_0_0, 0))
+        self.connect((self.blocks_throttle2_0, 0), (self.blocks_add_xx_0, 0))
         self.connect((self.blocks_uchar_to_float_0_0_0, 0), (self.qtgui_time_sink_x_1, 1))
-        self.connect((self.digital_binary_slicer_fb_0, 0), (self.blocks_uchar_to_float_0_0_0, 0))
         self.connect((self.digital_symbol_sync_xx_0, 0), (self.ble_ieee802154_packet_sink_0, 0))
-        self.connect((self.digital_symbol_sync_xx_0, 0), (self.digital_binary_slicer_fb_0, 0))
         self.connect((self.digital_symbol_sync_xx_0, 0), (self.qtgui_time_sink_x_1, 0))
         self.connect((self.low_pass_filter_0_0, 0), (self.analog_quadrature_demod_cf_0, 0))
         self.connect((self.single_pole_iir_filter_xx_0, 0), (self.blocks_sub_xx_0, 1))
@@ -202,6 +265,14 @@ class ieee802154_packet_example(gr.top_block, Qt.QWidget):
         self.tuning_LPF_cutoff_kHz = tuning_LPF_cutoff_kHz
         self.low_pass_filter_0_0.set_taps(firdes.low_pass(1, self.samp_rate, (self.tuning_LPF_cutoff_kHz*1000), (self.samp_rate/100), window.WIN_HAMMING, 6.76))
 
+    def get_trigger_delay(self):
+        return self.trigger_delay
+
+    def set_trigger_delay(self, trigger_delay):
+        self.trigger_delay = trigger_delay
+        self.qtgui_time_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_TAG, qtgui.TRIG_SLOPE_POS, 0.0, self.trigger_delay, 0, "Payload start")
+        self.qtgui_time_sink_x_1.set_trigger_mode(qtgui.TRIG_MODE_TAG, qtgui.TRIG_SLOPE_POS, 0.0, self.trigger_delay, 1, "Payload start")
+
     def get_samples_per_chip(self):
         return self.samples_per_chip
 
@@ -216,8 +287,9 @@ class ieee802154_packet_example(gr.top_block, Qt.QWidget):
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
         self.analog_quadrature_demod_cf_0.set_gain(((self.samp_rate / self.decimation)/(2*math.pi*self.fsk_deviation_hz)))
-        self.blocks_throttle2_0.set_sample_rate((self.samp_rate/400))
+        self.blocks_throttle2_0.set_sample_rate((self.samp_rate/100))
         self.low_pass_filter_0_0.set_taps(firdes.low_pass(1, self.samp_rate, (self.tuning_LPF_cutoff_kHz*1000), (self.samp_rate/100), window.WIN_HAMMING, 6.76))
+        self.qtgui_time_sink_x_0.set_samp_rate(self.samp_rate)
         self.qtgui_time_sink_x_1.set_samp_rate(int(self.samp_rate / self.samples_per_chip))
 
     def get_plot_N(self):

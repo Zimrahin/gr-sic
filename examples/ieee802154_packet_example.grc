@@ -78,7 +78,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [224, 8.0]
+    coordinate: [224, 16.0]
     rotation: 0
     state: enabled
 - name: samples_per_chip
@@ -91,6 +91,18 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [592, 16.0]
+    rotation: 0
+    state: enabled
+- name: trigger_delay
+  id: variable
+  parameters:
+    comment: ''
+    value: 500E-6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [832, 16.0]
     rotation: 0
     state: enabled
 - name: tuning_LPF_cutoff_kHz
@@ -111,9 +123,29 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [288, 376.0]
+    coordinate: [520, 104.0]
     rotation: 0
     state: true
+- name: analog_fastnoise_source_x_0
+  id: analog_fastnoise_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    amp: '0.025'
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    noise_type: analog.GR_GAUSSIAN
+    samples: '8192'
+    seed: '0'
+    type: complex
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [40, 264.0]
+    rotation: 0
+    state: enabled
 - name: analog_quadrature_demod_cf_0
   id: analog_quadrature_demod_cf
   parameters:
@@ -127,7 +159,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [536, 280.0]
+    coordinate: [784, 272.0]
     rotation: 0
     state: enabled
 - name: ble_ieee802154_packet_sink_0
@@ -137,6 +169,7 @@ blocks:
     alias: ''
     block_id: '0'
     comment: ''
+    crc_included: 'True'
     maxoutbuf: '0'
     minoutbuf: '0'
     preamble_threshold: '7'
@@ -144,7 +177,74 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [464, 688.0]
+    coordinate: [296, 648.0]
+    rotation: 0
+    state: enabled
+- name: ble_plot_iq_from_pmt_0_0
+  id: ble_plot_iq_from_pmt
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    max_queue_size: '10'
+    sample_rate: int(samp_rate)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [776, 456.0]
+    rotation: 0
+    state: enabled
+- name: ble_tag_iq_stream_0
+  id: ble_tag_iq_stream
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    sps: samples_per_chip
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [184, 448.0]
+    rotation: 0
+    state: enabled
+- name: ble_tagged_iq_to_vector_0
+  id: ble_tagged_iq_to_vector
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    max_gap: 128*8*8*samples_per_chip
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    post_offset: int(trigger_delay * samp_rate)
+    pre_offset: int(trigger_delay * samp_rate)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [440, 480.0]
+    rotation: 0
+    state: enabled
+- name: blocks_add_xx_0
+  id: blocks_add_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_inputs: '2'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [352, 264.0]
     rotation: 0
     state: enabled
 - name: blocks_file_source_0
@@ -159,7 +259,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     offset: '0'
-    repeat: 'False'
+    repeat: 'True'
     type: complex
     vlen: '1'
   states:
@@ -169,7 +269,7 @@ blocks:
     coordinate: [24, 136.0]
     rotation: 0
     state: enabled
-- name: blocks_message_debug_0
+- name: blocks_message_debug_1
   id: blocks_message_debug
   parameters:
     affinity: ''
@@ -181,7 +281,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [912, 400.0]
+    coordinate: [648, 704.0]
     rotation: 0
     state: disabled
 - name: blocks_sub_xx_0
@@ -199,7 +299,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [952, 288.0]
+    coordinate: [1232, 280.0]
     rotation: 0
     state: enabled
 - name: blocks_throttle2_0
@@ -213,14 +313,14 @@ blocks:
     maximum: '0.1'
     maxoutbuf: '0'
     minoutbuf: '0'
-    samples_per_second: samp_rate/400
+    samples_per_second: samp_rate/100
     type: complex
     vlen: '1'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [264, 160.0]
+    coordinate: [328, 160.0]
     rotation: 0
     state: enabled
 - name: blocks_uchar_to_float_0_0_0
@@ -235,22 +335,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1128, 624.0]
-    rotation: 0
-    state: enabled
-- name: digital_binary_slicer_fb_0
-  id: digital_binary_slicer_fb
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [80, 624.0]
+    coordinate: [608, 656.0]
     rotation: 0
     state: enabled
 - name: digital_symbol_sync_xx_0
@@ -277,25 +362,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1064, 100.0]
+    coordinate: [1064, 84.0]
     rotation: 0
     state: enabled
-- name: ieee802_15_4_packet_sink_0
-  id: ieee802_15_4_packet_sink
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    th: '5'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [656, 440.0]
-    rotation: 0
-    state: disabled
 - name: low_pass_filter_0_0
   id: low_pass_filter
   parameters:
@@ -317,7 +386,104 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [296, 240.0]
+    coordinate: [520, 232.0]
+    rotation: 0
+    state: enabled
+- name: qtgui_time_sink_x_0
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: ''
+    ctrlpanel: 'False'
+    entags: 'True'
+    grid: 'False'
+    gui_hint: ''
+    label1: Signal 1
+    label10: Signal 10
+    label2: Signal 2
+    label3: Signal 3
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '"Testing Tag IQ Stream block"'
+    nconnections: '1'
+    size: plot_N
+    srate: samp_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: trigger_delay
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_TAG
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '"Payload start"'
+    type: complex
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Amplitude
+    ymax: '1'
+    ymin: '-1'
+    yunit: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [440, 376.0]
     rotation: 0
     state: enabled
 - name: qtgui_time_sink_x_1
@@ -388,12 +554,12 @@ blocks:
     style7: '1'
     style8: '1'
     style9: '1'
-    tr_chan: '0'
-    tr_delay: '0'
+    tr_chan: '1'
+    tr_delay: trigger_delay
     tr_level: '0.0'
-    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_mode: qtgui.TRIG_MODE_TAG
     tr_slope: qtgui.TRIG_SLOPE_POS
-    tr_tag: '""'
+    tr_tag: '"Payload start"'
     type: float
     update_time: '0.10'
     width1: '1'
@@ -414,7 +580,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1352, 512.0]
+    coordinate: [824, 592.0]
     rotation: 0
     state: enabled
 - name: qtgui_waterfall_sink_x_0
@@ -475,7 +641,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [632, 112.0]
+    coordinate: [768, 104.0]
     rotation: 0
     state: disabled
 - name: single_pole_iir_filter_xx_0
@@ -493,7 +659,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [736, 312.0]
+    coordinate: [1000, 304.0]
     rotation: 0
     state: enabled
 - name: virtual_sink_0
@@ -506,7 +672,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1480, 112.0]
+    coordinate: [1488, 96.0]
     rotation: 0
     state: enabled
 - name: virtual_source_0
@@ -519,26 +685,32 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [80, 520.0]
+    coordinate: [80, 600.0]
     rotation: 0
     state: enabled
 
 connections:
+- [analog_fastnoise_source_x_0, '0', blocks_add_xx_0, '1']
 - [analog_quadrature_demod_cf_0, '0', blocks_sub_xx_0, '0']
 - [analog_quadrature_demod_cf_0, '0', single_pole_iir_filter_xx_0, '0']
+- [ble_ieee802154_packet_sink_0, '0', ble_tag_iq_stream_0, '1']
+- [ble_ieee802154_packet_sink_0, '0', blocks_uchar_to_float_0_0_0, '0']
+- [ble_ieee802154_packet_sink_0, pdu, ble_plot_iq_from_pmt_0_0, pdu]
+- [ble_ieee802154_packet_sink_0, pdu, blocks_message_debug_1, print]
+- [ble_tag_iq_stream_0, '0', ble_tagged_iq_to_vector_0, '0']
+- [ble_tag_iq_stream_0, '0', qtgui_time_sink_x_0, '0']
+- [ble_tagged_iq_to_vector_0, out, ble_plot_iq_from_pmt_0_0, iq]
+- [blocks_add_xx_0, '0', ble_tag_iq_stream_0, '0']
+- [blocks_add_xx_0, '0', low_pass_filter_0_0, '0']
 - [blocks_file_source_0, '0', blocks_throttle2_0, '0']
 - [blocks_sub_xx_0, '0', digital_symbol_sync_xx_0, '0']
-- [blocks_throttle2_0, '0', low_pass_filter_0_0, '0']
+- [blocks_throttle2_0, '0', blocks_add_xx_0, '0']
 - [blocks_uchar_to_float_0_0_0, '0', qtgui_time_sink_x_1, '1']
-- [digital_binary_slicer_fb_0, '0', blocks_uchar_to_float_0_0_0, '0']
 - [digital_symbol_sync_xx_0, '0', virtual_sink_0, '0']
-- [ieee802_15_4_packet_sink_0, out, blocks_message_debug_0, print]
 - [low_pass_filter_0_0, '0', analog_quadrature_demod_cf_0, '0']
 - [low_pass_filter_0_0, '0', qtgui_waterfall_sink_x_0, '0']
 - [single_pole_iir_filter_xx_0, '0', blocks_sub_xx_0, '1']
 - [virtual_source_0, '0', ble_ieee802154_packet_sink_0, '0']
-- [virtual_source_0, '0', digital_binary_slicer_fb_0, '0']
-- [virtual_source_0, '0', ieee802_15_4_packet_sink_0, '0']
 - [virtual_source_0, '0', qtgui_time_sink_x_1, '0']
 
 metadata:

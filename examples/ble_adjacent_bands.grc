@@ -54,7 +54,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [896, 16.0]
+    coordinate: [816, 16.0]
     rotation: 0
     state: enabled
 - name: fsk_deviation_hz
@@ -103,6 +103,18 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [584, 16.0]
+    rotation: 0
+    state: enabled
+- name: trigger_delay
+  id: variable
+  parameters:
+    comment: ''
+    value: 200E-6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [920, 16.0]
     rotation: 0
     state: enabled
 - name: tuning_LPF_cutoff_kHz
@@ -220,7 +232,7 @@ blocks:
     bus_structure: null
     coordinate: [600, 648.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_multiply_xx_0
   id: blocks_multiply_xx
   parameters:
@@ -395,7 +407,7 @@ blocks:
     style8: '1'
     style9: '1'
     tr_chan: '1'
-    tr_delay: 200E-6
+    tr_delay: trigger_delay
     tr_level: '0.0'
     tr_mode: qtgui.TRIG_MODE_TAG
     tr_slope: qtgui.TRIG_SLOPE_POS
@@ -674,6 +686,7 @@ connections:
 - [analog_quadrature_demod_cf_0, '0', qtgui_time_sink_x_1_0, '0']
 - [analog_sig_source_x_0, '0', blocks_multiply_xx_0, '1']
 - [ble_ble_packet_sink_0, '0', blocks_uchar_to_float_0_0_0_0, '0']
+- [ble_ble_packet_sink_0, pdu, blocks_message_debug_0, print]
 - [blocks_file_source_0, '0', blocks_throttle2_0, '0']
 - [blocks_multiply_xx_0, '0', low_pass_filter_0_0, '0']
 - [blocks_multiply_xx_0, '0', qtgui_waterfall_sink_x_1, '0']
