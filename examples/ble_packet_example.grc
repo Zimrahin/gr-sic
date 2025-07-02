@@ -236,7 +236,7 @@ blocks:
     alias: ''
     begin_tag: pmt.PMT_NIL
     comment: ''
-    file: /home/diego/Documents/GNU_radio_OOT_modules/gr-ble/examples/data/BLE_124B.dat
+    file: /home/diego/Documents/GNU_radio_OOT_modules/gr-sic/examples/data/BLE_124B.dat
     length: '0'
     maxoutbuf: '0'
     minoutbuf: '0'

@@ -184,7 +184,7 @@ blocks:
     alias: ''
     begin_tag: pmt.PMT_NIL
     comment: ''
-    file: /home/diego/Documents/SDR_projects/capture_nRF/data/new/BLE_BLE_2424MHz_2426MHz.dat
+    file: /home/diego/Documents/GNU_radio_OOT_modules/gr-sic/examples/data/BLE_BLE_2424MHz_2426MHz.dat
     length: '0'
     maxoutbuf: '0'
     minoutbuf: '0'

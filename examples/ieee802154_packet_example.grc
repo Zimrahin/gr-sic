@@ -254,7 +254,7 @@ blocks:
     alias: ''
     begin_tag: pmt.PMT_NIL
     comment: ''
-    file: /home/diego/Documents/SDR_projects/capture_nRF/data/new/802154_0dBm.dat
+    file: /home/diego/Documents/GNU_radio_OOT_modules/gr-sic/examples/data/802154_84B.dat
     length: '0'
     maxoutbuf: '0'
     minoutbuf: '0'
