@@ -10,7 +10,7 @@ parameters:
 - id: base_address
   label: Base Address
   dtype: int
-  default: 0x12345678
+  default: '0x12345678'
 - id: preamble_threshold
   label: Preamble Threshold
   dtype: int
@@ -18,7 +18,7 @@ parameters:
 - id: lfsr
   label: Whitening LFSR
   dtype: int
-  default: 0x01
+  default: '0x01'
 - id: block_id
   label: Block ID
   dtype: int
