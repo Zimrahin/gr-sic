@@ -1,6 +1,6 @@
 options:
   parameters:
-    author: ''
+    author: Diego Badillo-San-Juan
     catch_exceptions: 'True'
     category: '[GRC Hier Blocks]'
     cmake_opt: ''
@@ -90,7 +90,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [200, 12]
+    coordinate: [224, 16.0]
     rotation: 0
     state: enabled
 - name: samples_per_bit
