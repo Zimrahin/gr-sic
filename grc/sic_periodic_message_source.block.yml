@@ -1,0 +1,38 @@
+id: sic_periodic_message_source
+label: Periodic Message Source
+category: '[sic]'
+
+templates:
+  imports: from gnuradio import sic
+  make: sic.periodic_message_source(${message}, ${period_ms}, ${n_messages})
+
+
+parameters:
+- id: message
+  label: Message
+  dtype: raw
+  default: 'gr.pmt.mp("trigger")'
+- id: period_ms
+  label: Period (ms)
+  dtype: int
+  default: 1000
+- id: n_messages
+  label: Number of Messages
+  dtype: int
+  default: -1
+  hide: part
+
+inputs:
+- id: pause
+  domain: message
+  dtype: pmt
+  optional: true
+
+outputs:
+- id: out
+  domain: message
+  dtype: pmt
+
+#  'file_format' specifies the version of the GRC yml format used in the file
+#  and should usually not be changed.
+file_format: 1
