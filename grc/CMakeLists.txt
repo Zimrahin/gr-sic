@@ -12,5 +12,6 @@ install(FILES
     sic_plot_iq_from_pmt.block.yml
     sic_tag_iq_stream.block.yml
     sic_tagged_iq_to_vector.block.yml
+    sic_ble_packet_source.block.yml
     sic_transmission_enabler.block.yml
     sic_periodic_message_source.block.yml DESTINATION share/gnuradio/grc/blocks)
