@@ -13,4 +13,5 @@ install(FILES api.h
     ble_packet_sink.h
     ieee802154_packet_sink.h
     tag_iq_stream.h
-    tagged_iq_to_vector.h DESTINATION include/gnuradio/sic)
+    tagged_iq_to_vector.h
+    transmission_enabler.h DESTINATION include/gnuradio/sic)

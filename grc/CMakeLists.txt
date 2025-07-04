@@ -11,4 +11,5 @@ install(FILES
     sic_ieee802154_packet_sink.block.yml
     sic_plot_iq_from_pmt.block.yml
     sic_tag_iq_stream.block.yml
-    sic_tagged_iq_to_vector.block.yml DESTINATION share/gnuradio/grc/blocks)
+    sic_tagged_iq_to_vector.block.yml
+    sic_transmission_enabler.block.yml DESTINATION share/gnuradio/grc/blocks)
