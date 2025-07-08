@@ -19,11 +19,11 @@ parameters:
   label: Whitening LFSR
   dtype: int
   default: '0x01'
+  hide: part
 - id: block_id
   label: Block ID
   dtype: int
   default: 0
-  hide: none
 
 inputs:
 - label: in

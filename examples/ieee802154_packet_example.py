@@ -6,6 +6,7 @@
 #
 # GNU Radio Python Flow Graph
 # Title: ieee802154_packet_example
+# Author: Diego Badillo-San-Juan
 # GNU Radio version: v3.11.0.0git-843-g6b25c171
 
 from PyQt5 import Qt
