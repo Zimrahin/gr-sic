@@ -12,6 +12,7 @@
 from PyQt5 import Qt
 from gnuradio import qtgui
 from PyQt5 import QtCore
+from gnuradio import analog
 from gnuradio import blocks
 from gnuradio import gr
 from gnuradio.filter import firdes
@@ -68,7 +69,6 @@ class sic_tx_test(gr.top_block, Qt.QWidget):
         self.samp_rate = samp_rate = int(10e6)
         self.payload_length = payload_length = 50
         self.pause_button = pause_button = 0
-        self.amplitude = amplitude = 1
 
         ##################################################
         # Blocks
@@ -77,16 +77,13 @@ class sic_tx_test(gr.top_block, Qt.QWidget):
         self._payload_length_range = qtgui.Range(1, 255, 1, 50, 200)
         self._payload_length_win = qtgui.RangeWidget(self._payload_length_range, self.set_payload_length, "'payload_length'", "eng_slider", int, QtCore.Qt.Horizontal)
         self.top_layout.addWidget(self._payload_length_win)
-        self._amplitude_range = qtgui.Range(0, 1, 0.01, 1, 200)
-        self._amplitude_win = qtgui.RangeWidget(self._amplitude_range, self.set_amplitude, "'amplitude'", "eng_slider", float, QtCore.Qt.Horizontal)
-        self.top_layout.addWidget(self._amplitude_win)
         self.tx_trigger_button = _tx_trigger_button_toggle_button = qtgui.MsgPushButton('tx_trigger_button', 'pressed',1,"default","default")
         self.tx_trigger_button = _tx_trigger_button_toggle_button
 
         self.top_layout.addWidget(_tx_trigger_button_toggle_button)
         self.sic_transmission_enabler_0 = sic.transmission_enabler(1024)
         self.sic_periodic_message_source_0 = sic.periodic_message_source(gr.pmt.mp("trigger"), 1000, (-1))
-        self.sic_ble_packet_source_0 = sic.ble_packet_source(10e6, payload_length, amplitude)
+        self.sic_ble_packet_source_0 = sic.ble_packet_source(10e6, payload_length, 1e6)
         self.qtgui_waterfall_sink_x_0 = qtgui.waterfall_sink_c(
             8192, #size
             window.WIN_BLACKMAN_hARRIS, #wintype
@@ -181,6 +178,8 @@ class sic_tx_test(gr.top_block, Qt.QWidget):
 
         self.top_layout.addWidget(_pause_button_toggle_button)
         self.blocks_throttle2_0_1 = blocks.throttle( gr.sizeof_gr_complex*1, (samp_rate/200), True, 0 if "auto" == "auto" else max( int(float(0.1) * (samp_rate/200)) if "auto" == "time" else int(0.1), 1) )
+        self.blocks_add_xx_0 = blocks.add_vcc(1)
+        self.analog_const_source_x_0 = analog.sig_source_c(0, analog.GR_CONST_WAVE, 0, 0, 0)
 
 
         ##################################################
@@ -189,9 +188,11 @@ class sic_tx_test(gr.top_block, Qt.QWidget):
         self.msg_connect((self.pause_button, 'state'), (self.sic_periodic_message_source_0, 'pause'))
         self.msg_connect((self.sic_periodic_message_source_0, 'out'), (self.sic_transmission_enabler_0, 'trigger'))
         self.msg_connect((self.tx_trigger_button, 'pressed'), (self.sic_transmission_enabler_0, 'trigger'))
+        self.connect((self.analog_const_source_x_0, 0), (self.blocks_add_xx_0, 1))
+        self.connect((self.blocks_add_xx_0, 0), (self.qtgui_time_sink_x_0, 0))
+        self.connect((self.blocks_add_xx_0, 0), (self.qtgui_waterfall_sink_x_0, 0))
         self.connect((self.blocks_throttle2_0_1, 0), (self.sic_ble_packet_source_0, 0))
-        self.connect((self.sic_ble_packet_source_0, 0), (self.qtgui_time_sink_x_0, 0))
-        self.connect((self.sic_ble_packet_source_0, 0), (self.qtgui_waterfall_sink_x_0, 0))
+        self.connect((self.sic_ble_packet_source_0, 0), (self.blocks_add_xx_0, 0))
         self.connect((self.sic_transmission_enabler_0, 0), (self.blocks_throttle2_0_1, 0))
 
 
@@ -230,13 +231,6 @@ class sic_tx_test(gr.top_block, Qt.QWidget):
 
     def set_pause_button(self, pause_button):
         self.pause_button = pause_button
-
-    def get_amplitude(self):
-        return self.amplitude
-
-    def set_amplitude(self, amplitude):
-        self.amplitude = amplitude
-        self.sic_ble_packet_source_0.set_amplitude(self.amplitude)
 
 
 

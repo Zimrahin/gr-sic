@@ -6,10 +6,10 @@ templates:
   imports: |-
     from gnuradio import sic
     import threading
-  make: sic.ble_packet_source(${sample_rate}, ${payload_length}, ${amplitude})
+  make: sic.ble_packet_source(${sample_rate}, ${payload_length}, ${transmission_rate})
   callbacks:
   - set_payload_length(${payload_length})
-  - set_amplitude(${amplitude})
+  - set_transmission_rate(${transmission_rate})
 
 parameters:
 - id: sample_rate
@@ -20,10 +20,10 @@ parameters:
   label: Payload Length
   dtype: int
   default: 120
-- id: amplitude
-  label: Amplitude
+- id: transmission_rate
+  label: Transmission Rate
   dtype: float
-  default: 1.0
+  default: 1e6
 
 inputs:
 - label: in
