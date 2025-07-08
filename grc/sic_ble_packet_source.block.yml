@@ -23,7 +23,7 @@ parameters:
 - id: transmission_rate
   label: Transmission Rate
   dtype: float
-  default: 1e6
+  default: 1000000
 
 inputs:
 - label: in

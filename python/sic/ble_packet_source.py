@@ -25,18 +25,47 @@ class ble_packet_source(gr.sync_block):
         # Parameters
         self.max_payload_length = 255
         self.sample_rate = sample_rate
-        self.transmission_rate = transmission_rate
         self.payload_template = triangular_wave(step=2, length=self.max_payload_length)
-        self.transmitter = TransmitterBLE(sample_rate, transmission_rate)
         self.param_mutex = threading.Lock()
 
-        self.waveform = np.array([], dtype=np.complex64)
-        self.set_payload_length(payload_length)  # Initialises IQ waveform
+        # Changeable at runtime
+        self.transmitter = TransmitterBLE(sample_rate, transmission_rate)
+        self.current_payload_length = payload_length
 
         # State variables
         self.transmitting = False
         self.samples_remaining = 0
         self.waveform_offset = 0  # Where in the waveform we are currently transmitting
+
+        self.waveform = self.generate_waveform(payload_length, transmission_rate)
+
+    def generate_waveform(
+        self, payload_length: int, transmission_rate: float
+    ) -> np.ndarray:
+        """Generate IQ waveform using current parameters"""
+        constrained_length = max(0, min(payload_length, self.max_payload_length))
+        payload_segment = self.payload_template[:constrained_length]
+        self.transmitter.transmission_rate = transmission_rate
+        return self.transmitter.modulate_from_payload(payload_segment)
+
+    def set_payload_length(self, length: int):
+        """Update payload length and regenerate waveform"""
+        new_length = int(length)
+        new_waveform = self.generate_waveform(
+            new_length, self.transmitter.transmission_rate
+        )
+        with self.param_mutex:
+            self.current_payload_length = new_length
+            self.waveform = new_waveform
+
+    def set_transmission_rate(self, transmission_rate: float):
+        """Update transmission rate and regenerate waveform"""
+        new_waveform = self.generate_waveform(
+            self.current_payload_length, transmission_rate
+        )
+        with self.param_mutex:
+            self.transmitter.transmission_rate = transmission_rate
+            self.waveform = new_waveform
 
     def start_burst(self):
         """Start new burst using current parameters"""
@@ -47,20 +76,6 @@ class ble_packet_source(gr.sync_block):
             self.transmitting = True
             self.samples_remaining = len(self.waveform)
             self.waveform_offset = 0
-
-    def set_payload_length(self, length: int):
-        """Update payload length and regenerate waveform"""
-        constrained_length = max(0, min(int(length), self.max_payload_length))
-        new_waveform = self.transmitter.modulate_from_payload(
-            self.payload_template[:constrained_length]
-        )
-        with self.param_mutex:
-            self.payload_length = constrained_length
-            self.waveform = new_waveform
-
-    def set_transmission_rate(self, transmission_rate: float):
-        with self.param_mutex:
-            self.transmission_rate = float(transmission_rate)
 
     def work(self, input_items, output_items):
         in0 = input_items[0]

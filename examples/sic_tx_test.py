@@ -12,6 +12,7 @@
 from PyQt5 import Qt
 from gnuradio import qtgui
 from PyQt5 import QtCore
+from PyQt5.QtCore import QObject, pyqtSlot
 from gnuradio import analog
 from gnuradio import blocks
 from gnuradio import gr
@@ -69,21 +70,38 @@ class sic_tx_test(gr.top_block, Qt.QWidget):
         self.samp_rate = samp_rate = int(10e6)
         self.payload_length = payload_length = 50
         self.pause_button = pause_button = 0
+        self.ble_transmission_rate = ble_transmission_rate = 1000000
 
         ##################################################
         # Blocks
         ##################################################
 
         self._payload_length_range = qtgui.Range(1, 255, 1, 50, 200)
-        self._payload_length_win = qtgui.RangeWidget(self._payload_length_range, self.set_payload_length, "'payload_length'", "eng_slider", int, QtCore.Qt.Horizontal)
+        self._payload_length_win = qtgui.RangeWidget(self._payload_length_range, self.set_payload_length, "Payload Length", "eng_slider", int, QtCore.Qt.Horizontal)
         self.top_layout.addWidget(self._payload_length_win)
+        # Create the options list
+        self._ble_transmission_rate_options = [1000000, 2000000]
+        # Create the labels list
+        self._ble_transmission_rate_labels = ['1 Mbit/s', '2 Mbit/s']
+        # Create the combo box
+        self._ble_transmission_rate_tool_bar = Qt.QToolBar(self)
+        self._ble_transmission_rate_tool_bar.addWidget(Qt.QLabel("BLE Transmission Rate" + ": "))
+        self._ble_transmission_rate_combo_box = Qt.QComboBox()
+        self._ble_transmission_rate_tool_bar.addWidget(self._ble_transmission_rate_combo_box)
+        for _label in self._ble_transmission_rate_labels: self._ble_transmission_rate_combo_box.addItem(_label)
+        self._ble_transmission_rate_callback = lambda i: Qt.QMetaObject.invokeMethod(self._ble_transmission_rate_combo_box, "setCurrentIndex", Qt.Q_ARG("int", self._ble_transmission_rate_options.index(i)))
+        self._ble_transmission_rate_callback(self.ble_transmission_rate)
+        self._ble_transmission_rate_combo_box.currentIndexChanged.connect(
+            lambda i: self.set_ble_transmission_rate(self._ble_transmission_rate_options[i]))
+        # Create the radio buttons
+        self.top_layout.addWidget(self._ble_transmission_rate_tool_bar)
         self.tx_trigger_button = _tx_trigger_button_toggle_button = qtgui.MsgPushButton('tx_trigger_button', 'pressed',1,"default","default")
         self.tx_trigger_button = _tx_trigger_button_toggle_button
 
         self.top_layout.addWidget(_tx_trigger_button_toggle_button)
         self.sic_transmission_enabler_0 = sic.transmission_enabler(1024)
         self.sic_periodic_message_source_0 = sic.periodic_message_source(gr.pmt.mp("trigger"), 1000, (-1))
-        self.sic_ble_packet_source_0 = sic.ble_packet_source(10e6, payload_length, 1e6)
+        self.sic_ble_packet_source_0 = sic.ble_packet_source(10e6, payload_length, ble_transmission_rate)
         self.qtgui_waterfall_sink_x_0 = qtgui.waterfall_sink_c(
             8192, #size
             window.WIN_BLACKMAN_hARRIS, #wintype
@@ -231,6 +249,14 @@ class sic_tx_test(gr.top_block, Qt.QWidget):
 
     def set_pause_button(self, pause_button):
         self.pause_button = pause_button
+
+    def get_ble_transmission_rate(self):
+        return self.ble_transmission_rate
+
+    def set_ble_transmission_rate(self, ble_transmission_rate):
+        self.ble_transmission_rate = ble_transmission_rate
+        self._ble_transmission_rate_callback(self.ble_transmission_rate)
+        self.sic_ble_packet_source_0.set_transmission_rate(self.ble_transmission_rate)
 
 
 

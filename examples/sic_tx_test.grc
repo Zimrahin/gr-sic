@@ -33,6 +33,36 @@ options:
     state: enabled
 
 blocks:
+- name: ble_transmission_rate
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: BLE Transmission Rate
+    label0: ''
+    label1: ''
+    label2: ''
+    label3: ''
+    label4: ''
+    labels: '["1 Mbit/s", "2 Mbit/s"]'
+    num_opts: '0'
+    option0: '0'
+    option1: '1'
+    option2: '2'
+    option3: '3'
+    option4: '4'
+    options: '[1000000, 2000000]'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '1000000'
+    widget: combo_box
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1000, 64.0]
+    rotation: 0
+    state: enabled
 - name: pause_button
   id: variable_qtgui_toggle_button_msg
   parameters:
@@ -61,7 +91,7 @@ blocks:
   parameters:
     comment: ''
     gui_hint: ''
-    label: ''
+    label: Payload Length
     min_len: '200'
     orient: QtCore.Qt.Horizontal
     rangeType: int
@@ -325,7 +355,7 @@ blocks:
     minoutbuf: '0'
     payload_length: payload_length
     sample_rate: 10e6
-    transmission_rate: 1e6
+    transmission_rate: ble_transmission_rate
   states:
     bus_sink: false
     bus_source: false
@@ -343,7 +373,7 @@ blocks:
     minoutbuf: '0'
     payload_length: payload_length
     sample_rate: 10e6
-    transmission_rate: 1e6
+    transmission_rate: '1000000'
   states:
     bus_sink: false
     bus_source: false

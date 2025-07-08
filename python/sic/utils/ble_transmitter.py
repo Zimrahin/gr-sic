@@ -32,37 +32,11 @@ class TransmitterBLE:
         bits = self.process_phy_payload(payload)
         return self.modulate(bits)
 
+    @property
+    def transmission_rate(self) -> float:
+        return self._transmission_rate
 
-if __name__ == "__main__":
-    sample_rate = 1e6  # Example sample rate
-    transmitter = TransmitterBLE(sample_rate)
-
-    # Example payload
-    payload = triangular_wave(step=2, length=255)
-
-    # Process and modulate the payload
-    bits = transmitter.process_phy_payload(payload)
-    modulated_signal = transmitter.modulate(bits)
-
-    # Triangular shape
-
-    # Plot the modulated signal
-    plt.figure(figsize=(10, 4))
-    plt.plot(np.real(modulated_signal), label="In-phase")
-    plt.plot(np.imag(modulated_signal), label="Quadrature")
-    plt.title("Modulated Signal")
-    plt.xlabel("Sample Index")
-    plt.ylabel("Amplitude")
-    plt.legend()
-    plt.grid()
-    plt.show()
-
-    # plot the triangular waveform
-    plt.figure(figsize=(10, 4))
-    plt.stem(payload, label="Triangular Waveform")
-    plt.title("Triangular Waveform")
-    plt.xlabel("Sample Index")
-    plt.ylabel("Amplitude")
-    plt.legend()
-    plt.grid()
-    plt.show()
+    @transmission_rate.setter
+    def transmission_rate(self, rate: float) -> None:
+        self._transmission_rate = rate
+        self.sps: int = int(self.sample_rate / self.transmission_rate)
