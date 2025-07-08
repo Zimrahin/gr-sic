@@ -52,7 +52,7 @@ int transmission_enabler_impl::work(int noutput_items,
 {
     auto out = static_cast<output_type*>(output_items[0]);
 
-    std::memset(out, 0, noutput_items * sizeof(gr_complex)); // All-zero output
+    std::fill(out, out + noutput_items, gr_complex(0.0f, 0.0f));
 
     // Add tag if trigger is pending
     if (d_trigger_pending.exchange(false)) {
