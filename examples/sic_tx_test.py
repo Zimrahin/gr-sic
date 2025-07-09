@@ -13,17 +13,17 @@ from PyQt5 import Qt
 from gnuradio import qtgui
 from PyQt5 import QtCore
 from PyQt5.QtCore import QObject, pyqtSlot
-from gnuradio import analog
 from gnuradio import blocks
-from gnuradio import gr
+from gnuradio import channels
 from gnuradio.filter import firdes
+from gnuradio import eng_notation
+from gnuradio import gr
 from gnuradio.fft import window
 import sys
 import signal
 from PyQt5 import Qt
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
-from gnuradio import eng_notation
 from gnuradio import sic
 import threading
 import sip
@@ -66,19 +66,52 @@ class sic_tx_test(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.sps = sps = 10
         self.samp_rate = samp_rate = int(10e6)
-        self.payload_length = payload_length = 50
+        self.sps = sps = 10
+        self.payload_length_l = payload_length_l = 140
+        self.payload_length_h = payload_length_h = 60
         self.pause_button = pause_button = 0
+        self.label_ble = label_ble = ''
+        self.label_802154_tx_rate = label_802154_tx_rate = '250 kbit/s'
+        self.label_802154 = label_802154 = ''
+        self.delay_l = delay_l = 0
+        self.delay_h = delay_h = (int(160 * samp_rate * 1e-6))
         self.ble_transmission_rate = ble_transmission_rate = 1000000
+        self.amplitude_l = amplitude_l = 1
+        self.amplitude_h = amplitude_h = 1
 
         ##################################################
         # Blocks
         ##################################################
 
-        self._payload_length_range = qtgui.Range(1, 255, 1, 50, 200)
-        self._payload_length_win = qtgui.RangeWidget(self._payload_length_range, self.set_payload_length, "Payload Length", "eng_slider", int, QtCore.Qt.Horizontal)
-        self.top_layout.addWidget(self._payload_length_win)
+        self._payload_length_l_range = qtgui.Range(1, 255, 1, 140, 200)
+        self._payload_length_l_win = qtgui.RangeWidget(self._payload_length_l_range, self.set_payload_length_l, "Payload Length (bytes)", "eng_slider", int, QtCore.Qt.Horizontal)
+        self.top_grid_layout.addWidget(self._payload_length_l_win, 3, 1, 1, 1)
+        for r in range(3, 4):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(1, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self._payload_length_h_range = qtgui.Range(1, 255, 1, 60, 200)
+        self._payload_length_h_win = qtgui.RangeWidget(self._payload_length_h_range, self.set_payload_length_h, "Payload Length (bytes)", "eng_slider", int, QtCore.Qt.Horizontal)
+        self.top_grid_layout.addWidget(self._payload_length_h_win, 3, 0, 1, 1)
+        for r in range(3, 4):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 1):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self._delay_l_range = qtgui.Range(0, (int(800 * samp_rate * 1e-6)), 1, 0, 200)
+        self._delay_l_win = qtgui.RangeWidget(self._delay_l_range, self.set_delay_l, "Delay (µs)", "eng_slider", int, QtCore.Qt.Horizontal)
+        self.top_grid_layout.addWidget(self._delay_l_win, 4, 1, 1, 1)
+        for r in range(4, 5):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(1, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self._delay_h_range = qtgui.Range(0, (int(800 * samp_rate * 1e-6)), 1, (int(160 * samp_rate * 1e-6)), 200)
+        self._delay_h_win = qtgui.RangeWidget(self._delay_h_range, self.set_delay_h, "Delay (µs)", "eng_slider", int, QtCore.Qt.Horizontal)
+        self.top_grid_layout.addWidget(self._delay_h_win, 4, 0, 1, 1)
+        for r in range(4, 5):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 1):
+            self.top_grid_layout.setColumnStretch(c, 1)
         # Create the options list
         self._ble_transmission_rate_options = [1000000, 2000000]
         # Create the labels list
@@ -94,24 +127,47 @@ class sic_tx_test(gr.top_block, Qt.QWidget):
         self._ble_transmission_rate_combo_box.currentIndexChanged.connect(
             lambda i: self.set_ble_transmission_rate(self._ble_transmission_rate_options[i]))
         # Create the radio buttons
-        self.top_layout.addWidget(self._ble_transmission_rate_tool_bar)
-        self.tx_trigger_button = _tx_trigger_button_toggle_button = qtgui.MsgPushButton('tx_trigger_button', 'pressed',1,"default","default")
+        self.top_grid_layout.addWidget(self._ble_transmission_rate_tool_bar, 2, 1, 1, 1)
+        for r in range(2, 3):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(1, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self._amplitude_l_range = qtgui.Range(0, 4, 0.2, 1, 200)
+        self._amplitude_l_win = qtgui.RangeWidget(self._amplitude_l_range, self.set_amplitude_l, "Amplitude Multiplier", "eng_slider", float, QtCore.Qt.Horizontal)
+        self.top_grid_layout.addWidget(self._amplitude_l_win, 5, 1, 1, 1)
+        for r in range(5, 6):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(1, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self._amplitude_h_range = qtgui.Range(0, 4, 0.2, 1, 200)
+        self._amplitude_h_win = qtgui.RangeWidget(self._amplitude_h_range, self.set_amplitude_h, "Amplitude Multiplier", "eng_slider", float, QtCore.Qt.Horizontal)
+        self.top_grid_layout.addWidget(self._amplitude_h_win, 5, 0, 1, 1)
+        for r in range(5, 6):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 1):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self.tx_trigger_button = _tx_trigger_button_toggle_button = qtgui.MsgPushButton('Trigger Transmission', 'pressed',1,"green","default")
         self.tx_trigger_button = _tx_trigger_button_toggle_button
 
-        self.top_layout.addWidget(_tx_trigger_button_toggle_button)
+        self.top_grid_layout.addWidget(_tx_trigger_button_toggle_button, 0, 0, 1, 1)
+        for r in range(0, 1):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 1):
+            self.top_grid_layout.setColumnStretch(c, 1)
         self.sic_transmission_enabler_0 = sic.transmission_enabler(1024)
         self.sic_periodic_message_source_0 = sic.periodic_message_source(gr.pmt.mp("trigger"), 1000, (-1))
-        self.sic_ble_packet_source_0 = sic.ble_packet_source(10e6, payload_length, ble_transmission_rate, 0x12345678)
+        self.sic_ble_packet_source_0_0 = sic.ble_packet_source(10e6, payload_length_l, ble_transmission_rate, 0x12345678)
+        self.sic_ble_packet_source_0 = sic.ble_packet_source(10e6, payload_length_h, ble_transmission_rate, 0x12345678)
         self.qtgui_waterfall_sink_x_0 = qtgui.waterfall_sink_c(
-            8192, #size
-            window.WIN_BLACKMAN_hARRIS, #wintype
+            32768, #size
+            window.WIN_HANN, #wintype
             0, #fc
             samp_rate, #bw
             "", #name
             1, #number of inputs
             None # parent
         )
-        self.qtgui_waterfall_sink_x_0.set_update_time(0.10)
+        self.qtgui_waterfall_sink_x_0.set_update_time(0.01)
         self.qtgui_waterfall_sink_x_0.enable_grid(False)
         self.qtgui_waterfall_sink_x_0.enable_axis_labels(True)
 
@@ -132,11 +188,15 @@ class sic_tx_test(gr.top_block, Qt.QWidget):
             self.qtgui_waterfall_sink_x_0.set_color_map(i, colors[i])
             self.qtgui_waterfall_sink_x_0.set_line_alpha(i, alphas[i])
 
-        self.qtgui_waterfall_sink_x_0.set_intensity_range(-140, 0)
+        self.qtgui_waterfall_sink_x_0.set_intensity_range(-60, -50)
 
         self._qtgui_waterfall_sink_x_0_win = sip.wrapinstance(self.qtgui_waterfall_sink_x_0.qwidget(), Qt.QWidget)
 
-        self.top_layout.addWidget(self._qtgui_waterfall_sink_x_0_win)
+        self.top_grid_layout.addWidget(self._qtgui_waterfall_sink_x_0_win, 6, 0, 8, 2)
+        for r in range(6, 14):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
         self.qtgui_time_sink_x_0 = qtgui.time_sink_c(
             (int(samp_rate/100)), #size
             samp_rate, #samp_rate
@@ -144,14 +204,14 @@ class sic_tx_test(gr.top_block, Qt.QWidget):
             1, #number of inputs
             None # parent
         )
-        self.qtgui_time_sink_x_0.set_update_time(0.10)
+        self.qtgui_time_sink_x_0.set_update_time(0.01)
         self.qtgui_time_sink_x_0.set_y_axis(-1, 1)
 
         self.qtgui_time_sink_x_0.set_y_label('Amplitude', "")
 
         self.qtgui_time_sink_x_0.enable_tags(True)
-        self.qtgui_time_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_TAG, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "trigger")
-        self.qtgui_time_sink_x_0.enable_autoscale(False)
+        self.qtgui_time_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_TAG, qtgui.TRIG_SLOPE_POS, 0.0, 800 * 1e-6, 0, "trigger")
+        self.qtgui_time_sink_x_0.enable_autoscale(True)
         self.qtgui_time_sink_x_0.enable_grid(False)
         self.qtgui_time_sink_x_0.enable_axis_labels(True)
         self.qtgui_time_sink_x_0.enable_control_panel(False)
@@ -187,17 +247,87 @@ class sic_tx_test(gr.top_block, Qt.QWidget):
             self.qtgui_time_sink_x_0.set_line_alpha(i, alphas[i])
 
         self._qtgui_time_sink_x_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0.qwidget(), Qt.QWidget)
-        self.top_layout.addWidget(self._qtgui_time_sink_x_0_win)
+        self.top_grid_layout.addWidget(self._qtgui_time_sink_x_0_win, 14, 0, 8, 2)
+        for r in range(14, 22):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
         self._pause_button_choices = {'Pressed': bool(1), 'Released': bool(0)}
 
-        _pause_button_toggle_button = qtgui.ToggleButton(self.set_pause_button, 'pause_button', self._pause_button_choices, False, 'value')
-        _pause_button_toggle_button.setColors("default", "default", "default", "default")
+        _pause_button_toggle_button = qtgui.ToggleButton(self.set_pause_button, 'Pause Periodic Transmission', self._pause_button_choices, False, 'value')
+        _pause_button_toggle_button.setColors("red", "default", "red", "default")
         self.pause_button = _pause_button_toggle_button
 
-        self.top_layout.addWidget(_pause_button_toggle_button)
-        self.blocks_throttle2_0_1 = blocks.throttle( gr.sizeof_gr_complex*1, (samp_rate/200), True, 0 if "auto" == "auto" else max( int(float(0.1) * (samp_rate/200)) if "auto" == "time" else int(0.1), 1) )
+        self.top_grid_layout.addWidget(_pause_button_toggle_button, 0, 1, 1, 1)
+        for r in range(0, 1):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(1, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self._label_ble_tool_bar = Qt.QToolBar(self)
+
+        if None:
+            self._label_ble_formatter = None
+        else:
+            self._label_ble_formatter = lambda x: str(x)
+
+        self._label_ble_tool_bar.addWidget(Qt.QLabel("<font size='5'><b>BLE</b> (weaker signal) </font>"))
+        self._label_ble_label = Qt.QLabel(str(self._label_ble_formatter(self.label_ble)))
+        self._label_ble_tool_bar.addWidget(self._label_ble_label)
+        self.top_grid_layout.addWidget(self._label_ble_tool_bar, 1, 1, 1, 1)
+        for r in range(1, 2):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(1, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self._label_802154_tx_rate_tool_bar = Qt.QToolBar(self)
+
+        if None:
+            self._label_802154_tx_rate_formatter = None
+        else:
+            self._label_802154_tx_rate_formatter = lambda x: str(x)
+
+        self._label_802154_tx_rate_tool_bar.addWidget(Qt.QLabel("Transmission Rate: "))
+        self._label_802154_tx_rate_label = Qt.QLabel(str(self._label_802154_tx_rate_formatter(self.label_802154_tx_rate)))
+        self._label_802154_tx_rate_tool_bar.addWidget(self._label_802154_tx_rate_label)
+        self.top_grid_layout.addWidget(self._label_802154_tx_rate_tool_bar, 2, 0, 1, 1)
+        for r in range(2, 3):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 1):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self._label_802154_tool_bar = Qt.QToolBar(self)
+
+        if None:
+            self._label_802154_formatter = None
+        else:
+            self._label_802154_formatter = lambda x: str(x)
+
+        self._label_802154_tool_bar.addWidget(Qt.QLabel("<font size='5'><b>IEEE 802.15.4</b> (stronger signal) </font>"))
+        self._label_802154_label = Qt.QLabel(str(self._label_802154_formatter(self.label_802154)))
+        self._label_802154_tool_bar.addWidget(self._label_802154_label)
+        self.top_grid_layout.addWidget(self._label_802154_tool_bar, 1, 0, 1, 1)
+        for r in range(1, 2):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 1):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self.channels_channel_model_0_0 = channels.channel_model(
+            noise_voltage=0.1,
+            frequency_offset=0,
+            epsilon=1.0,
+            taps=[1.0],
+            noise_seed=0,
+            block_tags=False)
+        self.channels_channel_model_0 = channels.channel_model(
+            noise_voltage=0.1,
+            frequency_offset=9e3,
+            epsilon=1.0,
+            taps=[1.0],
+            noise_seed=0,
+            block_tags=False)
+        self.blocks_throttle2_0_1 = blocks.throttle( gr.sizeof_gr_complex*1, (samp_rate/20), True, 0 if "auto" == "auto" else max( int(float(0.1) * (samp_rate/20)) if "auto" == "time" else int(0.1), 1) )
+        self.blocks_multiply_const_vxx_0_0 = blocks.multiply_const_cc(amplitude_l)
+        self.blocks_multiply_const_vxx_0 = blocks.multiply_const_cc(amplitude_h)
+        self.blocks_delay_0_0 = blocks.delay(gr.sizeof_gr_complex*1, delay_h)
+        self.blocks_delay_0 = blocks.delay(gr.sizeof_gr_complex*1, delay_l)
         self.blocks_add_xx_0 = blocks.add_vcc(1)
-        self.analog_const_source_x_0 = analog.sig_source_c(0, analog.GR_CONST_WAVE, 0, 0, 0)
 
 
         ##################################################
@@ -206,11 +336,18 @@ class sic_tx_test(gr.top_block, Qt.QWidget):
         self.msg_connect((self.pause_button, 'state'), (self.sic_periodic_message_source_0, 'pause'))
         self.msg_connect((self.sic_periodic_message_source_0, 'out'), (self.sic_transmission_enabler_0, 'trigger'))
         self.msg_connect((self.tx_trigger_button, 'pressed'), (self.sic_transmission_enabler_0, 'trigger'))
-        self.connect((self.analog_const_source_x_0, 0), (self.blocks_add_xx_0, 1))
         self.connect((self.blocks_add_xx_0, 0), (self.qtgui_time_sink_x_0, 0))
         self.connect((self.blocks_add_xx_0, 0), (self.qtgui_waterfall_sink_x_0, 0))
+        self.connect((self.blocks_delay_0, 0), (self.blocks_multiply_const_vxx_0_0, 0))
+        self.connect((self.blocks_delay_0_0, 0), (self.blocks_multiply_const_vxx_0, 0))
+        self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_add_xx_0, 0))
+        self.connect((self.blocks_multiply_const_vxx_0_0, 0), (self.blocks_add_xx_0, 1))
         self.connect((self.blocks_throttle2_0_1, 0), (self.sic_ble_packet_source_0, 0))
-        self.connect((self.sic_ble_packet_source_0, 0), (self.blocks_add_xx_0, 0))
+        self.connect((self.blocks_throttle2_0_1, 0), (self.sic_ble_packet_source_0_0, 0))
+        self.connect((self.channels_channel_model_0, 0), (self.blocks_delay_0_0, 0))
+        self.connect((self.channels_channel_model_0_0, 0), (self.blocks_delay_0, 0))
+        self.connect((self.sic_ble_packet_source_0, 0), (self.channels_channel_model_0, 0))
+        self.connect((self.sic_ble_packet_source_0_0, 0), (self.channels_channel_model_0_0, 0))
         self.connect((self.sic_transmission_enabler_0, 0), (self.blocks_throttle2_0_1, 0))
 
 
@@ -222,33 +359,76 @@ class sic_tx_test(gr.top_block, Qt.QWidget):
 
         event.accept()
 
+    def get_samp_rate(self):
+        return self.samp_rate
+
+    def set_samp_rate(self, samp_rate):
+        self.samp_rate = samp_rate
+        self.set_delay_h((int(160 * self.samp_rate * 1e-6)))
+        self.blocks_throttle2_0_1.set_sample_rate((self.samp_rate/20))
+        self.qtgui_time_sink_x_0.set_samp_rate(self.samp_rate)
+        self.qtgui_waterfall_sink_x_0.set_frequency_range(0, self.samp_rate)
+
     def get_sps(self):
         return self.sps
 
     def set_sps(self, sps):
         self.sps = sps
 
-    def get_samp_rate(self):
-        return self.samp_rate
+    def get_payload_length_l(self):
+        return self.payload_length_l
 
-    def set_samp_rate(self, samp_rate):
-        self.samp_rate = samp_rate
-        self.blocks_throttle2_0_1.set_sample_rate((self.samp_rate/200))
-        self.qtgui_time_sink_x_0.set_samp_rate(self.samp_rate)
-        self.qtgui_waterfall_sink_x_0.set_frequency_range(0, self.samp_rate)
+    def set_payload_length_l(self, payload_length_l):
+        self.payload_length_l = payload_length_l
+        self.sic_ble_packet_source_0_0.set_payload_length(self.payload_length_l)
 
-    def get_payload_length(self):
-        return self.payload_length
+    def get_payload_length_h(self):
+        return self.payload_length_h
 
-    def set_payload_length(self, payload_length):
-        self.payload_length = payload_length
-        self.sic_ble_packet_source_0.set_payload_length(self.payload_length)
+    def set_payload_length_h(self, payload_length_h):
+        self.payload_length_h = payload_length_h
+        self.sic_ble_packet_source_0.set_payload_length(self.payload_length_h)
 
     def get_pause_button(self):
         return self.pause_button
 
     def set_pause_button(self, pause_button):
         self.pause_button = pause_button
+
+    def get_label_ble(self):
+        return self.label_ble
+
+    def set_label_ble(self, label_ble):
+        self.label_ble = label_ble
+        Qt.QMetaObject.invokeMethod(self._label_ble_label, "setText", Qt.Q_ARG("QString", str(self._label_ble_formatter(self.label_ble))))
+
+    def get_label_802154_tx_rate(self):
+        return self.label_802154_tx_rate
+
+    def set_label_802154_tx_rate(self, label_802154_tx_rate):
+        self.label_802154_tx_rate = label_802154_tx_rate
+        Qt.QMetaObject.invokeMethod(self._label_802154_tx_rate_label, "setText", Qt.Q_ARG("QString", str(self._label_802154_tx_rate_formatter(self.label_802154_tx_rate))))
+
+    def get_label_802154(self):
+        return self.label_802154
+
+    def set_label_802154(self, label_802154):
+        self.label_802154 = label_802154
+        Qt.QMetaObject.invokeMethod(self._label_802154_label, "setText", Qt.Q_ARG("QString", str(self._label_802154_formatter(self.label_802154))))
+
+    def get_delay_l(self):
+        return self.delay_l
+
+    def set_delay_l(self, delay_l):
+        self.delay_l = delay_l
+        self.blocks_delay_0.set_dly(int(self.delay_l))
+
+    def get_delay_h(self):
+        return self.delay_h
+
+    def set_delay_h(self, delay_h):
+        self.delay_h = delay_h
+        self.blocks_delay_0_0.set_dly(int(self.delay_h))
 
     def get_ble_transmission_rate(self):
         return self.ble_transmission_rate
@@ -257,6 +437,21 @@ class sic_tx_test(gr.top_block, Qt.QWidget):
         self.ble_transmission_rate = ble_transmission_rate
         self._ble_transmission_rate_callback(self.ble_transmission_rate)
         self.sic_ble_packet_source_0.set_transmission_rate(self.ble_transmission_rate)
+        self.sic_ble_packet_source_0_0.set_transmission_rate(self.ble_transmission_rate)
+
+    def get_amplitude_l(self):
+        return self.amplitude_l
+
+    def set_amplitude_l(self, amplitude_l):
+        self.amplitude_l = amplitude_l
+        self.blocks_multiply_const_vxx_0_0.set_k(self.amplitude_l)
+
+    def get_amplitude_h(self):
+        return self.amplitude_h
+
+    def set_amplitude_h(self, amplitude_h):
+        self.amplitude_h = amplitude_h
+        self.blocks_multiply_const_vxx_0.set_k(self.amplitude_h)
 
 
 

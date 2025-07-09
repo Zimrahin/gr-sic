@@ -33,11 +33,53 @@ options:
     state: enabled
 
 blocks:
+- name: amplitude_h
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: (5,0,1,1)
+    label: Amplitude Multiplier
+    min_len: '200'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '0'
+    step: '0.2'
+    stop: '4'
+    value: '1'
+    widget: eng_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1160, 16.0]
+    rotation: 0
+    state: enabled
+- name: amplitude_l
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: (5,1,1,1)
+    label: Amplitude Multiplier
+    min_len: '200'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '0'
+    step: '0.2'
+    stop: '4'
+    value: '1'
+    widget: eng_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1344, 16.0]
+    rotation: 0
+    state: enabled
 - name: ble_transmission_rate
   id: variable_qtgui_chooser
   parameters:
     comment: ''
-    gui_hint: ''
+    gui_hint: (2,1,1,1)
     label: BLE Transmission Rate
     label0: ''
     label1: ''
@@ -60,21 +102,111 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1000, 64.0]
+    coordinate: [1352, 360.0]
+    rotation: 0
+    state: enabled
+- name: delay_h
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: (4,0,1,1)
+    label: "Delay (\xB5s)"
+    min_len: '200'
+    orient: QtCore.Qt.Horizontal
+    rangeType: int
+    start: '0'
+    step: '1'
+    stop: int(800 * samp_rate * 1e-6)
+    value: int(160 * samp_rate * 1e-6)
+    widget: eng_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [864, 16.0]
+    rotation: 0
+    state: enabled
+- name: delay_l
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: (4,1,1,1)
+    label: "Delay (\xB5s)"
+    min_len: '200'
+    orient: QtCore.Qt.Horizontal
+    rangeType: int
+    start: '0'
+    step: '1'
+    stop: int(800 * samp_rate * 1e-6)
+    value: '0'
+    widget: eng_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1008, 16.0]
+    rotation: 0
+    state: enabled
+- name: label_802154
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: (1,0,1,1)
+    label: <font size='5'><b>IEEE 802.15.4</b> (stronger signal) </font>
+    type: string
+    value: ''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1352, 272.0]
+    rotation: 0
+    state: enabled
+- name: label_802154_tx_rate
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: (2,0,1,1)
+    label: 'Transmission Rate: '
+    type: string
+    value: 250 kbit/s
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1352, 496.0]
+    rotation: 0
+    state: enabled
+- name: label_ble
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: (1,1,1,1)
+    label: <font size='5'><b>BLE</b> (weaker signal) </font>
+    type: string
+    value: ''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1352, 184.0]
     rotation: 0
     state: enabled
 - name: pause_button
   id: variable_qtgui_toggle_button_msg
   parameters:
     comment: ''
-    gui_hint: ''
+    gui_hint: (0,1,1,1)
     initPressed: 'False'
-    label: ''
+    label: Pause Periodic Transmission
     outputmsgname: value
-    pressBackgroundColor: default
+    pressBackgroundColor: red
     pressFontColor: default
     pressed: '1'
-    relBackgroundColor: default
+    relBackgroundColor: red
     relFontColor: default
     released: '0'
     type: bool
@@ -83,28 +215,49 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [120, 336.0]
+    coordinate: [112, 360.0]
     rotation: 180
     state: enabled
-- name: payload_length
+- name: payload_length_h
   id: variable_qtgui_range
   parameters:
     comment: ''
-    gui_hint: ''
-    label: Payload Length
+    gui_hint: (3,0,1,1)
+    label: Payload Length (bytes)
     min_len: '200'
     orient: QtCore.Qt.Horizontal
     rangeType: int
     start: '1'
     step: '1'
     stop: '255'
-    value: '50'
+    value: '60'
     widget: eng_slider
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [568, 32.0]
+    coordinate: [440, 16.0]
+    rotation: 0
+    state: enabled
+- name: payload_length_l
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: (3,1,1,1)
+    label: Payload Length (bytes)
+    min_len: '200'
+    orient: QtCore.Qt.Horizontal
+    rangeType: int
+    start: '1'
+    step: '1'
+    stop: '255'
+    value: '140'
+    widget: eng_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [640, 16.0]
     rotation: 0
     state: enabled
 - name: samp_rate
@@ -116,7 +269,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [352, 24.0]
+    coordinate: [320, 16.0]
     rotation: 0
     state: enabled
 - name: sps
@@ -128,25 +281,8 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [272, 24.0]
+    coordinate: [240, 16.0]
     rotation: 0
-    state: enabled
-- name: analog_const_source_x_0
-  id: analog_const_source_x
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    const: '0'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    type: complex
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [632, 440.0]
-    rotation: 180
     state: enabled
 - name: blocks_add_xx_0
   id: blocks_add_xx
@@ -163,7 +299,83 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [664, 512.0]
+    coordinate: [952, 600.0]
+    rotation: 0
+    state: enabled
+- name: blocks_delay_0
+  id: blocks_delay
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    delay: delay_l
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_ports: '1'
+    showports: 'False'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [528, 672.0]
+    rotation: 0
+    state: enabled
+- name: blocks_delay_0_0
+  id: blocks_delay
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    delay: delay_h
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_ports: '1'
+    showports: 'False'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [520, 536.0]
+    rotation: 0
+    state: enabled
+- name: blocks_multiply_const_vxx_0
+  id: blocks_multiply_const_vxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    const: amplitude_h
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [688, 536.0]
+    rotation: 0
+    state: enabled
+- name: blocks_multiply_const_vxx_0_0
+  id: blocks_multiply_const_vxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    const: amplitude_l
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [688, 672.0]
     rotation: 0
     state: enabled
 - name: blocks_throttle2_0_1
@@ -177,14 +389,56 @@ blocks:
     maximum: '0.1'
     maxoutbuf: '0'
     minoutbuf: '0'
-    samples_per_second: samp_rate/200
+    samples_per_second: samp_rate/20
     type: complex
     vlen: '1'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [688, 216.0]
+    coordinate: [664, 240.0]
+    rotation: 0
+    state: enabled
+- name: channels_channel_model_0
+  id: channels_channel_model
+  parameters:
+    affinity: ''
+    alias: ''
+    block_tags: 'False'
+    comment: ''
+    epsilon: '1.0'
+    freq_offset: 9e3
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    noise_voltage: '0.1'
+    seed: '0'
+    taps: '1.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [264, 496.0]
+    rotation: 0
+    state: enabled
+- name: channels_channel_model_0_0
+  id: channels_channel_model
+  parameters:
+    affinity: ''
+    alias: ''
+    block_tags: 'False'
+    comment: ''
+    epsilon: '1.0'
+    freq_offset: '0'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    noise_voltage: '0.1'
+    seed: '0'
+    taps: '1.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [264, 632.0]
     rotation: 0
     state: enabled
 - name: qtgui_time_sink_x_0
@@ -202,7 +456,7 @@ blocks:
     alpha7: '1.0'
     alpha8: '1.0'
     alpha9: '1.0'
-    autoscale: 'False'
+    autoscale: 'True'
     axislabels: 'True'
     color1: blue
     color10: dark blue
@@ -218,7 +472,7 @@ blocks:
     ctrlpanel: 'False'
     entags: 'True'
     grid: 'False'
-    gui_hint: ''
+    gui_hint: (14,0,8,2)
     label1: Signal 1
     label10: Signal 10
     label2: Signal 2
@@ -256,13 +510,13 @@ blocks:
     style8: '1'
     style9: '1'
     tr_chan: '0'
-    tr_delay: '0'
+    tr_delay: 800 * 1e-6
     tr_level: '0.0'
     tr_mode: qtgui.TRIG_MODE_TAG
     tr_slope: qtgui.TRIG_SLOPE_POS
     tr_tag: '"trigger"'
     type: complex
-    update_time: '0.10'
+    update_time: '0.01'
     width1: '1'
     width10: '1'
     width2: '1'
@@ -281,7 +535,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [832, 560.0]
+    coordinate: [1128, 648.0]
     rotation: 0
     state: enabled
 - name: qtgui_waterfall_sink_x_0
@@ -313,12 +567,12 @@ blocks:
     color9: '0'
     comment: ''
     fc: '0'
-    fftsize: '8192'
+    fftsize: '32768'
     freqhalf: 'True'
     grid: 'False'
-    gui_hint: ''
-    int_max: '0'
-    int_min: '-140'
+    gui_hint: (6,0,8,2)
+    int_max: '-50'
+    int_min: '-60'
     label1: ''
     label10: ''
     label2: ''
@@ -336,13 +590,13 @@ blocks:
     nconnections: '1'
     showports: 'False'
     type: complex
-    update_time: '0.10'
-    wintype: window.WIN_BLACKMAN_hARRIS
+    update_time: '0.01'
+    wintype: window.WIN_HANN
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [832, 448.0]
+    coordinate: [1128, 536.0]
     rotation: 0
     state: enabled
 - name: sic_ble_packet_source_0
@@ -350,17 +604,18 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
+    base_address: '0x12345678'
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    payload_length: payload_length
+    payload_length: payload_length_h
     sample_rate: 10e6
     transmission_rate: ble_transmission_rate
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [400, 456.0]
+    coordinate: [856, 168.0]
     rotation: 0
     state: enabled
 - name: sic_ble_packet_source_0_0
@@ -368,19 +623,20 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
+    base_address: '0x12345678'
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    payload_length: payload_length
+    payload_length: payload_length_l
     sample_rate: 10e6
-    transmission_rate: '1000000'
+    transmission_rate: ble_transmission_rate
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [400, 560.0]
+    coordinate: [856, 288.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: sic_periodic_message_source_0
   id: sic_periodic_message_source
   parameters:
@@ -396,7 +652,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [120, 256.0]
+    coordinate: [112, 280.0]
     rotation: 0
     state: enabled
 - name: sic_transmission_enabler_0
@@ -412,17 +668,17 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [440, 232.0]
+    coordinate: [432, 256.0]
     rotation: 0
     state: enabled
 - name: tx_trigger_button
   id: variable_qtgui_msg_push_button
   parameters:
     comment: ''
-    gui_hint: ''
-    label: ''
+    gui_hint: (0,0,1,1)
+    label: Trigger Transmission
     msgName: pressed
-    relBackgroundColor: default
+    relBackgroundColor: green
     relFontColor: default
     type: int
     value: '1'
@@ -430,7 +686,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [56, 160.0]
+    coordinate: [56, 168.0]
     rotation: 0
     state: enabled
 - name: virtual_sink_0
@@ -438,12 +694,25 @@ blocks:
   parameters:
     alias: ''
     comment: ''
-    stream_id: ''
+    stream_id: high
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [896, 224.0]
+    coordinate: [1112, 192.0]
+    rotation: 0
+    state: enabled
+- name: virtual_sink_1
+  id: virtual_sink
+  parameters:
+    alias: ''
+    comment: ''
+    stream_id: low
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1112, 312.0]
     rotation: 0
     state: enabled
 - name: virtual_source_0
@@ -451,28 +720,47 @@ blocks:
   parameters:
     alias: ''
     comment: ''
-    stream_id: ''
+    stream_id: high
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [152, 528.0]
+    coordinate: [56, 536.0]
+    rotation: 0
+    state: enabled
+- name: virtual_source_1
+  id: virtual_source
+  parameters:
+    alias: ''
+    comment: ''
+    stream_id: low
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [56, 672.0]
     rotation: 0
     state: enabled
 
 connections:
-- [analog_const_source_x_0, '0', blocks_add_xx_0, '1']
 - [blocks_add_xx_0, '0', qtgui_time_sink_x_0, '0']
 - [blocks_add_xx_0, '0', qtgui_waterfall_sink_x_0, '0']
-- [blocks_throttle2_0_1, '0', virtual_sink_0, '0']
+- [blocks_delay_0, '0', blocks_multiply_const_vxx_0_0, '0']
+- [blocks_delay_0_0, '0', blocks_multiply_const_vxx_0, '0']
+- [blocks_multiply_const_vxx_0, '0', blocks_add_xx_0, '0']
+- [blocks_multiply_const_vxx_0_0, '0', blocks_add_xx_0, '1']
+- [blocks_throttle2_0_1, '0', sic_ble_packet_source_0, '0']
+- [blocks_throttle2_0_1, '0', sic_ble_packet_source_0_0, '0']
+- [channels_channel_model_0, '0', blocks_delay_0_0, '0']
+- [channels_channel_model_0_0, '0', blocks_delay_0, '0']
 - [pause_button, state, sic_periodic_message_source_0, pause]
-- [sic_ble_packet_source_0, '0', blocks_add_xx_0, '0']
-- [sic_ble_packet_source_0_0, '0', blocks_add_xx_0, '1']
+- [sic_ble_packet_source_0, '0', virtual_sink_0, '0']
+- [sic_ble_packet_source_0_0, '0', virtual_sink_1, '0']
 - [sic_periodic_message_source_0, out, sic_transmission_enabler_0, trigger]
 - [sic_transmission_enabler_0, '0', blocks_throttle2_0_1, '0']
 - [tx_trigger_button, pressed, sic_transmission_enabler_0, trigger]
-- [virtual_source_0, '0', sic_ble_packet_source_0, '0']
-- [virtual_source_0, '0', sic_ble_packet_source_0_0, '0']
+- [virtual_source_0, '0', channels_channel_model_0, '0']
+- [virtual_source_1, '0', channels_channel_model_0_0, '0']
 
 metadata:
   file_format: 1
