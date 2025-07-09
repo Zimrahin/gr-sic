@@ -10,7 +10,8 @@
 from gnuradio import gr
 import numpy as np
 import threading
-from .utils.ble_transmitter import TransmitterBLE, triangular_wave
+from .utils.transmitters import TransmitterBLE
+from .utils.packet_utils import triangular_wave
 
 
 class ble_packet_source(gr.sync_block):
@@ -18,7 +19,13 @@ class ble_packet_source(gr.sync_block):
     Generates BLE packets from tagged triggers using precomputed modulated IQ waveforms.
     """
 
-    def __init__(self, sample_rate: float, payload_length: int, transmission_rate: float):
+    def __init__(
+        self,
+        sample_rate: float,
+        payload_length: int,
+        transmission_rate: float,
+        base_address: int,
+    ):
         gr.sync_block.__init__(
             self, name="ble_packet_source", in_sig=[np.complex64], out_sig=[np.complex64]
         )
@@ -26,6 +33,7 @@ class ble_packet_source(gr.sync_block):
         self.max_payload_length = 255
         self.sample_rate = sample_rate
         self.payload_template = triangular_wave(step=2, length=self.max_payload_length)
+        self.base_address = base_address
         self.param_mutex = threading.Lock()
 
         # Changeable at runtime
@@ -46,7 +54,7 @@ class ble_packet_source(gr.sync_block):
         constrained_length = max(0, min(payload_length, self.max_payload_length))
         payload_segment = self.payload_template[:constrained_length]
         self.transmitter.transmission_rate = transmission_rate
-        return self.transmitter.modulate_from_payload(payload_segment)
+        return self.transmitter.modulate_from_payload(payload_segment, self.base_address)
 
     def set_payload_length(self, length: int):
         """Update payload length and regenerate waveform"""

@@ -20,7 +20,10 @@ endif()
 gr_python_install(
     FILES
     __init__.py
-    ble_transmitter.py
+    transmitters.py
+    filters.py
+    modulation.py
+    packet_utils.py
     DESTINATION ${GR_PYTHON_DIR}/gnuradio/sic/utils
 )
 

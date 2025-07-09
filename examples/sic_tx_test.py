@@ -101,7 +101,7 @@ class sic_tx_test(gr.top_block, Qt.QWidget):
         self.top_layout.addWidget(_tx_trigger_button_toggle_button)
         self.sic_transmission_enabler_0 = sic.transmission_enabler(1024)
         self.sic_periodic_message_source_0 = sic.periodic_message_source(gr.pmt.mp("trigger"), 1000, (-1))
-        self.sic_ble_packet_source_0 = sic.ble_packet_source(10e6, payload_length, ble_transmission_rate)
+        self.sic_ble_packet_source_0 = sic.ble_packet_source(10e6, payload_length, ble_transmission_rate, 0x12345678)
         self.qtgui_waterfall_sink_x_0 = qtgui.waterfall_sink_c(
             8192, #size
             window.WIN_BLACKMAN_hARRIS, #wintype
