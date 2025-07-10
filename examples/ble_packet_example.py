@@ -88,6 +88,7 @@ class ble_packet_example(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(0, 1):
             self.top_grid_layout.setColumnStretch(c, 1)
+        self.single_pole_iir_filter_xx_0 = filter.single_pole_iir_filter_ff((160E-6), 1)
         self.sic_ble_packet_sink_0 = sic.ble_packet_sink(0x12345678, 0, 0x1, 0)
         self.qtgui_time_sink_x_1 = qtgui.time_sink_f(
             (int( plot_N/ samples_per_bit)), #size
@@ -215,6 +216,7 @@ class ble_packet_example(gr.top_block, Qt.QWidget):
             [])
         self.blocks_uchar_to_float_0_0_0_0 = blocks.uchar_to_float()
         self.blocks_throttle2_0 = blocks.throttle( gr.sizeof_gr_complex*1, (samp_rate/2), True, 0 if "auto" == "auto" else max( int(float(0.1) * (samp_rate/2)) if "auto" == "time" else int(0.1), 1) )
+        self.blocks_sub_xx_0 = blocks.sub_ff(1)
         self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, '/home/diego/Documents/GNU_radio_OOT_modules/gr-sic/examples/data/BLE_124B.dat', True, 0, 0)
         self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
         self.blocks_add_xx_0 = blocks.add_vcc(1)
@@ -231,12 +233,14 @@ class ble_packet_example(gr.top_block, Qt.QWidget):
         self.msg_connect((self.ble_tagged_iq_to_vector_0, 'out'), (self.ble_plot_iq_from_pmt_0, 'iq'))
         self.msg_connect((self.sic_ble_packet_sink_0, 'pdu'), (self.ble_plot_iq_from_pmt_0, 'pdu'))
         self.connect((self.analog_fastnoise_source_x_0, 0), (self.blocks_add_xx_0, 1))
-        self.connect((self.analog_quadrature_demod_cf_0, 0), (self.digital_symbol_sync_xx_0, 0))
+        self.connect((self.analog_quadrature_demod_cf_0, 0), (self.blocks_sub_xx_0, 0))
+        self.connect((self.analog_quadrature_demod_cf_0, 0), (self.single_pole_iir_filter_xx_0, 0))
         self.connect((self.ble_tag_iq_stream_0, 0), (self.ble_tagged_iq_to_vector_0, 0))
         self.connect((self.ble_tag_iq_stream_0, 0), (self.qtgui_time_sink_x_0, 0))
         self.connect((self.blocks_add_xx_0, 0), (self.ble_tag_iq_stream_0, 0))
         self.connect((self.blocks_add_xx_0, 0), (self.low_pass_filter_0_0, 0))
         self.connect((self.blocks_file_source_0, 0), (self.blocks_throttle2_0, 0))
+        self.connect((self.blocks_sub_xx_0, 0), (self.digital_symbol_sync_xx_0, 0))
         self.connect((self.blocks_throttle2_0, 0), (self.blocks_add_xx_0, 0))
         self.connect((self.blocks_uchar_to_float_0_0_0_0, 0), (self.qtgui_time_sink_x_1, 1))
         self.connect((self.digital_symbol_sync_xx_0, 0), (self.qtgui_time_sink_x_1, 0))
@@ -244,6 +248,7 @@ class ble_packet_example(gr.top_block, Qt.QWidget):
         self.connect((self.low_pass_filter_0_0, 0), (self.analog_quadrature_demod_cf_0, 0))
         self.connect((self.sic_ble_packet_sink_0, 0), (self.ble_tag_iq_stream_0, 1))
         self.connect((self.sic_ble_packet_sink_0, 0), (self.blocks_uchar_to_float_0_0_0_0, 0))
+        self.connect((self.single_pole_iir_filter_xx_0, 0), (self.blocks_sub_xx_0, 1))
 
 
     def closeEvent(self, event):
