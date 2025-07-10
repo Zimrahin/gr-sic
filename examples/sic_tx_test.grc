@@ -229,8 +229,8 @@ blocks:
     rangeType: int
     start: '1'
     step: '1'
-    stop: '255'
-    value: '60'
+    stop: '125'
+    value: '10'
     widget: eng_slider
   states:
     bus_sink: false
@@ -428,7 +428,7 @@ blocks:
     block_tags: 'False'
     comment: ''
     epsilon: '1.0'
-    freq_offset: '0'
+    freq_offset: -5e3
     maxoutbuf: '0'
     minoutbuf: '0'
     noise_voltage: '0.1'
@@ -599,25 +599,6 @@ blocks:
     coordinate: [1128, 536.0]
     rotation: 0
     state: enabled
-- name: sic_ble_packet_source_0
-  id: sic_ble_packet_source
-  parameters:
-    affinity: ''
-    alias: ''
-    base_address: '0x12345678'
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    payload_length: payload_length_h
-    sample_rate: 10e6
-    transmission_rate: ble_transmission_rate
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [856, 168.0]
-    rotation: 0
-    state: enabled
 - name: sic_ble_packet_source_0_0
   id: sic_ble_packet_source
   parameters:
@@ -635,6 +616,24 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [856, 288.0]
+    rotation: 0
+    state: enabled
+- name: sic_ieee802154_packet_source_0
+  id: sic_ieee802154_packet_source
+  parameters:
+    affinity: ''
+    alias: ''
+    append_crc: 'True'
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    payload_length: payload_length_h
+    sample_rate: 10e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [848, 168.0]
     rotation: 0
     state: enabled
 - name: sic_periodic_message_source_0
@@ -699,7 +698,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1112, 192.0]
+    coordinate: [1152, 184.0]
     rotation: 0
     state: enabled
 - name: virtual_sink_1
@@ -712,7 +711,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1112, 312.0]
+    coordinate: [1152, 312.0]
     rotation: 0
     state: enabled
 - name: virtual_source_0
@@ -749,13 +748,13 @@ connections:
 - [blocks_delay_0_0, '0', blocks_multiply_const_vxx_0, '0']
 - [blocks_multiply_const_vxx_0, '0', blocks_add_xx_0, '0']
 - [blocks_multiply_const_vxx_0_0, '0', blocks_add_xx_0, '1']
-- [blocks_throttle2_0_1, '0', sic_ble_packet_source_0, '0']
 - [blocks_throttle2_0_1, '0', sic_ble_packet_source_0_0, '0']
+- [blocks_throttle2_0_1, '0', sic_ieee802154_packet_source_0, '0']
 - [channels_channel_model_0, '0', blocks_delay_0_0, '0']
 - [channels_channel_model_0_0, '0', blocks_delay_0, '0']
 - [pause_button, state, sic_periodic_message_source_0, pause]
-- [sic_ble_packet_source_0, '0', virtual_sink_0, '0']
 - [sic_ble_packet_source_0_0, '0', virtual_sink_1, '0']
+- [sic_ieee802154_packet_source_0, '0', virtual_sink_0, '0']
 - [sic_periodic_message_source_0, out, sic_transmission_enabler_0, trigger]
 - [sic_transmission_enabler_0, '0', blocks_throttle2_0_1, '0']
 - [tx_trigger_button, pressed, sic_transmission_enabler_0, trigger]

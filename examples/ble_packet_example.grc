@@ -299,7 +299,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [624, 696.0]
+    coordinate: [624, 688.0]
     rotation: 0
     state: true
 - name: digital_symbol_sync_xx_0

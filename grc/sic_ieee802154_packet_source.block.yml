@@ -1,0 +1,38 @@
+id: sic_ieee802154_packet_source
+label: IEEE 802.15.4 Packet Source
+category: '[sic]'
+
+templates:
+  imports: from gnuradio import sic
+  make: sic.ieee802154_packet_source(${sample_rate}, ${payload_length}, ${append_crc})
+  callbacks:
+  - set_payload_length(${payload_length})
+
+parameters:
+- id: sample_rate
+  label: Sample Rate
+  dtype: float
+  default: 10e6
+- id: payload_length
+  label: Payload Length
+  dtype: int
+  default: 60
+- id: append_crc
+  label: Append CRC
+  dtype: enum
+  options: ['True', 'False']
+  option_labels: ['Yes', 'No']
+
+inputs:
+- label: in
+  domain: stream
+  dtype: complex
+
+outputs:
+- label: out
+  domain: stream
+  dtype: complex
+
+#  'file_format' specifies the version of the GRC yml format used in the file
+#  and should usually not be changed.
+file_format: 1

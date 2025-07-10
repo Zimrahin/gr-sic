@@ -69,7 +69,7 @@ class sic_tx_test(gr.top_block, Qt.QWidget):
         self.samp_rate = samp_rate = int(10e6)
         self.sps = sps = 10
         self.payload_length_l = payload_length_l = 140
-        self.payload_length_h = payload_length_h = 60
+        self.payload_length_h = payload_length_h = 10
         self.pause_button = pause_button = 0
         self.label_ble = label_ble = ''
         self.label_802154_tx_rate = label_802154_tx_rate = '250 kbit/s'
@@ -91,7 +91,7 @@ class sic_tx_test(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(1, 2):
             self.top_grid_layout.setColumnStretch(c, 1)
-        self._payload_length_h_range = qtgui.Range(1, 255, 1, 60, 200)
+        self._payload_length_h_range = qtgui.Range(1, 125, 1, 10, 200)
         self._payload_length_h_win = qtgui.RangeWidget(self._payload_length_h_range, self.set_payload_length_h, "Payload Length (bytes)", "eng_slider", int, QtCore.Qt.Horizontal)
         self.top_grid_layout.addWidget(self._payload_length_h_win, 3, 0, 1, 1)
         for r in range(3, 4):
@@ -156,8 +156,8 @@ class sic_tx_test(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setColumnStretch(c, 1)
         self.sic_transmission_enabler_0 = sic.transmission_enabler(1024)
         self.sic_periodic_message_source_0 = sic.periodic_message_source(gr.pmt.mp("trigger"), 1000, (-1))
+        self.sic_ieee802154_packet_source_0 = sic.ieee802154_packet_source(10e6, payload_length_h, True)
         self.sic_ble_packet_source_0_0 = sic.ble_packet_source(10e6, payload_length_l, ble_transmission_rate, 0x12345678)
-        self.sic_ble_packet_source_0 = sic.ble_packet_source(10e6, payload_length_h, ble_transmission_rate, 0x12345678)
         self.qtgui_waterfall_sink_x_0 = qtgui.waterfall_sink_c(
             32768, #size
             window.WIN_HANN, #wintype
@@ -310,7 +310,7 @@ class sic_tx_test(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setColumnStretch(c, 1)
         self.channels_channel_model_0_0 = channels.channel_model(
             noise_voltage=0.1,
-            frequency_offset=0,
+            frequency_offset=(-5e3),
             epsilon=1.0,
             taps=[1.0],
             noise_seed=0,
@@ -342,12 +342,12 @@ class sic_tx_test(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_delay_0_0, 0), (self.blocks_multiply_const_vxx_0, 0))
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_add_xx_0, 0))
         self.connect((self.blocks_multiply_const_vxx_0_0, 0), (self.blocks_add_xx_0, 1))
-        self.connect((self.blocks_throttle2_0_1, 0), (self.sic_ble_packet_source_0, 0))
         self.connect((self.blocks_throttle2_0_1, 0), (self.sic_ble_packet_source_0_0, 0))
+        self.connect((self.blocks_throttle2_0_1, 0), (self.sic_ieee802154_packet_source_0, 0))
         self.connect((self.channels_channel_model_0, 0), (self.blocks_delay_0_0, 0))
         self.connect((self.channels_channel_model_0_0, 0), (self.blocks_delay_0, 0))
-        self.connect((self.sic_ble_packet_source_0, 0), (self.channels_channel_model_0, 0))
         self.connect((self.sic_ble_packet_source_0_0, 0), (self.channels_channel_model_0_0, 0))
+        self.connect((self.sic_ieee802154_packet_source_0, 0), (self.channels_channel_model_0, 0))
         self.connect((self.sic_transmission_enabler_0, 0), (self.blocks_throttle2_0_1, 0))
 
 
@@ -387,7 +387,7 @@ class sic_tx_test(gr.top_block, Qt.QWidget):
 
     def set_payload_length_h(self, payload_length_h):
         self.payload_length_h = payload_length_h
-        self.sic_ble_packet_source_0.set_payload_length(self.payload_length_h)
+        self.sic_ieee802154_packet_source_0.set_payload_length(self.payload_length_h)
 
     def get_pause_button(self):
         return self.pause_button
@@ -436,7 +436,6 @@ class sic_tx_test(gr.top_block, Qt.QWidget):
     def set_ble_transmission_rate(self, ble_transmission_rate):
         self.ble_transmission_rate = ble_transmission_rate
         self._ble_transmission_rate_callback(self.ble_transmission_rate)
-        self.sic_ble_packet_source_0.set_transmission_rate(self.ble_transmission_rate)
         self.sic_ble_packet_source_0_0.set_transmission_rate(self.ble_transmission_rate)
 
     def get_amplitude_l(self):

@@ -14,4 +14,5 @@ install(FILES
     sic_tagged_iq_to_vector.block.yml
     sic_ble_packet_source.block.yml
     sic_transmission_enabler.block.yml
-    sic_periodic_message_source.block.yml DESTINATION share/gnuradio/grc/blocks)
+    sic_periodic_message_source.block.yml
+    sic_ieee802154_packet_source.block.yml DESTINATION share/gnuradio/grc/blocks)

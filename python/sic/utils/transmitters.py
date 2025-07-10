@@ -15,7 +15,6 @@ from .packet_utils import (
     create_802154_phy_packet,
     map_nibbles_to_chips,
     split_iq_chips,
-    triangular_wave,
 )
 
 
@@ -92,3 +91,72 @@ class TransmitterBLE(Transmitter):
         self._transmission_rate = rate
         self._fsk_deviation = self.transmission_rate * 0.25
         self.sps: int = int(self.sample_rate / self.transmission_rate)
+
+
+class Transmitter802154(Transmitter):
+    # Class variables
+    _transmission_rate: float = 2e6  # 2 Mchip/s
+    _max_payload_size: int = 127
+
+    # Chip mapping for IEEE 802.15.4 O-QPSK DSSS encoding
+    chip_mapping: np.ndarray = np.array(
+        [
+            0xD9C3522E,  # 0
+            0xED9C3522,  # 1
+            0x2ED9C352,  # 2
+            0x22ED9C35,  # 3
+            0x522ED9C3,  # 4
+            0x3522ED9C,  # 5
+            0xC3522ED9,  # 6
+            0x9C3522ED,  # 7
+            0x8C96077B,  # 8
+            0xB8C96077,  # 9
+            0x7B8C9607,  # A
+            0x77B8C960,  # B
+            0x077B8C96,  # C
+            0x6077B8C9,  # D
+            0x96077B8C,  # E
+            0xC96077B8,  # F
+        ],
+        dtype=np.uint32,
+    )
+
+    def __init__(self, sample_rate: int | float):
+        self.sample_rate = sample_rate
+        self.sps: int = int(
+            2 * self.sample_rate / self._transmission_rate
+        )  # Samples per OQPSK symbol
+
+    def modulate(self, chips: np.ndarray, zero_padding: int = 0) -> np.ndarray:
+        """Receives a chip uint32 array and returns IQ O-QPSK modulated complex signal."""
+
+        I_chips, Q_chips = split_iq_chips(
+            chips
+        )  # Maps a the even and odd chips to I chips and Q chips respectively.
+        half_sine_pulse = half_sine_fir_taps(self.sps)
+        iq_signal = oqpsk_modulate(I_chips, Q_chips, half_sine_pulse, self.sps)
+        iq_signal = iq_signal.astype(np.complex64)
+        iq_signal = np.concatenate(
+            (
+                np.zeros(zero_padding, dtype=iq_signal.dtype),
+                iq_signal,
+                np.zeros(zero_padding, dtype=iq_signal.dtype),
+            )
+        )  # Zero padding at the beginning and end
+
+        return iq_signal
+
+    def process_phy_payload(
+        self, payload: np.ndarray, append_crc: bool = True
+    ) -> np.ndarray:
+        """Creates physical packet and maps it to an array of uint32 chips. CRC is optional."""
+        byte_packet = create_802154_phy_packet(payload, append_crc=append_crc)
+        chips = map_nibbles_to_chips(byte_packet, self.chip_mapping, return_string=False)
+        return chips
+
+    def modulate_from_payload(
+        self, payload: np.ndarray, append_crc: bool = True, zero_padding: int = 0
+    ) -> np.ndarray:
+        """Generates IQ data from physical payload"""
+        chips = self.process_phy_payload(payload, append_crc)
+        return self.modulate(chips, zero_padding)

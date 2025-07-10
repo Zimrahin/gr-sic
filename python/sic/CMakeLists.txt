@@ -21,7 +21,8 @@ add_subdirectory(bindings)
 ########################################################################
 gr_python_install(FILES __init__.py
     plot_iq_from_pmt.py
-    ble_packet_source.py DESTINATION ${GR_PYTHON_DIR}/gnuradio/sic)
+    ble_packet_source.py
+    ieee802154_packet_source.py DESTINATION ${GR_PYTHON_DIR}/gnuradio/sic)
 
 ########################################################################
 # Handle the unit tests

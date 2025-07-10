@@ -10,34 +10,32 @@
 import numpy as np
 import threading
 from gnuradio import gr
-from .utils.transmitters import TransmitterBLE
+from .utils.transmitters import Transmitter802154
 from .utils.packet_utils import triangular_wave
 
 
-class ble_packet_source(gr.sync_block):
+class ieee802154_packet_source(gr.sync_block):
     """
-    Generates BLE packets from tagged triggers using precomputed modulated IQ waveforms.
+    docstring for block ieee802154_packet_source
     """
 
-    def __init__(
-        self,
-        sample_rate: float,
-        payload_length: int,
-        transmission_rate: float,
-        base_address: int,
-    ):
+    def __init__(self, sample_rate: float, payload_length: int, append_crc: bool):
         gr.sync_block.__init__(
-            self, name="ble_packet_source", in_sig=[np.complex64], out_sig=[np.complex64]
+            self,
+            name="ieee802154_packet_source",
+            in_sig=[np.complex64],
+            out_sig=[np.complex64],
         )
+
         # Parameters
-        self.max_payload_length = 255
+        self.max_payload_length = 127
         self.sample_rate = sample_rate
         self.payload_template = triangular_wave(step=2, length=self.max_payload_length)
-        self.base_address = base_address
         self.param_mutex = threading.Lock()
+        self.append_crc = append_crc
+        self.transmitter = Transmitter802154(sample_rate)
 
         # Changeable at runtime
-        self.transmitter = TransmitterBLE(sample_rate, transmission_rate)
         self.current_payload_length = payload_length
 
         # State variables
@@ -45,34 +43,20 @@ class ble_packet_source(gr.sync_block):
         self.samples_remaining = 0
         self.waveform_offset = 0  # Where in the waveform we are currently transmitting
 
-        self.waveform = self.generate_waveform(payload_length, transmission_rate)
+        self.waveform = self.generate_waveform(payload_length)
 
-    def generate_waveform(
-        self, payload_length: int, transmission_rate: float
-    ) -> np.ndarray:
+    def generate_waveform(self, payload_length: int) -> np.ndarray:
         """Generate IQ waveform using current parameters"""
         constrained_length = max(0, min(payload_length, self.max_payload_length))
         payload_segment = self.payload_template[:constrained_length]
-        self.transmitter.transmission_rate = transmission_rate
-        return self.transmitter.modulate_from_payload(payload_segment, self.base_address)
+        return self.transmitter.modulate_from_payload(payload_segment, self.append_crc)
 
     def set_payload_length(self, length: int):
         """Update payload length and regenerate waveform"""
         new_length = int(length)
-        new_waveform = self.generate_waveform(
-            new_length, self.transmitter.transmission_rate
-        )
+        new_waveform = self.generate_waveform(new_length)
         with self.param_mutex:
             self.current_payload_length = new_length
-            self.waveform = new_waveform
-
-    def set_transmission_rate(self, transmission_rate: float):
-        """Update transmission rate and regenerate waveform"""
-        new_waveform = self.generate_waveform(
-            self.current_payload_length, transmission_rate
-        )
-        with self.param_mutex:
-            self.transmitter.transmission_rate = transmission_rate
             self.waveform = new_waveform
 
     def start_burst(self):
