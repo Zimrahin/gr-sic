@@ -1,6 +1,6 @@
 options:
   parameters:
-    author: diego
+    author: Diego Badillo-San-Juan
     catch_exceptions: 'True'
     category: '[GRC Hier Blocks]'
     cmake_opt: ''

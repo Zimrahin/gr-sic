@@ -6,7 +6,7 @@
 #
 # GNU Radio Python Flow Graph
 # Title: sic_tx_test
-# Author: diego
+# Author: Diego Badillo-San-Juan
 # GNU Radio version: v3.11.0.0git-843-g6b25c171
 
 from PyQt5 import Qt
