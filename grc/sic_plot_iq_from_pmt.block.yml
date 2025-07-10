@@ -4,7 +4,7 @@ category: '[sic]'
 
 templates:
   imports: from gnuradio import sic
-  make: sic.plot_iq_from_pmt(${sample_rate})
+  make: sic.plot_iq_from_pmt(${sample_rate}, ${max_queue_size})
 
 parameters:
 - id: sample_rate

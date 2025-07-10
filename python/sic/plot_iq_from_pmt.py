@@ -27,8 +27,8 @@ class plot_iq_from_pmt(gr.sync_block):
     The block is designed to handle heavy computation without blocking the
     main thread, using a thread-safe queue to manage incoming messages.
     Parameters:
-    - sample_rate: The sample rate of the incoming data (default: 1).
-    - max_queue_size: Maximum size of the queue for incoming messages (default: 5).
+    - sample_rate: The sample rate of the incoming data.
+    - max_queue_size: Maximum size of the queue for incoming messages.
     Usage:
     Connect this block to a source that sends PMT messages containing IQ data.
     The messages should have a structure where the first element is a dictionary
@@ -36,7 +36,7 @@ class plot_iq_from_pmt(gr.sync_block):
     containing the IQ samples.
     """
 
-    def __init__(self, sample_rate: int = 1, max_queue_size: int = 5) -> None:
+    def __init__(self, sample_rate: float, max_queue_size: int) -> None:
         gr.sync_block.__init__(self, name="plot_iq_from_pmt", in_sig=None, out_sig=None)
 
         # Parameters
@@ -215,6 +215,3 @@ class plot_iq_from_pmt(gr.sync_block):
 
         except Exception as e:
             print(f"plot_results() failed: {e}")
-
-    def work(self, input_items, output_items) -> int:
-        return len(input_items[0])  # No stream processing

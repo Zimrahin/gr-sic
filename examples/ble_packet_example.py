@@ -222,7 +222,7 @@ class ble_packet_example(gr.top_block, Qt.QWidget):
         self.blocks_add_xx_0 = blocks.add_vcc(1)
         self.ble_tagged_iq_to_vector_0 = sic.tagged_iq_to_vector((int(trigger_delay * samp_rate)), (int(trigger_delay * samp_rate)), (128*8*8*samples_per_bit))
         self.ble_tag_iq_stream_0 = sic.tag_iq_stream(samples_per_bit)
-        self.ble_plot_iq_from_pmt_0 = sic.plot_iq_from_pmt(int(samp_rate))
+        self.ble_plot_iq_from_pmt_0 = sic.plot_iq_from_pmt(int(samp_rate), 10)
         self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(((samp_rate / decimation)/(2*math.pi*fsk_deviation_hz)))
         self.analog_fastnoise_source_x_0 = analog.fastnoise_source_c(analog.GR_GAUSSIAN, 0.025, 0, 8192)
 
