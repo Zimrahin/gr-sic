@@ -40,9 +40,7 @@ class plot_iq_from_pmt(gr.sync_block):
         gr.sync_block.__init__(self, name="plot_iq_from_pmt", in_sig=None, out_sig=None)
 
         # Parameters
-        self.sample_rate = (
-            sample_rate if sample_rate == 1 else int(sample_rate / 1e6)
-        )  # µs
+        self.sample_rate = sample_rate
         self.max_queue_size = max_queue_size
 
         # PMT input ports
@@ -159,16 +157,19 @@ class plot_iq_from_pmt(gr.sync_block):
                 payload_before, dtype=np.uint8
             )
             payload_after_ints: np.ndarray = np.frombuffer(payload_after, dtype=np.uint8)
+            plot_sample_rate = (
+                self.sample_rate if self.sample_rate == 1 else int(self.sample_rate / 1e6)
+            )
 
             # --- Top Left: IQ Before ---
             ax = self.ax_grid[0, 0]
             ax.clear()
-            time_axis = np.arange(len(iq_before)) / self.sample_rate
+            time_axis = np.arange(len(iq_before)) / plot_sample_rate
             ax.plot(time_axis, np.real(iq_before), "b-", label="I (In-phase)", alpha=0.7)
             ax.plot(
                 time_axis, np.imag(iq_before), "r-", label="Q (Quadrature)", alpha=0.7
             )
-            ax.set_xlabel("Time (µs)" if self.sample_rate != 1 else "Samples")
+            ax.set_xlabel("Time (µs)" if plot_sample_rate != 1 else "Samples")
             ax.set_ylabel("Amplitude")
             ax.set_title("IQ (Before SIC)")
             ax.legend(loc="upper right")
@@ -177,10 +178,10 @@ class plot_iq_from_pmt(gr.sync_block):
             # --- Bottom Left: IQ After ---
             ax = self.ax_grid[1, 0]
             ax.clear()
-            time_axis = np.arange(len(iq_after)) / self.sample_rate
+            time_axis = np.arange(len(iq_after)) / plot_sample_rate
             ax.plot(time_axis, np.real(iq_after), "b-", label="I (In-phase)", alpha=0.7)
             ax.plot(time_axis, np.imag(iq_after), "r-", label="Q (Quadrature)", alpha=0.7)
-            ax.set_xlabel("Time (µs)" if self.sample_rate != 1 else "Samples")
+            ax.set_xlabel("Time (µs)" if plot_sample_rate != 1 else "Samples")
             ax.set_ylabel("Amplitude")
             ax.set_title("IQ (After SIC)")
             ax.legend(loc="upper right")
