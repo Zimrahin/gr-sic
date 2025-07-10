@@ -16,7 +16,9 @@ from .utils.packet_utils import triangular_wave
 
 class ieee802154_packet_source(gr.sync_block):
     """
-    docstring for block ieee802154_packet_source
+    This block generates IEEE 802.15.4 packets from tagged triggers using precomputed modulated IQ waveforms.
+    The purpose of using a sync block is to allow for parallel and synchronous transmission of multiple
+    packets acrosss various blocks.
     """
 
     def __init__(self, sample_rate: float, payload_length: int, append_crc: bool):
@@ -30,7 +32,7 @@ class ieee802154_packet_source(gr.sync_block):
         # Parameters
         self.max_payload_length = 127
         self.sample_rate = sample_rate
-        self.payload_template = triangular_wave(step=2, length=self.max_payload_length)
+        self.payload_template = triangular_wave(step=4, length=self.max_payload_length)
         self.param_mutex = threading.Lock()
         self.append_crc = append_crc
         self.transmitter = Transmitter802154(sample_rate)

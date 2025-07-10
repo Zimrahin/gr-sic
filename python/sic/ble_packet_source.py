@@ -16,7 +16,9 @@ from .utils.packet_utils import triangular_wave
 
 class ble_packet_source(gr.sync_block):
     """
-    Generates BLE packets from tagged triggers using precomputed modulated IQ waveforms.
+    This block generates BLE packets from tagged triggers using precomputed modulated IQ waveforms.
+    The purpose of using a sync block is to allow for parallel and synchronous transmission of multiple
+    packets acrosss various blocks.
     """
 
     def __init__(
@@ -27,7 +29,10 @@ class ble_packet_source(gr.sync_block):
         base_address: int,
     ):
         gr.sync_block.__init__(
-            self, name="ble_packet_source", in_sig=[np.complex64], out_sig=[np.complex64]
+            self,
+            name="ble_packet_source",
+            in_sig=[np.complex64],
+            out_sig=[np.complex64],
         )
         # Parameters
         self.max_payload_length = 255
