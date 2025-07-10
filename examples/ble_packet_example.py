@@ -6,6 +6,7 @@
 #
 # GNU Radio Python Flow Graph
 # Title: ble_packet_example
+# Author: Diego Badillo-San-Juan
 # GNU Radio version: v3.11.0.0git-843-g6b25c171
 
 from PyQt5 import Qt
@@ -214,7 +215,7 @@ class ble_packet_example(gr.top_block, Qt.QWidget):
             [])
         self.blocks_uchar_to_float_0_0_0_0 = blocks.uchar_to_float()
         self.blocks_throttle2_0 = blocks.throttle( gr.sizeof_gr_complex*1, (samp_rate/2), True, 0 if "auto" == "auto" else max( int(float(0.1) * (samp_rate/2)) if "auto" == "time" else int(0.1), 1) )
-        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, '/home/diego/Documents/GNU_radio_OOT_modules/gr-ble/examples/data/BLE_124B.dat', True, 0, 0)
+        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, '/home/diego/Documents/GNU_radio_OOT_modules/gr-sic/examples/data/BLE_124B.dat', True, 0, 0)
         self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
         self.blocks_add_xx_0 = blocks.add_vcc(1)
         self.ble_tagged_iq_to_vector_0 = sic.tagged_iq_to_vector((int(trigger_delay * samp_rate)), (int(trigger_delay * samp_rate)), (128*8*8*samples_per_bit))

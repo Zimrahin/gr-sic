@@ -1,6 +1,6 @@
 options:
   parameters:
-    author: ''
+    author: Diego Badillo-San-Juan
     catch_exceptions: 'True'
     category: '[GRC Hier Blocks]'
     cmake_opt: ''
@@ -78,7 +78,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [200, 12]
+    coordinate: [224, 16.0]
     rotation: 0
     state: enabled
 - name: samples_per_bit
@@ -236,7 +236,7 @@ blocks:
     alias: ''
     begin_tag: pmt.PMT_NIL
     comment: ''
-    file: /home/diego/Documents/GNU_radio_OOT_modules/gr-ble/examples/data/BLE_124B.dat
+    file: /home/diego/Documents/GNU_radio_OOT_modules/gr-sic/examples/data/BLE_124B.dat
     length: '0'
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -299,7 +299,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [624, 696.0]
+    coordinate: [624, 688.0]
     rotation: 0
     state: true
 - name: digital_symbol_sync_xx_0

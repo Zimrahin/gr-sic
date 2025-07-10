@@ -1,6 +1,6 @@
 options:
   parameters:
-    author: ''
+    author: Diego Badillo-San-Juan
     catch_exceptions: 'True'
     category: '[GRC Hier Blocks]'
     cmake_opt: ''
@@ -192,7 +192,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [776, 456.0]
+    coordinate: [760, 504.0]
     rotation: 0
     state: enabled
 - name: ble_tag_iq_stream_0
@@ -254,7 +254,7 @@ blocks:
     alias: ''
     begin_tag: pmt.PMT_NIL
     comment: ''
-    file: /home/diego/Documents/SDR_projects/capture_nRF/data/new/802154_0dBm.dat
+    file: /home/diego/Documents/GNU_radio_OOT_modules/gr-sic/examples/data/802154_84B.dat
     length: '0'
     maxoutbuf: '0'
     minoutbuf: '0'

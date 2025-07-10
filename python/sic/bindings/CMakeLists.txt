@@ -28,7 +28,9 @@ list(APPEND sic_python_files
     ble_packet_sink_python.cc
     ieee802154_packet_sink_python.cc
     tag_iq_stream_python.cc
-    tagged_iq_to_vector_python.cc python_bindings.cc)
+    tagged_iq_to_vector_python.cc
+    transmission_enabler_python.cc
+    periodic_message_source_python.cc python_bindings.cc)
 
 gr_pybind_make_oot(sic ../../.. gr::sic "${sic_python_files}")
 
