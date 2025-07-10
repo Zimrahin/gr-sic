@@ -40,7 +40,9 @@ class plot_iq_from_pmt(gr.sync_block):
         gr.sync_block.__init__(self, name="plot_iq_from_pmt", in_sig=None, out_sig=None)
 
         # Parameters
-        self.sample_rate = sample_rate if sample_rate == 1 else int(sample_rate / 1e6)  # µs
+        self.sample_rate = (
+            sample_rate if sample_rate == 1 else int(sample_rate / 1e6)
+        )  # µs
         self.max_queue_size = max_queue_size
 
         # PMT input ports
@@ -51,7 +53,9 @@ class plot_iq_from_pmt(gr.sync_block):
 
         # Queue for IQ packets
         self.iq_queue = queue.Queue(maxsize=self.max_queue_size)
-        self.processing_thread = threading.Thread(target=self.process_iq_queue, daemon=True)
+        self.processing_thread = threading.Thread(
+            target=self.process_iq_queue, daemon=True
+        )
         self.processing_thread.start()
 
         # Ordered dictionary for payload metadata
@@ -80,10 +84,14 @@ class plot_iq_from_pmt(gr.sync_block):
         """Store payloads in ordered dictionary."""
         try:
             meta = gr.pmt.car(msg)
-            crc_ok: bool = gr.pmt.to_bool(gr.pmt.dict_ref(meta, gr.pmt.intern("CRC check"), gr.pmt.PMT_NIL))
+            crc_ok: bool = gr.pmt.to_bool(
+                gr.pmt.dict_ref(meta, gr.pmt.intern("CRC check"), gr.pmt.PMT_NIL)
+            )
             if not crc_ok:
                 return
-            packet_id: int = gr.pmt.to_uint64(gr.pmt.dict_ref(meta, gr.pmt.intern("Packet ID"), gr.pmt.PMT_NIL))
+            packet_id: int = gr.pmt.to_uint64(
+                gr.pmt.dict_ref(meta, gr.pmt.intern("Packet ID"), gr.pmt.PMT_NIL)
+            )
             payload: bytes = bytes(gr.pmt.u8vector_elements(gr.pmt.cdr(msg)))
 
             with self.cache_lock:
@@ -98,7 +106,9 @@ class plot_iq_from_pmt(gr.sync_block):
     def process_iq_queue(self) -> None:
         """Process messages from queue in background thread."""
         while True:
-            msg: gr.pmt = self.iq_queue.get(block=True, timeout=None)  # Block until available
+            msg: gr.pmt = self.iq_queue.get(
+                block=True, timeout=None
+            )  # Block until available
             self.heavy_processing(msg)
 
     def heavy_processing(self, msg: gr.pmt) -> None:
@@ -108,10 +118,11 @@ class plot_iq_from_pmt(gr.sync_block):
             data = gr.pmt.cdr(msg)
             if not gr.pmt.is_c32vector(data):
                 return
-            packet_id: int = gr.pmt.to_uint64(gr.pmt.dict_ref(meta, gr.pmt.intern("Packet ID"), gr.pmt.PMT_NIL))
-            iq: np.ndarray = np.array(gr.pmt.c32vector_elements(data))
+            packet_id: int = gr.pmt.to_uint64(
+                gr.pmt.dict_ref(meta, gr.pmt.intern("Packet ID"), gr.pmt.PMT_NIL)
+            )
+            iq_mixed: np.ndarray = np.array(gr.pmt.c32vector_elements(data))
 
-            # Retrieve payload from cache
             payload: bytes = None
             with self.cache_lock:
                 payload = self.payload_cache.pop(packet_id, None)  # Remove if found
@@ -121,11 +132,8 @@ class plot_iq_from_pmt(gr.sync_block):
             # Simulate heavy processing
             time.sleep(2)
 
-            # Prepare title with payload info
             title = f"Packet {packet_id}"
-
-            # Plot results
-            self.plot_results(iq, iq, payload, payload, title)
+            self.plot_results(iq_mixed, iq_mixed, payload, payload, title)
 
         except Exception as e:
             if packet_id is not None:
@@ -135,14 +143,21 @@ class plot_iq_from_pmt(gr.sync_block):
             print(f"Message processing failed: {e}")
 
     def plot_results(
-        self, iq_before: np.ndarray, iq_after: np.ndarray, payload_before: bytes, payload_after: bytes, title: str
+        self,
+        iq_before: np.ndarray,
+        iq_after: np.ndarray,
+        payload_before: bytes,
+        payload_after: bytes,
+        title: str,
     ) -> None:
         """Update the plot with the SIC results."""
         if not self.fig:
             return
         try:
             # Convert payloads to integer arrays
-            payload_before_ints: np.ndarray = np.frombuffer(payload_before, dtype=np.uint8)
+            payload_before_ints: np.ndarray = np.frombuffer(
+                payload_before, dtype=np.uint8
+            )
             payload_after_ints: np.ndarray = np.frombuffer(payload_after, dtype=np.uint8)
 
             # --- Top Left: IQ Before ---
@@ -150,7 +165,9 @@ class plot_iq_from_pmt(gr.sync_block):
             ax.clear()
             time_axis = np.arange(len(iq_before)) / self.sample_rate
             ax.plot(time_axis, np.real(iq_before), "b-", label="I (In-phase)", alpha=0.7)
-            ax.plot(time_axis, np.imag(iq_before), "r-", label="Q (Quadrature)", alpha=0.7)
+            ax.plot(
+                time_axis, np.imag(iq_before), "r-", label="Q (Quadrature)", alpha=0.7
+            )
             ax.set_xlabel("Time (µs)" if self.sample_rate != 1 else "Samples")
             ax.set_ylabel("Amplitude")
             ax.set_title("IQ (Before SIC)")
