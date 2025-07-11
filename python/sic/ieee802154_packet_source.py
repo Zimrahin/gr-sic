@@ -81,9 +81,7 @@ class ieee802154_packet_source(gr.sync_block):
             if self.transmitting:
                 # Copy precomputed waveform in chunks
                 chunk = min(noutput_items - idx, self.samples_remaining)
-                out[idx : idx + chunk] = self.waveform[
-                    self.waveform_offset : self.waveform_offset + chunk
-                ]
+                out[idx : idx + chunk] = self.waveform[self.waveform_offset : self.waveform_offset + chunk]
                 idx += chunk
                 self.samples_remaining -= chunk
 

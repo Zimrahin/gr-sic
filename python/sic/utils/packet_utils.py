@@ -2,16 +2,12 @@ import numpy as np
 
 
 # Find a sequence of bits in a given binary dara array
-def correlate_access_code(
-    data: np.ndarray, access_code: str, threshold: int, reduce_mask: bool = False
-) -> np.ndarray:
+def correlate_access_code(data: np.ndarray, access_code: str, threshold: int, reduce_mask: bool = False) -> np.ndarray:
     """Find a sequence of bits in a given binary dara array."""
     # access_code: from LSB to MSB (as samples arrive on-air)
     access_code = access_code.replace("_", "")
     code_len = len(access_code)
-    access_int = int(
-        access_code, 2
-    )  # Convert the access code (e.g. "10110010") to an integer
+    access_int = int(access_code, 2)  # Convert the access code (e.g. "10110010") to an integer
     mask = (1 << code_len) - 1  # Create a mask to keep only the last code_len bits.
     if reduce_mask:
         # Create a mask that has ones everywhere except at the MSB and LSB:
@@ -162,9 +158,7 @@ def decode_chips(chips32: int, chip_mapping: np.ndarray, threshold: int = 32) ->
         # 0x7FFFFFFE masks out the first and last bit, since these depend on previous chip data
         # This is because we are using differential encoding
         masked_diff = (chips32 ^ chip_mapping[i]) & 0x7FFFFFFE
-        diff_bits = count_set_bits(
-            masked_diff, 32
-        )  # Count the number of bits that differ
+        diff_bits = count_set_bits(masked_diff, 32)  # Count the number of bits that differ
 
         if diff_bits < min_threshold:
             best_match = i
@@ -177,9 +171,7 @@ def decode_chips(chips32: int, chip_mapping: np.ndarray, threshold: int = 32) ->
 
 
 # Pack chips into bytes. Assumes each byte is formed from 64 chips (32 per nibble).
-def pack_chips_to_bytes(
-    chips: np.ndarray, num_bytes: int, chip_mapping: np.ndarray, threshold: int
-) -> np.ndarray:
+def pack_chips_to_bytes(chips: np.ndarray, num_bytes: int, chip_mapping: np.ndarray, threshold: int) -> np.ndarray:
     """Pack chips into bytes. Assumes each byte is formed from 64 chips (32 per nibble)."""
     bytes_out = np.empty(num_bytes, dtype=np.uint8)
 
@@ -267,9 +259,7 @@ def create_802154_phy_packet(payload: np.ndarray, append_crc: bool) -> np.ndarra
     crc_size = 2
     max_payload_size = 127  # Bytes
     max_payload_size_with_crc = max_payload_size - crc_size  # Bytes
-    preamble = np.array(
-        [0x00, 0x00, 0x00, 0x00, 0xA7], dtype=np.uint8
-    )  # Set the preamble
+    preamble = np.array([0x00, 0x00, 0x00, 0x00, 0xA7], dtype=np.uint8)  # Set the preamble
 
     # Adjust payload size based on CRC inclusion
     if append_crc:
@@ -286,9 +276,7 @@ def create_802154_phy_packet(payload: np.ndarray, append_crc: bool) -> np.ndarra
     else:
         if len(payload) > max_payload_size:
             payload = payload[:max_payload_size]
-            print(
-                f"Warning: create_802154_phy_packet() - Payload exceeded {max_payload_size}B and has been cropped."
-            )
+            print(f"Warning: create_802154_phy_packet() - Payload exceeded {max_payload_size}B and has been cropped.")
         length = np.uint8(len(payload))  # Set length byte
         packet = np.concatenate((preamble, [length], payload))  # Assemble packet
 
@@ -343,9 +331,7 @@ def preamble_detection_802154(
 
     # Detect potential preamble positions by searching for the first byte of the pattern
     access_code = map_nibbles_to_chips([pattern[0]], chip_mapping)
-    preamble_positions = correlate_access_code(
-        chip_samples, access_code, threshold=threshold, reduce_mask=True
-    )
+    preamble_positions = correlate_access_code(chip_samples, access_code, threshold=threshold, reduce_mask=True)
 
     if len(pattern) == 1:
         return np.array(preamble_positions)

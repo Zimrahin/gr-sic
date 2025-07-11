@@ -13,8 +13,6 @@ import matplotlib
 from gnuradio import gr
 import threading
 import queue
-import time
-from collections import OrderedDict
 
 matplotlib.rcParams["toolbar"] = "none"  # Disable the toolbar globally
 

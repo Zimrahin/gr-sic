@@ -118,8 +118,6 @@ class successive_interference_cancellation(gr.basic_block):
             # Prepare output message
             meta_out = gr.pmt.make_dict()
             meta_out = gr.pmt.dict_add(meta_out, gr.pmt.intern("Packet ID"), gr.pmt.from_long(packet_id))
-
-            # Create PMT vector of [iq_before, iq_after, payload_before, payload_after]
             data_out = gr.pmt.make_vector(4, gr.pmt.PMT_NIL)
             gr.pmt.vector_set(data_out, 0, gr.pmt.init_c32vector(len(iq_before), iq_before))
             gr.pmt.vector_set(data_out, 1, gr.pmt.init_c32vector(len(iq_after), iq_after))
