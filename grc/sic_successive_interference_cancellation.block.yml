@@ -1,0 +1,82 @@
+id: sic_successive_interference_cancellation
+label: Successive Interference Cancellation
+category: '[sic]'
+
+templates:
+  imports: from gnuradio import sic
+  make: |
+    sic.successive_interference_cancellation(
+      ${sample_rate},
+      ${max_queue_size},
+      ${protocol_high},
+      ${protocol_low},
+      ${frequency_start},
+      ${frequency_stop},
+      ${frequency_step_coarse},
+      ${frequency_step_fine},
+      ${ble_transmission_rate},
+    )
+  callbacks:
+  - set_frequency_start(${frequency_start})
+  - set_frequency_stop(${frequency_stop})
+  - set_frequency_step_coarse(${frequency_step_coarse})
+  - set_frequency_step_fine(${frequency_step_fine})
+
+parameters:
+- id: sample_rate
+  label: Sample Rate
+  dtype: float
+  default: 10e6
+- id: max_queue_size
+  label: Max Queue Size
+  dtype: int
+  default: 10
+  hide: part
+- id: protocol_high
+  label: Protocol High
+  dtype: enum
+  options: [0, 1]
+  option_labels: ['BLE', 'IEEE 802.15.4']
+- id: protocol_low
+  label: Protocol Low
+  dtype: enum
+  options: [0, 1]
+  option_labels: ['BLE', 'IEEE 802.15.4']
+- id: frequency_start
+  label: Frequency Start
+  dtype: int
+  default: -5000
+- id: frequency_stop
+  label: Frequency Stop
+  dtype: int
+  default: 5000
+- id: frequency_step_coarse
+  label: Frequency Step Coarse
+  dtype: int
+  default: 50
+- id: frequency_step_fine
+  label: Frequency Step Fine
+  dtype: int
+  default: 1
+- id: ble_transmission_rate
+  label: BLE Transmission Rate
+  dtype: float
+  default: 1e6
+
+
+inputs:
+- label: iq
+  domain: message
+  dtype: pmt
+- label: pdu
+  domain: message
+  dtype: pmt
+
+outputs:
+- label: out
+  domain: message
+  dtype: pmt
+
+#  'file_format' specifies the version of the GRC yml format used in the file
+#  and should usually not be changed.
+file_format: 1

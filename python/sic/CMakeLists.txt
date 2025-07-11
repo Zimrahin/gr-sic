@@ -20,9 +20,10 @@ add_subdirectory(bindings)
 # Install python sources
 ########################################################################
 gr_python_install(FILES __init__.py
-    plot_iq_from_pmt.py
+    plot_sic_results.py
     ble_packet_source.py
-    ieee802154_packet_source.py DESTINATION ${GR_PYTHON_DIR}/gnuradio/sic)
+    ieee802154_packet_source.py
+    successive_interference_cancellation.py DESTINATION ${GR_PYTHON_DIR}/gnuradio/sic)
 
 ########################################################################
 # Handle the unit tests
