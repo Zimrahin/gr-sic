@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# Author: Diego Badillo-San-Juan <diego.badillo-san-juan@inria.fr>
+# Copyright 2025 Inria.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
 import numpy as np
 import scipy
 from abc import ABC, abstractmethod
