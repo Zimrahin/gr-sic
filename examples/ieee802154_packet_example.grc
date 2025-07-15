@@ -380,7 +380,7 @@ blocks:
     minoutbuf: '0'
     samp_rate: samp_rate
     type: fir_filter_ccf
-    width: samp_rate/100
+    width: samp_rate/50
     win: window.WIN_HAMMING
   states:
     bus_sink: false

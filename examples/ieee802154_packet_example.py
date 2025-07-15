@@ -209,7 +209,7 @@ class ieee802154_packet_example(gr.top_block, Qt.QWidget):
                 1,
                 samp_rate,
                 (tuning_LPF_cutoff_kHz*1000),
-                (samp_rate/100),
+                (samp_rate/50),
                 window.WIN_HAMMING,
                 6.76))
         self.digital_symbol_sync_xx_0 = digital.symbol_sync_ff(
@@ -276,7 +276,7 @@ class ieee802154_packet_example(gr.top_block, Qt.QWidget):
 
     def set_tuning_LPF_cutoff_kHz(self, tuning_LPF_cutoff_kHz):
         self.tuning_LPF_cutoff_kHz = tuning_LPF_cutoff_kHz
-        self.low_pass_filter_0_0.set_taps(firdes.low_pass(1, self.samp_rate, (self.tuning_LPF_cutoff_kHz*1000), (self.samp_rate/100), window.WIN_HAMMING, 6.76))
+        self.low_pass_filter_0_0.set_taps(firdes.low_pass(1, self.samp_rate, (self.tuning_LPF_cutoff_kHz*1000), (self.samp_rate/50), window.WIN_HAMMING, 6.76))
 
     def get_trigger_delay(self):
         return self.trigger_delay
@@ -301,7 +301,7 @@ class ieee802154_packet_example(gr.top_block, Qt.QWidget):
         self.samp_rate = samp_rate
         self.analog_quadrature_demod_cf_0.set_gain(((self.samp_rate / self.decimation)/(2*math.pi*self.fsk_deviation_hz)))
         self.blocks_throttle2_0.set_sample_rate((self.samp_rate/2))
-        self.low_pass_filter_0_0.set_taps(firdes.low_pass(1, self.samp_rate, (self.tuning_LPF_cutoff_kHz*1000), (self.samp_rate/100), window.WIN_HAMMING, 6.76))
+        self.low_pass_filter_0_0.set_taps(firdes.low_pass(1, self.samp_rate, (self.tuning_LPF_cutoff_kHz*1000), (self.samp_rate/50), window.WIN_HAMMING, 6.76))
         self.qtgui_time_sink_x_0.set_samp_rate(self.samp_rate)
         self.qtgui_time_sink_x_1.set_samp_rate(int(self.samp_rate / self.samples_per_chip))
 
