@@ -13,8 +13,8 @@ import threading
 import queue
 import time
 from collections import OrderedDict
-from .utils.receivers import ReceiverBLE, Receiver802154
-from .utils.transmitters import TransmitterBLE, Transmitter802154
+from .utils.receivers import ReceiverBLE, Receiver802154, Receiver
+from .utils.transmitters import TransmitterBLE, Transmitter802154, Transmitter
 
 
 class successive_interference_cancellation(gr.basic_block):
@@ -58,7 +58,6 @@ class successive_interference_cancellation(gr.basic_block):
         }
         self.transmitter_high, self.receiver_high = self._init_protocol(protocol_high, protocol_map)
         self.transmitter_low, self.receiver_low = self._init_protocol(protocol_low, protocol_map)
-        print(self.transmitter_high, self.transmitter_low)
 
         self.message_port_register_in(gr.pmt.intern("iq"))
         self.set_msg_handler(gr.pmt.intern("iq"), self.handle_iq_message)
@@ -74,7 +73,7 @@ class successive_interference_cancellation(gr.basic_block):
         self.processing_thread = threading.Thread(target=self.process_iq_queue, daemon=True)
         self.processing_thread.start()
 
-    def _init_protocol(self, protocol_id: int, protocol_map: dict):
+    def _init_protocol(self, protocol_id: int, protocol_map: dict) -> tuple[Transmitter, Receiver]:
         if protocol_id not in protocol_map:
             raise ValueError(f"Invalid protocol ID: {protocol_id}")
         tx_class, rx_class, needs_tx_rate = protocol_map[protocol_id]
@@ -137,7 +136,15 @@ class successive_interference_cancellation(gr.basic_block):
             # Simulate heavy processing and placeholder outputs
             time.sleep(2)
             iq_after = iq_before
-            payload_after = payload_before
+            try:
+                received_packet_high: dict = self.receiver_high.demodulate_to_packet(iq_before)[0]
+            except Exception:
+                # Treat any exception as no packet received successfully
+                received_packet_high = []
+
+            if received_packet_high:
+                payload_after = received_packet_high["payload"]
+                print("sucessssssssssssssssssssssssss")
 
             # Prepare output message
             meta_out = gr.pmt.make_dict()

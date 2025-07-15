@@ -659,7 +659,7 @@ blocks:
     max_queue_size: '10'
     maxoutbuf: '0'
     minoutbuf: '0'
-    protocol_high: '1'
+    protocol_high: '0'
     protocol_low: '0'
     sample_rate: samp_rate
   states:
