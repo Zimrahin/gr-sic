@@ -39,10 +39,11 @@ class successive_interference_cancellation(gr.basic_block):
         max_queue_size: int,
         protocol_high: int,
         protocol_low: int,
-        frequency_start: int,
-        frequency_stop: int,
-        frequency_step_coarse: int,
-        frequency_step_fine: int,
+        frequency_start: float,
+        frequency_stop: float,
+        frequency_step_coarse: float,
+        frequency_step_fine: float,
+        frequency_fine_window: float,
         ble_transmission_rate: float,
     ):
         gr.basic_block.__init__(self, name="successive_interference_cancellation", in_sig=None, out_sig=None)
@@ -58,7 +59,7 @@ class successive_interference_cancellation(gr.basic_block):
         self.iq_queue = queue.Queue(maxsize=max_queue_size)
         self.payload_cache = OrderedDict()
         self.max_cache_size = max_queue_size
-        self.cache_lock = threading.Lock()
+        self.mutex = threading.Lock()
 
         self.processing_thread = threading.Thread(target=self.process_iq_queue, daemon=True)
         self.processing_thread.start()
@@ -81,7 +82,7 @@ class successive_interference_cancellation(gr.basic_block):
             packet_id = gr.pmt.to_uint64(gr.pmt.dict_ref(meta, gr.pmt.intern("Packet ID"), gr.pmt.PMT_NIL))
             payload = bytes(gr.pmt.u8vector_elements(gr.pmt.cdr(msg)))
 
-            with self.cache_lock:
+            with self.mutex:
                 if len(self.payload_cache) >= self.max_cache_size:
                     self.payload_cache.popitem(last=False)
                 self.payload_cache[packet_id] = payload
@@ -100,12 +101,11 @@ class successive_interference_cancellation(gr.basic_block):
             data = gr.pmt.cdr(msg)
             if not gr.pmt.is_c32vector(data):
                 return
-
             packet_id = gr.pmt.to_uint64(gr.pmt.dict_ref(meta, gr.pmt.intern("Packet ID"), gr.pmt.PMT_NIL))
             iq_before = np.array(gr.pmt.c32vector_elements(data))
 
             # Get payload from cache
-            with self.cache_lock:
+            with self.mutex:
                 payload_before = self.payload_cache.pop(packet_id, None)
             if payload_before is None:
                 return
@@ -129,6 +129,26 @@ class successive_interference_cancellation(gr.basic_block):
         except Exception as e:
             print(f"Heavy processing failed: {e}")
             if packet_id is not None:
-                with self.cache_lock:
+                with self.mutex:
                     if packet_id in self.payload_cache:
                         del self.payload_cache[packet_id]
+
+    def set_frequency_start(self, frequency_start: int):
+        """Set the start frequency for exhaustive search."""
+        with self.mutex:
+            self.frequency_start = frequency_start
+
+    def set_frequency_stop(self, frequency_stop: int):
+        """Set the stop frequency for exhaustive search."""
+        with self.mutex:
+            self.frequency_stop = frequency_stop
+
+    def set_frequency_step_coarse(self, frequency_step_coarse: int):
+        """Set the coarse frequency step for exhaustive search."""
+        with self.mutex:
+            self.frequency_step_coarse = frequency_step_coarse
+
+    def set_frequency_step_fine(self, frequency_step_fine: int):
+        """Set the fine frequency step for exhaustive search."""
+        with self.mutex:
+            self.frequency_step_fine = frequency_step_fine

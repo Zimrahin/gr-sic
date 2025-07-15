@@ -39,7 +39,7 @@ class ble_packet_source(gr.sync_block):
         self.sample_rate = sample_rate
         self.payload_template = triangular_wave(step=2, length=self.max_payload_length)
         self.base_address = base_address
-        self.param_mutex = threading.Lock()
+        self.mutex = threading.Lock()
 
         # Changeable at runtime
         self.transmitter = TransmitterBLE(sample_rate, transmission_rate)
@@ -63,20 +63,20 @@ class ble_packet_source(gr.sync_block):
         """Update payload length and regenerate waveform"""
         new_length = int(length)
         new_waveform = self.generate_waveform(new_length, self.transmitter.transmission_rate)
-        with self.param_mutex:
+        with self.mutex:
             self.current_payload_length = new_length
             self.waveform = new_waveform
 
     def set_transmission_rate(self, transmission_rate: float):
         """Update transmission rate and regenerate waveform"""
         new_waveform = self.generate_waveform(self.current_payload_length, transmission_rate)
-        with self.param_mutex:
+        with self.mutex:
             self.transmitter.transmission_rate = transmission_rate
             self.waveform = new_waveform
 
     def start_burst(self):
         """Start new burst using current parameters"""
-        with self.param_mutex:
+        with self.mutex:
             if len(self.waveform) == 0:
                 self.transmitting = False
                 return

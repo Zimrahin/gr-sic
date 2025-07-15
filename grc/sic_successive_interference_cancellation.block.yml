@@ -44,20 +44,24 @@ parameters:
   option_labels: ['BLE', 'IEEE 802.15.4']
 - id: frequency_start
   label: Frequency Start
-  dtype: int
+  dtype: float
   default: -5000
 - id: frequency_stop
   label: Frequency Stop
-  dtype: int
+  dtype: float
   default: 5000
 - id: frequency_step_coarse
   label: Frequency Step Coarse
-  dtype: int
+  dtype: float
   default: 50
 - id: frequency_step_fine
   label: Frequency Step Fine
-  dtype: int
+  dtype: float
   default: 1
+- id: frequency_fine_window
+  label: Frequency Fine Window
+  dtype: float
+  default: 50
 - id: ble_transmission_rate
   label: BLE Transmission Rate
   dtype: float

@@ -33,7 +33,7 @@ class ieee802154_packet_source(gr.sync_block):
         self.max_payload_length = 127
         self.sample_rate = sample_rate
         self.payload_template = triangular_wave(step=4, length=self.max_payload_length)
-        self.param_mutex = threading.Lock()
+        self.mutex = threading.Lock()
         self.append_crc = append_crc
         self.transmitter = Transmitter802154(sample_rate)
 
@@ -57,13 +57,13 @@ class ieee802154_packet_source(gr.sync_block):
         """Update payload length and regenerate waveform"""
         new_length = int(length)
         new_waveform = self.generate_waveform(new_length)
-        with self.param_mutex:
+        with self.mutex:
             self.current_payload_length = new_length
             self.waveform = new_waveform
 
     def start_burst(self):
         """Start new burst using current parameters"""
-        with self.param_mutex:
+        with self.mutex:
             if len(self.waveform) == 0:
                 self.transmitting = False
                 return
