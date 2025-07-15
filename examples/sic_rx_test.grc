@@ -651,6 +651,7 @@ blocks:
     alias: ''
     ble_transmission_rate: 1e6
     comment: ''
+    frequency_fine_window: '50'
     frequency_start: '25000'
     frequency_step_coarse: '50'
     frequency_step_fine: '1'
@@ -658,7 +659,7 @@ blocks:
     max_queue_size: '10'
     maxoutbuf: '0'
     minoutbuf: '0'
-    protocol_high: '0'
+    protocol_high: '1'
     protocol_low: '0'
     sample_rate: samp_rate
   states:
