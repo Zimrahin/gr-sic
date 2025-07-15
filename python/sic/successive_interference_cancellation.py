@@ -13,6 +13,8 @@ import threading
 import queue
 import time
 from collections import OrderedDict
+from .utils.receivers import ReceiverBLE, Receiver802154
+from .utils.transmitters import TransmitterBLE, Transmitter802154
 
 
 class successive_interference_cancellation(gr.basic_block):
@@ -49,6 +51,14 @@ class successive_interference_cancellation(gr.basic_block):
         gr.basic_block.__init__(self, name="successive_interference_cancellation", in_sig=None, out_sig=None)
         self.sample_rate = sample_rate
         self.max_queue_size = max_queue_size
+        self.ble_transmission_rate = ble_transmission_rate
+        protocol_map = {
+            0: (TransmitterBLE, ReceiverBLE, True),
+            1: (Transmitter802154, Receiver802154, False),
+        }
+        self.transmitter_high, self.receiver_high = self._init_protocol(protocol_high, protocol_map)
+        self.transmitter_low, self.receiver_low = self._init_protocol(protocol_low, protocol_map)
+        print(self.transmitter_high, self.transmitter_low)
 
         self.message_port_register_in(gr.pmt.intern("iq"))
         self.set_msg_handler(gr.pmt.intern("iq"), self.handle_iq_message)
@@ -63,6 +73,20 @@ class successive_interference_cancellation(gr.basic_block):
 
         self.processing_thread = threading.Thread(target=self.process_iq_queue, daemon=True)
         self.processing_thread.start()
+
+    def _init_protocol(self, protocol_id: int, protocol_map: dict):
+        if protocol_id not in protocol_map:
+            raise ValueError(f"Invalid protocol ID: {protocol_id}")
+        tx_class, rx_class, needs_tx_rate = protocol_map[protocol_id]
+
+        if needs_tx_rate:
+            transmitter = tx_class(self.sample_rate, self.ble_transmission_rate)
+            receiver = rx_class(self.sample_rate, self.ble_transmission_rate)
+        else:
+            transmitter = tx_class(self.sample_rate)
+            receiver = rx_class(self.sample_rate)
+
+        return transmitter, receiver
 
     def handle_iq_message(self, msg: gr.pmt) -> None:
         try:
@@ -93,9 +117,9 @@ class successive_interference_cancellation(gr.basic_block):
     def process_iq_queue(self) -> None:
         while True:
             msg = self.iq_queue.get(block=True)
-            self.heavy_processing(msg)
+            self.process_iq_message(msg)
 
-    def heavy_processing(self, msg: gr.pmt) -> None:
+    def process_iq_message(self, msg: gr.pmt) -> None:
         try:
             meta = gr.pmt.car(msg)
             data = gr.pmt.cdr(msg)
@@ -104,7 +128,7 @@ class successive_interference_cancellation(gr.basic_block):
             packet_id = gr.pmt.to_uint64(gr.pmt.dict_ref(meta, gr.pmt.intern("Packet ID"), gr.pmt.PMT_NIL))
             iq_before = np.array(gr.pmt.c32vector_elements(data))
 
-            # Get payload from cache
+            # Get payload from cache (obtained from pdu message input )
             with self.mutex:
                 payload_before = self.payload_cache.pop(packet_id, None)
             if payload_before is None:
@@ -133,22 +157,22 @@ class successive_interference_cancellation(gr.basic_block):
                     if packet_id in self.payload_cache:
                         del self.payload_cache[packet_id]
 
-    def set_frequency_start(self, frequency_start: int):
-        """Set the start frequency for exhaustive search."""
+    def set_frequency_start(self, frequency_start: float):
         with self.mutex:
             self.frequency_start = frequency_start
 
-    def set_frequency_stop(self, frequency_stop: int):
-        """Set the stop frequency for exhaustive search."""
+    def set_frequency_stop(self, frequency_stop: float):
         with self.mutex:
             self.frequency_stop = frequency_stop
 
-    def set_frequency_step_coarse(self, frequency_step_coarse: int):
-        """Set the coarse frequency step for exhaustive search."""
+    def set_frequency_step_coarse(self, frequency_step_coarse: float):
         with self.mutex:
             self.frequency_step_coarse = frequency_step_coarse
 
-    def set_frequency_step_fine(self, frequency_step_fine: int):
-        """Set the fine frequency step for exhaustive search."""
+    def set_frequency_step_fine(self, frequency_step_fine: float):
         with self.mutex:
             self.frequency_step_fine = frequency_step_fine
+
+    def set_ble_transmission_rate(self, ble_transmission_rate: float):
+        with self.mutex:
+            self.ble_transmission_rate = ble_transmission_rate
