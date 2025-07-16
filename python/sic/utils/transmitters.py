@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# Author: Diego Badillo-San-Juan <diego.badillo-san-juan@inria.fr>
+# Copyright 2025 Inria.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
 import numpy as np
 import scipy
 from abc import ABC, abstractmethod
@@ -43,9 +52,7 @@ class TransmitterBLE(Transmitter):
         self.sample_rate = sample_rate
         self.transmission_rate = transmission_rate
 
-    def process_phy_payload(
-        self, payload: np.ndarray, base_address: int = 0x12345678
-    ) -> np.ndarray:
+    def process_phy_payload(self, payload: np.ndarray, base_address: int = 0x12345678) -> np.ndarray:
         """Receive payload (bytes) and base address to create physical BLE packet."""
         byte_packet = create_ble_phy_packet(payload, base_address)
         bits_packet = unpack_uint8_to_bits(byte_packet)  # LSB first as sent on air
@@ -56,12 +63,8 @@ class TransmitterBLE(Transmitter):
         # Generate Gaussian taps and convolve with rectangular window
         gauss_taps = gaussian_fir_taps(sps=self.sps, ntaps=self.sps, bt=self._bt)
         gauss_taps = scipy.signal.convolve(gauss_taps, np.ones(self.sps))
-        pulse_shaped_symbols = pulse_shape_bits_fir(
-            bits, fir_taps=gauss_taps, sps=self.sps
-        )
-        iq_signal = modulate_frequency(
-            pulse_shaped_symbols, self._fsk_deviation, self.sample_rate
-        ).astype(np.complex64)
+        pulse_shaped_symbols = pulse_shape_bits_fir(bits, fir_taps=gauss_taps, sps=self.sps)
+        iq_signal = modulate_frequency(pulse_shaped_symbols, self._fsk_deviation, self.sample_rate).astype(np.complex64)
         iq_signal = np.concatenate(
             (
                 np.zeros(zero_padding, dtype=iq_signal.dtype),
@@ -85,9 +88,7 @@ class TransmitterBLE(Transmitter):
     @transmission_rate.setter
     def transmission_rate(self, rate: float) -> None:
         if rate not in self._valid_rates:
-            raise ValueError(
-                f"BLE transmission rate must be one of {self._valid_rates!r}"
-            )
+            raise ValueError(f"BLE transmission rate must be one of {self._valid_rates!r}")
         self._transmission_rate = rate
         self._fsk_deviation = self.transmission_rate * 0.25
         self.sps: int = int(self.sample_rate / self.transmission_rate)
@@ -123,16 +124,12 @@ class Transmitter802154(Transmitter):
 
     def __init__(self, sample_rate: int | float):
         self.sample_rate = sample_rate
-        self.sps: int = int(
-            2 * self.sample_rate / self._transmission_rate
-        )  # Samples per OQPSK symbol
+        self.sps: int = int(2 * self.sample_rate / self._transmission_rate)  # Samples per OQPSK symbol
 
     def modulate(self, chips: np.ndarray, zero_padding: int = 0) -> np.ndarray:
         """Receives a chip uint32 array and returns IQ O-QPSK modulated complex signal."""
 
-        I_chips, Q_chips = split_iq_chips(
-            chips
-        )  # Maps a the even and odd chips to I chips and Q chips respectively.
+        I_chips, Q_chips = split_iq_chips(chips)  # Maps a the even and odd chips to I chips and Q chips respectively.
         half_sine_pulse = half_sine_fir_taps(self.sps)
         iq_signal = oqpsk_modulate(I_chips, Q_chips, half_sine_pulse, self.sps)
         iq_signal = iq_signal.astype(np.complex64)
@@ -146,17 +143,13 @@ class Transmitter802154(Transmitter):
 
         return iq_signal
 
-    def process_phy_payload(
-        self, payload: np.ndarray, append_crc: bool = True
-    ) -> np.ndarray:
+    def process_phy_payload(self, payload: np.ndarray, append_crc: bool = True) -> np.ndarray:
         """Creates physical packet and maps it to an array of uint32 chips. CRC is optional."""
         byte_packet = create_802154_phy_packet(payload, append_crc=append_crc)
         chips = map_nibbles_to_chips(byte_packet, self.chip_mapping, return_string=False)
         return chips
 
-    def modulate_from_payload(
-        self, payload: np.ndarray, append_crc: bool = True, zero_padding: int = 0
-    ) -> np.ndarray:
+    def modulate_from_payload(self, payload: np.ndarray, append_crc: bool = True, zero_padding: int = 0) -> np.ndarray:
         """Generates IQ data from physical payload"""
         chips = self.process_phy_payload(payload, append_crc)
         return self.modulate(chips, zero_padding)

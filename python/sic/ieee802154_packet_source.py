@@ -16,7 +16,9 @@ from .utils.packet_utils import triangular_wave
 
 class ieee802154_packet_source(gr.sync_block):
     """
-    docstring for block ieee802154_packet_source
+    This block generates IEEE 802.15.4 packets from tagged triggers using precomputed modulated IQ waveforms.
+    The purpose of using a sync block is to allow for parallel and synchronous transmission of multiple
+    packets acrosss various blocks.
     """
 
     def __init__(self, sample_rate: float, payload_length: int, append_crc: bool):
@@ -30,8 +32,8 @@ class ieee802154_packet_source(gr.sync_block):
         # Parameters
         self.max_payload_length = 127
         self.sample_rate = sample_rate
-        self.payload_template = triangular_wave(step=2, length=self.max_payload_length)
-        self.param_mutex = threading.Lock()
+        self.payload_template = triangular_wave(step=4, length=self.max_payload_length)
+        self.mutex = threading.Lock()
         self.append_crc = append_crc
         self.transmitter = Transmitter802154(sample_rate)
 
@@ -55,13 +57,13 @@ class ieee802154_packet_source(gr.sync_block):
         """Update payload length and regenerate waveform"""
         new_length = int(length)
         new_waveform = self.generate_waveform(new_length)
-        with self.param_mutex:
+        with self.mutex:
             self.current_payload_length = new_length
             self.waveform = new_waveform
 
     def start_burst(self):
         """Start new burst using current parameters"""
-        with self.param_mutex:
+        with self.mutex:
             if len(self.waveform) == 0:
                 self.transmitting = False
                 return
@@ -79,9 +81,7 @@ class ieee802154_packet_source(gr.sync_block):
             if self.transmitting:
                 # Copy precomputed waveform in chunks
                 chunk = min(noutput_items - idx, self.samples_remaining)
-                out[idx : idx + chunk] = self.waveform[
-                    self.waveform_offset : self.waveform_offset + chunk
-                ]
+                out[idx : idx + chunk] = self.waveform[self.waveform_offset : self.waveform_offset + chunk]
                 idx += chunk
                 self.samples_remaining -= chunk
 

@@ -11,7 +11,7 @@ options:
     gen_linking: dynamic
     generate_options: qt_gui
     hier_block_src_path: '.:'
-    id: ieee802154_packet_example
+    id: sic_rx_test
     max_nouts: '0'
     output_language: python
     placement: (0,0)
@@ -22,7 +22,7 @@ options:
     run_options: prompt
     sizing_mode: fixed
     thread_safe_setters: ''
-    title: ieee802154_packet_example
+    title: sic_rx_test
     window_size: (1000,1000)
   states:
     bus_sink: false
@@ -61,7 +61,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '40000'
+    value: '16000'
   states:
     bus_sink: false
     bus_source: false
@@ -192,7 +192,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1136, 440.0]
+    coordinate: [1160, 440.0]
     rotation: 0
     state: enabled
 - name: ble_tag_iq_stream_0
@@ -254,7 +254,7 @@ blocks:
     alias: ''
     begin_tag: pmt.PMT_NIL
     comment: ''
-    file: /home/diego/Documents/GNU_radio_OOT_modules/gr-sic/examples/data/802154_84B.dat
+    file: /home/diego/Documents/GNU_radio_OOT_modules/gr-sic/examples/data/BLE_802154_0dBm_8dBm_0MHz.dat
     length: '0'
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -313,7 +313,7 @@ blocks:
     maximum: '0.1'
     maxoutbuf: '0'
     minoutbuf: '0'
-    samples_per_second: samp_rate/2
+    samples_per_second: samp_rate/100/2
     type: complex
     vlen: '1'
   states:
@@ -652,22 +652,22 @@ blocks:
     ble_transmission_rate: 1e6
     comment: ''
     frequency_fine_window: '50'
-    frequency_start: '-5000'
+    frequency_start: '25000'
     frequency_step_coarse: '50'
     frequency_step_fine: '1'
-    frequency_stop: '5000'
+    frequency_stop: '30000'
     max_queue_size: '10'
     maxoutbuf: '0'
     minoutbuf: '0'
     protocol_high: '1'
-    protocol_low: '1'
+    protocol_low: '0'
     sample_rate: samp_rate
-    upsampling_factor: '1'
+    upsampling_factor: '2'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [768, 380.0]
+    coordinate: [784, 380.0]
     rotation: 0
     state: enabled
 - name: single_pole_iir_filter_xx_0

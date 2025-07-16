@@ -1,26 +1,24 @@
-id: ble_plot_iq_from_pmt
-label: Plot IQ from PMT
+id: ble_plot_sic_results
+label: Plot SIC Results
 category: '[sic]'
 
 templates:
   imports: from gnuradio import sic
-  make: sic.plot_iq_from_pmt(${sample_rate})
+  make: sic.plot_sic_results(${sample_rate}, ${max_queue_size})
 
 parameters:
 - id: sample_rate
   label: Sample Rate
   dtype: int
-  default: 1
+  default: 10e6
 - id: max_queue_size
   label: Max Queue Size
   dtype: int
   default: 10
+  hide: part
 
 inputs:
-- label: iq
-  domain: message
-  dtype: pmt
-- label: pdu
+- label: in
   domain: message
   dtype: pmt
 
