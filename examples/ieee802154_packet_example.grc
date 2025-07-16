@@ -192,7 +192,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1128, 464.0]
+    coordinate: [1128, 472.0]
     rotation: 0
     state: enabled
 - name: ble_tag_iq_stream_0

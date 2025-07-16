@@ -192,7 +192,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1144, 448.0]
+    coordinate: [1144, 456.0]
     rotation: 0
     state: enabled
 - name: ble_tag_iq_stream_0
@@ -659,7 +659,7 @@ blocks:
     max_queue_size: '10'
     maxoutbuf: '0'
     minoutbuf: '0'
-    protocol_high: '0'
+    protocol_high: '1'
     protocol_low: '0'
     sample_rate: samp_rate
   states:

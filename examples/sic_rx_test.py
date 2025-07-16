@@ -92,7 +92,7 @@ class sic_rx_test(gr.top_block, Qt.QWidget):
         self.sic_successive_interference_cancellation_0 = sic.successive_interference_cancellation(
           samp_rate,
           10,
-          0,
+          1,
           0,
           25000,
           30000,

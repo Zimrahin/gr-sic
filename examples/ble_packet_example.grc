@@ -174,7 +174,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1168, 480.0]
+    coordinate: [1168, 488.0]
     rotation: 0
     state: enabled
 - name: ble_tag_iq_stream_0
@@ -652,6 +652,7 @@ blocks:
     alias: ''
     ble_transmission_rate: 1e6
     comment: ''
+    frequency_fine_window: '50'
     frequency_start: '-5000'
     frequency_step_coarse: '50'
     frequency_step_fine: '1'
