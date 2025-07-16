@@ -15,6 +15,7 @@ import time
 from collections import OrderedDict
 from .utils.receivers import ReceiverBLE, Receiver802154, Receiver
 from .utils.transmitters import TransmitterBLE, Transmitter802154, Transmitter
+from .utils.interference import subtract_interference_wrapper
 
 
 class successive_interference_cancellation(gr.basic_block):
@@ -52,6 +53,11 @@ class successive_interference_cancellation(gr.basic_block):
         self.sample_rate = sample_rate
         self.max_queue_size = max_queue_size
         self.ble_transmission_rate = ble_transmission_rate
+        self.frequency_start = frequency_start
+        self.frequency_stop = frequency_stop
+        self.frequency_step_coarse = frequency_step_coarse
+        self.frequency_step_fine = frequency_step_fine
+        self.frequency_fine_window = frequency_fine_window
         protocol_map = {
             0: (TransmitterBLE, ReceiverBLE, True),
             1: (Transmitter802154, Receiver802154, False),
@@ -65,6 +71,7 @@ class successive_interference_cancellation(gr.basic_block):
         self.set_msg_handler(gr.pmt.intern("pdu"), self.handle_payload_message)
         self.message_port_register_out(gr.pmt.intern("out"))
 
+        # Queue and cache to store IQ arrays and payloads
         self.iq_queue = queue.Queue(maxsize=max_queue_size)
         self.payload_cache = OrderedDict()
         self.max_cache_size = max_queue_size
@@ -93,7 +100,7 @@ class successive_interference_cancellation(gr.basic_block):
                 self.iq_queue.get_nowait()
             self.iq_queue.put_nowait(msg)
         except Exception as e:
-            print(f"handle_iq_message error: {e}")
+            print(f"handle_iq_message failed: {e}")
 
     def handle_payload_message(self, msg: gr.pmt) -> None:
         try:
@@ -111,7 +118,7 @@ class successive_interference_cancellation(gr.basic_block):
                 self.payload_cache[packet_id] = payload
                 self.payload_cache.move_to_end(packet_id)
         except Exception as e:
-            print(f"handle_payload_message error: {e}")
+            print(f"handle_payload_message failed: {e}")
 
     def process_iq_queue(self) -> None:
         while True:
@@ -120,6 +127,7 @@ class successive_interference_cancellation(gr.basic_block):
 
     def process_iq_message(self, msg: gr.pmt) -> None:
         try:
+            packet_id = None
             meta = gr.pmt.car(msg)
             data = gr.pmt.cdr(msg)
             if not gr.pmt.is_c32vector(data):
@@ -129,22 +137,31 @@ class successive_interference_cancellation(gr.basic_block):
 
             # Get payload from cache (obtained from pdu message input )
             with self.mutex:
-                payload_before = self.payload_cache.pop(packet_id, None)
-            if payload_before is None:
+                payload_high: bytes = self.payload_cache.pop(packet_id, None)
+            if payload_high is None:
                 return
 
-            # Simulate heavy processing and placeholder outputs
-            time.sleep(2)
-            iq_after = iq_before
+            # Successive Interference Cancellation
             try:
-                received_packet_high: dict = self.receiver_high.demodulate_to_packet(iq_before)[0]
+                received_packet_low: dict = self.receiver_low.demodulate_to_packet(iq_before)[0]
             except Exception:
-                # Treat any exception as no packet received successfully
-                received_packet_high = []
+                received_packet_low = []  # Treat any exception as no packet received successfully
+            payload_low_before = received_packet_low["payload"] if received_packet_low else []
 
-            if received_packet_high:
-                payload_after = received_packet_high["payload"]
-                print("sucessssssssssssssssssssssssss")
+            payload_low_after, iq_after = self.sic_implementation(
+                self.sample_rate,
+                iq_before,
+                self.receiver_high,
+                self.transmitter_high,
+                self.receiver_low,
+                self.frequency_start,
+                self.frequency_stop,
+                self.frequency_step_coarse,
+                self.frequency_step_fine,
+                self.frequency_fine_window,
+                payload_high=np.frombuffer(payload_high, dtype=np.uint8),
+            )
+            # time.sleep(1)
 
             # Prepare output message
             meta_out = gr.pmt.make_dict()
@@ -152,17 +169,73 @@ class successive_interference_cancellation(gr.basic_block):
             data_out = gr.pmt.make_vector(4, gr.pmt.PMT_NIL)
             gr.pmt.vector_set(data_out, 0, gr.pmt.init_c32vector(len(iq_before), iq_before))
             gr.pmt.vector_set(data_out, 1, gr.pmt.init_c32vector(len(iq_after), iq_after))
-            gr.pmt.vector_set(data_out, 2, gr.pmt.init_u8vector(len(payload_before), list(payload_before)))
-            gr.pmt.vector_set(data_out, 3, gr.pmt.init_u8vector(len(payload_after), list(payload_after)))
+            gr.pmt.vector_set(data_out, 2, gr.pmt.init_u8vector(len(payload_low_before), list(payload_low_before)))
+            gr.pmt.vector_set(data_out, 3, gr.pmt.init_u8vector(len(payload_low_after), list(payload_low_after)))
 
             self.message_port_pub(gr.pmt.intern("out"), gr.pmt.cons(meta_out, data_out))
 
         except Exception as e:
-            print(f"Heavy processing failed: {e}")
+            print(f"process_iq_message failed: {e}")
             if packet_id is not None:
                 with self.mutex:
                     if packet_id in self.payload_cache:
                         del self.payload_cache[packet_id]
+
+    def sic_implementation(
+        self,
+        sample_rate: float,
+        mixed_iq_signal: np.ndarray,
+        receiver_high: Receiver,  # Receiver for the stronger signal
+        transmitter_high: Transmitter,  # Transmitter for the stronger signal
+        receiver_low: Receiver,  # Receiver for the weaker signal
+        frequency_start: float,
+        frequency_stop: float,
+        frequency_step_coarse: float,
+        frequency_step_fine: float,
+        frequency_fine_window: float,
+        *,
+        payload_high: np.ndarray = None,
+        verbose: bool = False,
+    ) -> tuple:
+        """
+        Perform successive interference cancellation:
+        1. Demodulate stronger signal
+        2. Synthesise stronger signal
+        3. Subtract stronger signal from mixed signal
+        4. Demodulate weaker signal from residual
+        """
+        # 1. Demodulate stronger signal if not given
+        if payload_high is None:
+            try:
+                received_packet_high: dict = receiver_high.demodulate_to_packet(mixed_iq_signal)[0]
+                payload_high = received_packet_high["payload"]
+                if not received_packet_high["crc_check"]:
+                    return [], mixed_iq_signal
+            except Exception:
+                return [], mixed_iq_signal
+
+        # 2. Synthesise stronger signal
+        synthesised_high = transmitter_high.modulate_from_payload(payload_high)
+
+        # 3. Subtract stronger signal from mixed signal
+        subtracted_iq_signal = subtract_interference_wrapper(
+            affected=mixed_iq_signal,
+            interference=synthesised_high,
+            sample_rate=sample_rate,
+            freq_offsets=np.arange(frequency_start, frequency_stop, frequency_step_coarse),
+            fine_step=frequency_step_fine,
+            fine_window=frequency_fine_window,
+            verbose=verbose,
+        )
+
+        # 4. Demodulate weaker signal from residual
+        try:
+            received_packet_low: dict = receiver_low.demodulate_to_packet(subtracted_iq_signal)[0]
+            payload_low = received_packet_low["payload"]
+        except Exception:
+            return [], subtracted_iq_signal
+
+        return payload_low, subtracted_iq_signal
 
     def set_frequency_start(self, frequency_start: float):
         with self.mutex:

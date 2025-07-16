@@ -26,11 +26,11 @@ def pulse_shape_bits_fir(bits: np.ndarray, fir_taps: np.ndarray, sps: int) -> np
 
 
 # Modulates in frequency a real array of symbols. Outputs IQ complex signal
-def modulate_frequency(symbols: np.ndarray, fsk_deviation: float, fs: float) -> np.ndarray:
+def modulate_frequency(symbols: np.ndarray, fsk_deviation: float, sample_rate: float) -> np.ndarray:
     """Modulates in frequency a real array of symbols. Outputs IQ complex signal."""
     # fsk_deviation: a value of 1 in symbols maps to a frequency of fsk_deviation
     # Compute the phase increment per sample based on fsk_deviation
-    phase_increments = symbols * (2 * np.pi * fsk_deviation / fs)
+    phase_increments = symbols * (2 * np.pi * fsk_deviation / sample_rate)
 
     # Prepending a zero ensures that the signal starts at phase 0
     phase_increments = np.insert(phase_increments, 0, 0)

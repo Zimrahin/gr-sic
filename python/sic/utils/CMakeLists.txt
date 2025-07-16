@@ -26,6 +26,7 @@ gr_python_install(
     packet_utils.py
     receivers.py
     demodulation.py
+    interference.py
     DESTINATION ${GR_PYTHON_DIR}/gnuradio/sic/utils
 )
 
