@@ -255,7 +255,7 @@ class Receiver802154(Receiver):
         self.sample_rate = int(sample_rate)  # Sampling rate
         self.spc: int = int(self.sample_rate / self.transmission_rate)  # Samples per chip
 
-        # Matched filtering (Half Sine FIR taps) from sampling rate `fs`
+        # Matched filtering (Half Sine FIR taps)
         hss_taps = half_sine_fir_taps(2 * self.spc)  # One symbol is two chips long
         hss_taps /= np.sum(hss_taps)  # Unitary gain
         self.hss_taps = hss_taps
@@ -271,8 +271,8 @@ class Receiver802154(Receiver):
     def demodulate(
         self,
         iq_samples: np.ndarray,
-        demodulation_type: DemodulationType = "BAND_PASS",
-        ted_type: TEDType = "GARDNER",
+        demodulation_type: DemodulationType = "INSTANTANEOUS_FREQUENCY",
+        ted_type: TEDType = "MOD_MUELLER_AND_MULLER",
     ) -> np.ndarray:
         """Receives an array of complex data and returns hard decision array."""
 
@@ -325,7 +325,7 @@ class Receiver802154(Receiver):
     def process_phy_packet(
         self,
         chip_samples: np.ndarray,
-        preamble_threshold: int = 12,
+        preamble_threshold: int = 8,
         CRC_included: bool = True,
     ) -> list[dict]:
         """Receive hard decisions (bit samples) and return dictionary with detected packets."""
@@ -375,9 +375,9 @@ class Receiver802154(Receiver):
     def demodulate_to_packet(
         self,
         iq_samples: np.ndarray,
-        demodulation_type: DemodulationType = "BAND_PASS",
-        ted_type: TEDType = "GARDNER",
-        preamble_threshold: int = 12,
+        demodulation_type: DemodulationType = "INSTANTANEOUS_FREQUENCY",
+        ted_type: TEDType = "MOD_MUELLER_AND_MULLER",
+        preamble_threshold: int = 8,
         CRC_included: bool = True,
     ) -> list[dict]:
         """Receive IQ data and return dictionary with detected packets."""
@@ -389,15 +389,3 @@ class Receiver802154(Receiver):
         )  # From hard decisions to packets
 
         return received_packets
-
-
-def adc_quantise(iq: np.ndarray, vmax: float, bits: int) -> np.ndarray:
-    """Simulate a linear symmetric ADC"""
-    levels = 2**bits - 1  # Odd number of levels
-    level_size = 2 * vmax / (levels - 1)
-
-    # Clip and quantise
-    real_q = level_size * np.round(np.clip(iq.real, -vmax, vmax) / level_size)
-    imag_q = level_size * np.round(np.clip(iq.imag, -vmax, vmax) / level_size)
-
-    return real_q + 1j * imag_q
