@@ -174,7 +174,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1168, 488.0]
+    coordinate: [1168, 472.0]
     rotation: 0
     state: enabled
 - name: ble_tag_iq_stream_0
@@ -663,11 +663,12 @@ blocks:
     protocol_high: '0'
     protocol_low: '0'
     sample_rate: samp_rate
+    upsampling_factor: '1'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [800, 420.0]
+    coordinate: [800, 412.0]
     rotation: 0
     state: enabled
 - name: single_pole_iir_filter_xx_0

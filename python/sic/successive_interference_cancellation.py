@@ -7,8 +7,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
-import numpy as np
 from gnuradio import gr
+import numpy as np
+import scipy.signal
 import threading
 import queue
 import time
@@ -48,9 +49,11 @@ class successive_interference_cancellation(gr.basic_block):
         frequency_step_fine: float,
         frequency_fine_window: float,
         ble_transmission_rate: float,
+        upsampling_factor: int,
     ):
         gr.basic_block.__init__(self, name="successive_interference_cancellation", in_sig=None, out_sig=None)
-        self.sample_rate = sample_rate
+        self.upsampling_factor = upsampling_factor
+        self.sample_rate = upsampling_factor * sample_rate
         self.max_queue_size = max_queue_size
         self.ble_transmission_rate = ble_transmission_rate
         self.frequency_start = frequency_start
@@ -141,6 +144,11 @@ class successive_interference_cancellation(gr.basic_block):
             if payload_high is None:
                 return
 
+            # Upsample to target sample rate
+            if self.upsampling_factor > 1:
+                target_length = len(iq_before) * self.upsampling_factor
+                iq_before = scipy.signal.resample(iq_before, target_length)
+
             # Successive Interference Cancellation
             try:
                 received_packet_low: dict = self.receiver_low.demodulate_to_packet(iq_before)[0]
@@ -161,7 +169,11 @@ class successive_interference_cancellation(gr.basic_block):
                 self.frequency_fine_window,
                 payload_high=np.frombuffer(payload_high, dtype=np.uint8),
             )
-            # time.sleep(1)
+
+            # Downsample
+            if self.upsampling_factor > 1:
+                iq_after = scipy.signal.resample(iq_after, int(len(iq_after) / self.upsampling_factor))
+                iq_before = scipy.signal.resample(iq_before, int(len(iq_before) / self.upsampling_factor))
 
             # Prepare output message
             meta_out = gr.pmt.make_dict()

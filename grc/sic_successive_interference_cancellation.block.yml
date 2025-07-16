@@ -16,6 +16,7 @@ templates:
       ${frequency_step_fine},
       ${frequency_fine_window},
       ${ble_transmission_rate},
+      ${upsampling_factor},
     )
   callbacks:
   - set_frequency_start(${frequency_start})
@@ -59,14 +60,20 @@ parameters:
   label: Frequency Step Fine
   dtype: float
   default: 1
+  hide: part
 - id: frequency_fine_window
   label: Frequency Fine Window
   dtype: float
   default: 50
+  hide: part
 - id: ble_transmission_rate
   label: BLE Transmission Rate
   dtype: float
   default: 1e6
+- id: upsampling_factor
+  label: Upsampling Factor
+  dtype: int
+  default: 1
 
 inputs:
 - label: iq

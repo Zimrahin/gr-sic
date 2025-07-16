@@ -100,6 +100,7 @@ class sic_rx_test(gr.top_block, Qt.QWidget):
           1,
           50,
           1e6,
+          2,
         )
         self.qtgui_time_sink_x_1 = qtgui.time_sink_f(
             (int( plot_N/ samples_per_chip)), #size
