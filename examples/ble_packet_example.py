@@ -94,11 +94,13 @@ class ble_packet_example(gr.top_block, Qt.QWidget):
           10,
           0,
           0,
-          (-5000),
+          -5000,
           5000,
           50,
           1,
+          50,
           1e6,
+          1,
         )
         self.sic_ble_packet_sink_0 = sic.ble_packet_sink(0x12345678, 0, 0x1, 0)
         self.qtgui_time_sink_x_1 = qtgui.time_sink_f(
