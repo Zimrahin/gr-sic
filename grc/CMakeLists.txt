@@ -16,4 +16,5 @@ install(FILES
     sic_transmission_enabler.block.yml
     sic_periodic_message_source.block.yml
     sic_ieee802154_packet_source.block.yml
-    sic_successive_interference_cancellation.block.yml DESTINATION share/gnuradio/grc/blocks)
+    sic_successive_interference_cancellation.block.yml
+    sic_ieee802154_hier_rx.block.yml DESTINATION share/gnuradio/grc/blocks)
