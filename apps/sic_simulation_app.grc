@@ -723,7 +723,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     payload_length: payload_length_l
-    sample_rate: 10e6
+    sample_rate: samp_rate
     transmission_rate: ble_transmission_rate
   states:
     bus_sink: false
@@ -760,7 +760,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     payload_length: payload_length_h
-    sample_rate: 10e6
+    sample_rate: samp_rate
   states:
     bus_sink: false
     bus_source: false

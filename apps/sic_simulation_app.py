@@ -170,9 +170,9 @@ class sic_simulation_app(gr.top_block, Qt.QWidget):
           2,
         )
         self.sic_periodic_message_source_0 = sic.periodic_message_source(gr.pmt.mp("trigger"), 2000, (-1))
-        self.sic_ieee802154_packet_source_0 = sic.ieee802154_packet_source(10e6, payload_length_h, True)
+        self.sic_ieee802154_packet_source_0 = sic.ieee802154_packet_source(samp_rate, payload_length_h, True)
         self.sic_ieee802154_hier_rx_0 = sic.ieee802154_hier_rx(samp_rate, 2e6, 5)
-        self.sic_ble_packet_source_0_0 = sic.ble_packet_source(10e6, payload_length_l, ble_transmission_rate, 0x12345678)
+        self.sic_ble_packet_source_0_0 = sic.ble_packet_source(samp_rate, payload_length_l, ble_transmission_rate, 0x12345678)
         self.qtgui_waterfall_sink_x_0 = qtgui.waterfall_sink_c(
             32768, #size
             window.WIN_HANN, #wintype
