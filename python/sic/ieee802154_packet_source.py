@@ -42,19 +42,18 @@ class ieee802154_packet_source(gr.sync_block):
 
         # State variables
         self.transmitting = False
-        self.samples_remaining = 0
-        self.waveform_offset = 0  # Where in the waveform we are currently transmitting
+        self.active_waveform = np.array([], dtype=np.complex64)
+        self.active_remaining = 0
+        self.active_offset = 0  # Where in the waveform we are currently transmitting
 
         self.waveform = self.generate_waveform(payload_length)
 
     def generate_waveform(self, payload_length: int) -> np.ndarray:
-        """Generate IQ waveform using current parameters"""
         constrained_length = max(0, min(payload_length, self.max_payload_length))
         payload_segment = self.payload_template[:constrained_length]
         return self.transmitter.modulate_from_payload(payload_segment, self.append_crc)
 
     def set_payload_length(self, length: int):
-        """Update payload length and regenerate waveform"""
         new_length = int(length)
         new_waveform = self.generate_waveform(new_length)
         with self.mutex:
@@ -62,14 +61,15 @@ class ieee802154_packet_source(gr.sync_block):
             self.waveform = new_waveform
 
     def start_burst(self):
-        """Start new burst using current parameters"""
         with self.mutex:
             if len(self.waveform) == 0:
                 self.transmitting = False
                 return
             self.transmitting = True
-            self.samples_remaining = len(self.waveform)
-            self.waveform_offset = 0
+            # Capture current waveform for the entire burst
+            self.active_waveform = self.waveform
+            self.active_remaining = len(self.waveform)
+            self.active_offset = 0
 
     def work(self, input_items, output_items):
         in0 = input_items[0]
@@ -79,16 +79,17 @@ class ieee802154_packet_source(gr.sync_block):
 
         while idx < noutput_items:
             if self.transmitting:
-                # Copy precomputed waveform in chunks
-                chunk = min(noutput_items - idx, self.samples_remaining)
-                out[idx : idx + chunk] = self.waveform[self.waveform_offset : self.waveform_offset + chunk]
+                # Use burst-specific waveform copy
+                chunk = min(noutput_items - idx, self.active_remaining)
+                out[idx : idx + chunk] = self.active_waveform[self.active_offset : self.active_offset + chunk]
                 idx += chunk
-                self.samples_remaining -= chunk
+                self.active_offset += chunk
+                self.active_remaining -= chunk
 
-                if self.samples_remaining <= 0:
+                if self.active_remaining <= 0:
                     self.transmitting = False
             else:
-                # Check for trigger tags in remaining buffer
+                # Check for trigger tags
                 tags = self.get_tags_in_window(0, idx, noutput_items)
                 if not tags:
                     out[idx:] = in0[idx:]
