@@ -25,5 +25,6 @@ from .ble_packet_source import ble_packet_source
 from .ieee802154_packet_source import ieee802154_packet_source
 from .successive_interference_cancellation import successive_interference_cancellation
 from .ieee802154_hier_rx import ieee802154_hier_rx
+from .ble_hier_rx import ble_hier_rx
 
 #

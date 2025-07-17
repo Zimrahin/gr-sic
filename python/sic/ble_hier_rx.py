@@ -12,15 +12,15 @@ from gnuradio.fft import window
 import numpy as np
 
 
-class ieee802154_hier_rx(gr.hier_block2):
+class ble_hier_rx(gr.hier_block2):
     """
-    IEEE 802.15.4 receiver hier block
+    BLE receiver hier block
     """
 
-    def __init__(self, sample_rate: float, symbol_rate: float, preamble_threshold: int):
+    def __init__(self, sample_rate: float, symbol_rate: float, preamble_threshold: int, base_address: int):
         gr.hier_block2.__init__(
             self,
-            "ieee802154_hier_rx",
+            "ble_hier_rx",
             gr.io_signature(1, 1, gr.sizeof_gr_complex),
             gr.io_signature(1, 1, gr.sizeof_char),
         )
@@ -28,6 +28,7 @@ class ieee802154_hier_rx(gr.hier_block2):
         self._sample_rate = sample_rate
         self._symbol_rate = symbol_rate
         self._preamble_threshold = preamble_threshold
+        self._base_address = base_address
 
         # Low Pass Filter
         self.lpf = filter.fir_filter_ccf(
@@ -65,7 +66,7 @@ class ieee802154_hier_rx(gr.hier_block2):
         )
 
         # Packet Sink Block (Custom OOT)
-        self.packet_sink = sic.ieee802154_packet_sink(self._preamble_threshold, True, 0)
+        self.packet_sink = sic.ble_packet_sink(self._base_address, self._preamble_threshold, 0x1, 0)
 
         # Stream connections
         self.connect(self, self.lpf)
