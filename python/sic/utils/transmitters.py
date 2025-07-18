@@ -44,7 +44,6 @@ class Transmitter(ABC):
 
 
 class TransmitterBLE(Transmitter):
-    _valid_rates = (1e6, 2e6)  # BLE 1Mb/s or 2Mb/s
     _bt: float = 0.5  # Bandwidth-bit period product for Gaussian pulse shaping
     _max_payload_size: int = 255
 
@@ -87,8 +86,6 @@ class TransmitterBLE(Transmitter):
 
     @transmission_rate.setter
     def transmission_rate(self, rate: float) -> None:
-        if rate not in self._valid_rates:
-            raise ValueError(f"BLE transmission rate must be one of {self._valid_rates!r}")
         self._transmission_rate = rate
         self._fsk_deviation = self.transmission_rate * 0.25
         self.sps: int = int(self.sample_rate / self.transmission_rate)
@@ -96,7 +93,6 @@ class TransmitterBLE(Transmitter):
 
 class Transmitter802154(Transmitter):
     # Class variables
-    _transmission_rate: float = 2e6  # 2 Mchip/s
     _max_payload_size: int = 127
 
     # Chip mapping for IEEE 802.15.4 O-QPSK DSSS encoding
@@ -122,9 +118,9 @@ class Transmitter802154(Transmitter):
         dtype=np.uint32,
     )
 
-    def __init__(self, sample_rate: int | float):
+    def __init__(self, sample_rate: int | float, transmission_rate: float = 2e6):
         self.sample_rate = sample_rate
-        self.sps: int = int(2 * self.sample_rate / self._transmission_rate)  # Samples per OQPSK symbol
+        self.transmission_rate = transmission_rate  # chips/s
 
     def modulate(self, chips: np.ndarray, zero_padding: int = 0) -> np.ndarray:
         """Receives a chip uint32 array and returns IQ O-QPSK modulated complex signal."""
@@ -153,3 +149,13 @@ class Transmitter802154(Transmitter):
         """Generates IQ data from physical payload"""
         chips = self.process_phy_payload(payload, append_crc)
         return self.modulate(chips, zero_padding)
+
+    @property
+    def transmission_rate(self) -> float:
+        return self._transmission_rate
+
+    @transmission_rate.setter
+    def transmission_rate(self, rate: float) -> None:
+        self._transmission_rate = rate
+        self._fsk_deviation = self.transmission_rate * 0.25
+        self.sps: int = int(2 * self.sample_rate / self.transmission_rate)  # Samples per OQPSK symbol

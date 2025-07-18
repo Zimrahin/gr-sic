@@ -73,16 +73,12 @@ class Receiver(ABC):
 
 
 class ReceiverBLE(Receiver):
-    _valid_rates = (1e6, 2e6)  # BLE 1Mb/s or 2Mb/s
     _crc_size: int = 3  # 3 bytes CRC for BLE
     _max_payload_size: int = 255  # Bytes
 
     def __init__(self, sample_rate: int, transmission_rate: float = 1e6):
-        self.transmission_rate: float = transmission_rate  # BLE 1 Mb/s or 2Mb/s
-        self._fsk_deviation: float = transmission_rate * 0.25  # Hz
-
         self._sample_rate = int(sample_rate)
-        self._sps: int = int(self._sample_rate / self.transmission_rate)
+        self.transmission_rate: float = transmission_rate  # BLE 1 Mb/s or 2Mb/s
 
         # Generate Gaussian taps and convolve with rectangular window
         gauss_taps = gaussian_fir_taps(sps=self._sps, ntaps=self._sps, bt=0.5)
@@ -214,18 +210,14 @@ class ReceiverBLE(Receiver):
 
     @transmission_rate.setter
     def transmission_rate(self, rate: float) -> None:
-        if rate not in self._valid_rates:
-            raise ValueError(f"BLE transmission rate must be one of {self._valid_rates!r}")
         self._transmission_rate = rate
         self._fsk_deviation = self.transmission_rate * 0.25
+        self._sps = int(self._sample_rate / self.transmission_rate)
 
 
 class Receiver802154(Receiver):
-    # Class variables
-    transmission_rate: float = 2e6  # IEEE 802.15.4 2 Mchip/s
-    fsk_deviation: float = 500e3  # Hz
-    crc_size: int = 2  # 2 bytes CRC for IEEE 802.15.4
-    max_packet_len: int = 127  # Bytes
+    _crc_size: int = 2  # 2 bytes CRC for IEEE 802.15.4
+    _max_packet_len: int = 127  # Bytes
 
     # Chip mapping for differential MSK encoding
     chip_mapping: np.ndarray = np.array(
@@ -250,18 +242,17 @@ class Receiver802154(Receiver):
         dtype=np.uint32,
     )
 
-    def __init__(self, sample_rate: int):
-        # Instance variables
-        self.sample_rate = int(sample_rate)  # Sampling rate
-        self.spc: int = int(self.sample_rate / self.transmission_rate)  # Samples per chip
+    def __init__(self, sample_rate: int, transmission_rate: float = 2e6):
+        self._sample_rate = int(sample_rate)
+        self.transmission_rate: float = transmission_rate  # IEEE 802.15.4 2 Mchip/s
 
         # Matched filtering (Half Sine FIR taps)
-        hss_taps = half_sine_fir_taps(2 * self.spc)  # One symbol is two chips long
+        hss_taps = half_sine_fir_taps(2 * self._sps)  # One symbol is two chips long
         hss_taps /= np.sum(hss_taps)  # Unitary gain
         self.hss_taps = hss_taps
 
         # Matched filtering (Rect taps) after frequency demodulation
-        rect_taps = np.ones(self.spc)
+        rect_taps = np.ones(self._sps)
         rect_taps /= np.sum(rect_taps)  # Unitary gain
         self.rect_taps = rect_taps
 
@@ -281,13 +272,13 @@ class Receiver802154(Receiver):
             iq_samples = scipy.signal.correlate(iq_samples, self.hss_taps, mode="full")
 
             # Frequency demodulation
-            freq_samples = demodulate_frequency(iq_samples, gain=(self.sample_rate) / (2 * np.pi * self.fsk_deviation))
+            freq_samples = demodulate_frequency(iq_samples, gain=(self._sample_rate) / (2 * np.pi * self.fsk_deviation))
             freq_samples -= single_pole_iir_filter(freq_samples, alpha=160e-6)
             before_symbol_sync = scipy.signal.correlate(freq_samples, self.rect_taps, mode="full")
 
         elif demodulation_type == "BAND_PASS":
             complex_exp = np.exp(
-                1j * 2 * np.pi * self.fsk_deviation * np.arange(len(self.rect_taps)) / self.sample_rate
+                1j * 2 * np.pi * self.fsk_deviation * np.arange(len(self.rect_taps)) / self._sample_rate
             )
             rect_bandpass_lower = self.rect_taps / complex_exp
             rect_bandpass_higher = self.rect_taps * complex_exp
@@ -310,7 +301,7 @@ class Receiver802154(Receiver):
         # Symbol synchronisation
         bit_samples = symbol_sync(
             before_symbol_sync,
-            sps=self.spc,
+            sps=self._sps,
             ted_type=ted_type,
             TED_gain=self._symbol_sync_param_TED_gain,
             loop_BW=self._symbol_sync_param_loop_BW,
@@ -341,7 +332,7 @@ class Receiver802154(Receiver):
                 chip_samples[preamble:payload_start], num_bytes=1, chip_mapping=self.chip_mapping, threshold=10
             )  # Payload length in bytes
             payload_length = payload_length[0]
-            if payload_length > self.max_packet_len:  # Maximum payload length is 127 bytes
+            if payload_length > self._max_packet_len:  # Maximum payload length is 127 bytes
                 continue  # The packet is lost (not valid)
 
             try:
@@ -359,10 +350,10 @@ class Receiver802154(Receiver):
             # CRC check
             if CRC_included:
                 computed_crc = compute_crc(
-                    payload[: -self.crc_size], crc_init=0x0000, crc_poly=0x011021, crc_size=self.crc_size
+                    payload[: -self._crc_size], crc_init=0x0000, crc_poly=0x011021, crc_size=self._crc_size
                 )
-                crc_check = True if (computed_crc == payload[-self.crc_size :]).all() else False
-                payload = payload[: -self.crc_size]  # Remove CRC bytes
+                crc_check = True if (computed_crc == payload[-self._crc_size :]).all() else False
+                payload = payload[: -self._crc_size]  # Remove CRC bytes
 
             # Append dictionary to return list
             detected_packets.append(
@@ -389,3 +380,13 @@ class Receiver802154(Receiver):
         )  # From hard decisions to packets
 
         return received_packets
+
+    @property
+    def transmission_rate(self) -> float:
+        return self._transmission_rate
+
+    @transmission_rate.setter
+    def transmission_rate(self, rate: float) -> None:
+        self._transmission_rate = rate
+        self._fsk_deviation = self.transmission_rate * 0.25
+        self._sps = int(self._sample_rate / self.transmission_rate)  # Samples per chip

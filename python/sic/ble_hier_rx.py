@@ -80,3 +80,25 @@ class ble_hier_rx(gr.hier_block2):
         # Message connections
         self.message_port_register_hier_out("pdu")
         self.msg_connect((self.packet_sink, "pdu"), (self, "pdu"))
+
+    def set_symbol_rate(self, symbol_rate: float):
+        self._symbol_rate = symbol_rate
+
+        # Update LPF taps
+        lpf_taps = filter.firdes.low_pass(
+            gain=1,
+            sampling_freq=self._sample_rate,
+            cutoff_freq=symbol_rate,
+            transition_width=200e3,
+            window=window.WIN_HAMMING,
+        )
+        self.lpf.set_taps(lpf_taps)
+
+        # Update Quadrature Demod gain
+        fsk_deviation_hz = symbol_rate / 4
+        new_gain = self._sample_rate / (2 * np.pi * fsk_deviation_hz)
+        self.quadrature_demod.set_gain(new_gain)
+
+        # Update Symbol Sync samples/symbol
+        omega = self._sample_rate / symbol_rate
+        self.symbol_sync.set_omega(omega)

@@ -25,8 +25,8 @@ class ble_packet_source(gr.sync_block):
         self,
         sample_rate: float,
         payload_length: int,
-        transmission_rate: float,
         base_address: int,
+        transmission_rate: float,
     ):
         gr.sync_block.__init__(
             self,

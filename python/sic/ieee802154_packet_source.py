@@ -21,7 +21,13 @@ class ieee802154_packet_source(gr.sync_block):
     packets acrosss various blocks.
     """
 
-    def __init__(self, sample_rate: float, payload_length: int, append_crc: bool):
+    def __init__(
+        self,
+        sample_rate: float,
+        payload_length: int,
+        append_crc: bool,
+        transmission_rate: float,
+    ):
         gr.sync_block.__init__(
             self,
             name="ieee802154_packet_source",
@@ -35,9 +41,9 @@ class ieee802154_packet_source(gr.sync_block):
         self.payload_template = triangular_wave(step=4, length=self.max_payload_length)
         self.mutex = threading.Lock()
         self.append_crc = append_crc
-        self.transmitter = Transmitter802154(sample_rate)
 
         # Changeable at runtime
+        self.transmitter = Transmitter802154(sample_rate, transmission_rate)
         self.current_payload_length = payload_length
 
         # State variables
@@ -46,18 +52,25 @@ class ieee802154_packet_source(gr.sync_block):
         self.active_remaining = 0
         self.active_offset = 0  # Where in the waveform we are currently transmitting
 
-        self.waveform = self.generate_waveform(payload_length)
+        self.waveform = self.generate_waveform(payload_length, transmission_rate)
 
-    def generate_waveform(self, payload_length: int) -> np.ndarray:
+    def generate_waveform(self, payload_length: int, transmission_rate: float) -> np.ndarray:
         constrained_length = max(0, min(payload_length, self.max_payload_length))
         payload_segment = self.payload_template[:constrained_length]
+        self.transmitter.transmission_rate = transmission_rate
         return self.transmitter.modulate_from_payload(payload_segment, self.append_crc)
 
     def set_payload_length(self, length: int):
         new_length = int(length)
-        new_waveform = self.generate_waveform(new_length)
+        new_waveform = self.generate_waveform(new_length, self.transmitter.transmission_rate)
         with self.mutex:
             self.current_payload_length = new_length
+            self.waveform = new_waveform
+
+    def set_transmission_rate(self, transmission_rate: float):
+        new_waveform = self.generate_waveform(self.current_payload_length, transmission_rate)
+        with self.mutex:
+            self.transmitter.transmission_rate = transmission_rate
             self.waveform = new_waveform
 
     def start_burst(self):

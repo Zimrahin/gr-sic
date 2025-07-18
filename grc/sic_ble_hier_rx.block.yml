@@ -5,6 +5,8 @@ category: '[sic]'
 templates:
   imports: from gnuradio import sic
   make: sic.ble_hier_rx(${sample_rate}, ${symbol_rate}, ${preamble_threshold}, ${base_address})
+  callbacks:
+  - set_symbol_rate(${symbol_rate})
 
 parameters:
 - id: sample_rate

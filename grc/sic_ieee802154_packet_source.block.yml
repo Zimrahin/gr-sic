@@ -4,9 +4,10 @@ category: '[sic]'
 
 templates:
   imports: from gnuradio import sic
-  make: sic.ieee802154_packet_source(${sample_rate}, ${payload_length}, ${append_crc})
+  make: sic.ieee802154_packet_source(${sample_rate}, ${payload_length}, ${append_crc}, ${transmission_rate})
   callbacks:
   - set_payload_length(${payload_length})
+  - set_transmission_rate(${transmission_rate})
 
 parameters:
 - id: sample_rate
@@ -22,6 +23,10 @@ parameters:
   dtype: enum
   options: ['True', 'False']
   option_labels: ['Yes', 'No']
+- id: transmission_rate
+  label: Transmission Rate
+  dtype: float
+  default: 2000000
 
 inputs:
 - label: in
