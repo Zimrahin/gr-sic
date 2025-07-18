@@ -26,7 +26,6 @@ from gnuradio.eng_arg import eng_float, intx
 from gnuradio import iio
 from gnuradio import sic
 import threading
-import sip
 
 
 
@@ -66,7 +65,7 @@ class sic_app(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.samp_rate = samp_rate = int(2e6)
+        self.samp_rate = samp_rate = int(4e6)
         self.trigger_delay = trigger_delay = 700e-6 *2
         self.symbol_rate_high = symbol_rate_high = int(1e6)
         self.payload_length_l = payload_length_l = 140
@@ -76,7 +75,7 @@ class sic_app(gr.top_block, Qt.QWidget):
         self.label_802154_tx_rate = label_802154_tx_rate = '250 kbit/s'
         self.label_802154 = label_802154 = ''
         self.delay_l = delay_l = 0
-        self.delay_h = delay_h = (int(160 * samp_rate * 1e-6))
+        self.delay_h = delay_h = (int(0 * samp_rate * 1e-6))
         self.centre_frequency = centre_frequency = int(2495e6)
         self.ble_transmission_rate = ble_transmission_rate = 1000000
         self.amplitude_l = amplitude_l = 0.5
@@ -93,12 +92,26 @@ class sic_app(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(1, 2):
             self.top_grid_layout.setColumnStretch(c, 1)
+        self._payload_length_h_range = qtgui.Range(1, 125, 1, 10, 200)
+        self._payload_length_h_win = qtgui.RangeWidget(self._payload_length_h_range, self.set_payload_length_h, "Payload Length (bytes)", "eng_slider", int, QtCore.Qt.Horizontal)
+        self.top_grid_layout.addWidget(self._payload_length_h_win, 3, 0, 1, 1)
+        for r in range(3, 4):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 1):
+            self.top_grid_layout.setColumnStretch(c, 1)
         self._delay_l_range = qtgui.Range(0, (int(800 * samp_rate * 1e-6)), 1, 0, 200)
         self._delay_l_win = qtgui.RangeWidget(self._delay_l_range, self.set_delay_l, "Delay (µs)", "eng_slider", int, QtCore.Qt.Horizontal)
         self.top_grid_layout.addWidget(self._delay_l_win, 4, 1, 1, 1)
         for r in range(4, 5):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(1, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self._delay_h_range = qtgui.Range(0, (int(800 * samp_rate * 1e-6)), 1, (int(0 * samp_rate * 1e-6)), 200)
+        self._delay_h_win = qtgui.RangeWidget(self._delay_h_range, self.set_delay_h, "Delay (µs)", "eng_slider", int, QtCore.Qt.Horizontal)
+        self.top_grid_layout.addWidget(self._delay_h_win, 4, 0, 1, 1)
+        for r in range(4, 5):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 1):
             self.top_grid_layout.setColumnStretch(c, 1)
         # Create the options list
         self._ble_transmission_rate_options = [1000000, 2000000]
@@ -120,6 +133,20 @@ class sic_app(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(1, 2):
             self.top_grid_layout.setColumnStretch(c, 1)
+        self._amplitude_l_range = qtgui.Range(0, 4, 0.2, 0.5, 200)
+        self._amplitude_l_win = qtgui.RangeWidget(self._amplitude_l_range, self.set_amplitude_l, "Amplitude Multiplier", "eng_slider", float, QtCore.Qt.Horizontal)
+        self.top_grid_layout.addWidget(self._amplitude_l_win, 5, 1, 1, 1)
+        for r in range(5, 6):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(1, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self._amplitude_h_range = qtgui.Range(0, 4, 0.2, 1, 200)
+        self._amplitude_h_win = qtgui.RangeWidget(self._amplitude_h_range, self.set_amplitude_h, "Amplitude Multiplier", "eng_slider", float, QtCore.Qt.Horizontal)
+        self.top_grid_layout.addWidget(self._amplitude_h_win, 5, 0, 1, 1)
+        for r in range(5, 6):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 1):
+            self.top_grid_layout.setColumnStretch(c, 1)
         self.tx_trigger_button = _tx_trigger_button_toggle_button = qtgui.MsgPushButton('Trigger Transmission', 'pressed',1,"green","default")
         self.tx_trigger_button = _tx_trigger_button_toggle_button
 
@@ -129,66 +156,23 @@ class sic_app(gr.top_block, Qt.QWidget):
         for c in range(0, 1):
             self.top_grid_layout.setColumnStretch(c, 1)
         self.sic_transmission_enabler_0 = sic.transmission_enabler(1024)
-        self.sic_periodic_message_source_0 = sic.periodic_message_source(gr.pmt.mp("trigger"), 2000, (-1))
-        self.sic_ble_packet_source_0_0 = sic.ble_packet_source(samp_rate, payload_length_l, ble_transmission_rate, 0x12345678)
-        self.qtgui_time_sink_x_0_0_0 = qtgui.time_sink_c(
-            160000, #size
-            samp_rate, #samp_rate
-            "Testing Tag IQ Stream block", #name
-            1, #number of inputs
-            None # parent
+        self.sic_successive_interference_cancellation_0 = sic.successive_interference_cancellation(
+          samp_rate,
+          10,
+          0,
+          1,
+          -10000,
+          10000,
+          100,
+          2,
+          50,
+          1e6,
+          2,
         )
-        self.qtgui_time_sink_x_0_0_0.set_update_time(0.10)
-        self.qtgui_time_sink_x_0_0_0.set_y_axis(-2, 2)
-
-        self.qtgui_time_sink_x_0_0_0.set_y_label('Amplitude', "")
-
-        self.qtgui_time_sink_x_0_0_0.enable_tags(True)
-        self.qtgui_time_sink_x_0_0_0.set_trigger_mode(qtgui.TRIG_MODE_NORM, qtgui.TRIG_SLOPE_POS, 0.5, trigger_delay, 0, "Payload start")
-        self.qtgui_time_sink_x_0_0_0.enable_autoscale(True)
-        self.qtgui_time_sink_x_0_0_0.enable_grid(False)
-        self.qtgui_time_sink_x_0_0_0.enable_axis_labels(True)
-        self.qtgui_time_sink_x_0_0_0.enable_control_panel(False)
-        self.qtgui_time_sink_x_0_0_0.enable_stem_plot(False)
-
-
-        labels = ['Signal 1', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
-            'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
-        widths = [1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        colors = ['blue', 'red', 'green', 'black', 'cyan',
-            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
-        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0, 1.0]
-        styles = [1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        markers = [-1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1]
-
-
-        for i in range(2):
-            if len(labels[i]) == 0:
-                if (i % 2 == 0):
-                    self.qtgui_time_sink_x_0_0_0.set_line_label(i, "Re{{Data {0}}}".format(i/2))
-                else:
-                    self.qtgui_time_sink_x_0_0_0.set_line_label(i, "Im{{Data {0}}}".format(i/2))
-            else:
-                self.qtgui_time_sink_x_0_0_0.set_line_label(i, labels[i])
-            self.qtgui_time_sink_x_0_0_0.set_line_width(i, widths[i])
-            self.qtgui_time_sink_x_0_0_0.set_line_color(i, colors[i])
-            self.qtgui_time_sink_x_0_0_0.set_line_style(i, styles[i])
-            self.qtgui_time_sink_x_0_0_0.set_line_marker(i, markers[i])
-            self.qtgui_time_sink_x_0_0_0.set_line_alpha(i, alphas[i])
-
-        self._qtgui_time_sink_x_0_0_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0_0_0.qwidget(), Qt.QWidget)
-        self.top_layout.addWidget(self._qtgui_time_sink_x_0_0_0_win)
-        self._payload_length_h_range = qtgui.Range(1, 125, 1, 10, 200)
-        self._payload_length_h_win = qtgui.RangeWidget(self._payload_length_h_range, self.set_payload_length_h, "Payload Length (bytes)", "eng_slider", int, QtCore.Qt.Horizontal)
-        self.top_grid_layout.addWidget(self._payload_length_h_win, 3, 0, 1, 1)
-        for r in range(3, 4):
-            self.top_grid_layout.setRowStretch(r, 1)
-        for c in range(0, 1):
-            self.top_grid_layout.setColumnStretch(c, 1)
+        self.sic_periodic_message_source_0 = sic.periodic_message_source(gr.pmt.mp("trigger"), 2000, (-1))
+        self.sic_ieee802154_packet_source_0 = sic.ieee802154_packet_source(samp_rate, payload_length_h, True)
+        self.sic_ble_packet_source_0_0 = sic.ble_packet_source(samp_rate, payload_length_l, ble_transmission_rate, 0x12345678)
+        self.sic_ble_hier_rx_0 = sic.ble_hier_rx(samp_rate, ble_transmission_rate, 0, 0x12345678)
         self._pause_button_choices = {'Pressed': bool(1), 'Released': bool(0)}
 
         _pause_button_toggle_button = qtgui.ToggleButton(self.set_pause_button, 'Pause Periodic Transmission', self._pause_button_choices, False, 'value')
@@ -250,52 +234,50 @@ class sic_app(gr.top_block, Qt.QWidget):
         self.iio_pluto_source_0.set_frequency(centre_frequency)
         self.iio_pluto_source_0.set_samplerate(samp_rate)
         self.iio_pluto_source_0.set_gain_mode(0, 'manual')
-        self.iio_pluto_source_0.set_gain(0, 50)
+        self.iio_pluto_source_0.set_gain(0, 45)
         self.iio_pluto_source_0.set_quadrature(True)
-        self.iio_pluto_source_0.set_rfdc(False)
-        self.iio_pluto_source_0.set_bbdc(False)
+        self.iio_pluto_source_0.set_rfdc(True)
+        self.iio_pluto_source_0.set_bbdc(True)
         self.iio_pluto_source_0.set_filter_params('Auto', '', 0, 0)
         self.iio_pluto_sink_0 = iio.fmcomms2_sink_fc32('192.168.3.1' if '192.168.3.1' else iio.get_pluto_uri(), [True, True], 32768, False)
         self.iio_pluto_sink_0.set_len_tag_key('')
-        self.iio_pluto_sink_0.set_bandwidth(int(samp_rate))
+        self.iio_pluto_sink_0.set_bandwidth((int(samp_rate)*2))
         self.iio_pluto_sink_0.set_frequency(centre_frequency)
         self.iio_pluto_sink_0.set_samplerate(samp_rate)
         self.iio_pluto_sink_0.set_attenuation(0, 0)
         self.iio_pluto_sink_0.set_filter_params('Auto', '', 0, 0)
-        self._delay_h_range = qtgui.Range(0, (int(800 * samp_rate * 1e-6)), 1, (int(160 * samp_rate * 1e-6)), 200)
-        self._delay_h_win = qtgui.RangeWidget(self._delay_h_range, self.set_delay_h, "Delay (µs)", "eng_slider", int, QtCore.Qt.Horizontal)
-        self.top_grid_layout.addWidget(self._delay_h_win, 4, 0, 1, 1)
-        for r in range(4, 5):
-            self.top_grid_layout.setRowStretch(r, 1)
-        for c in range(0, 1):
-            self.top_grid_layout.setColumnStretch(c, 1)
+        self.blocks_multiply_const_vxx_0_0_0 = blocks.multiply_const_cc(amplitude_l)
+        self.blocks_multiply_const_vxx_0_0 = blocks.multiply_const_cc(amplitude_h)
+        self.blocks_delay_0_0 = blocks.delay(gr.sizeof_gr_complex*1, delay_h)
         self.blocks_delay_0 = blocks.delay(gr.sizeof_gr_complex*1, delay_l)
-        self._amplitude_l_range = qtgui.Range(0, 4, 0.2, 0.5, 200)
-        self._amplitude_l_win = qtgui.RangeWidget(self._amplitude_l_range, self.set_amplitude_l, "Amplitude Multiplier", "eng_slider", float, QtCore.Qt.Horizontal)
-        self.top_grid_layout.addWidget(self._amplitude_l_win, 5, 1, 1, 1)
-        for r in range(5, 6):
-            self.top_grid_layout.setRowStretch(r, 1)
-        for c in range(1, 2):
-            self.top_grid_layout.setColumnStretch(c, 1)
-        self._amplitude_h_range = qtgui.Range(0, 4, 0.2, 1, 200)
-        self._amplitude_h_win = qtgui.RangeWidget(self._amplitude_h_range, self.set_amplitude_h, "Amplitude Multiplier", "eng_slider", float, QtCore.Qt.Horizontal)
-        self.top_grid_layout.addWidget(self._amplitude_h_win, 5, 0, 1, 1)
-        for r in range(5, 6):
-            self.top_grid_layout.setRowStretch(r, 1)
-        for c in range(0, 1):
-            self.top_grid_layout.setColumnStretch(c, 1)
+        self.blocks_add_xx_0 = blocks.add_vcc(1)
+        self.ble_tagged_iq_to_vector_0 = sic.tagged_iq_to_vector((int(trigger_delay * samp_rate)), (int(trigger_delay * samp_rate)), (100000 * int(samp_rate / symbol_rate_high)))
+        self.ble_tag_iq_stream_0 = sic.tag_iq_stream((int(samp_rate / symbol_rate_high)))
+        self.ble_plot_sic_results_0 = sic.plot_sic_results(samp_rate, 10)
 
 
         ##################################################
         # Connections
         ##################################################
+        self.msg_connect((self.ble_tagged_iq_to_vector_0, 'out'), (self.sic_successive_interference_cancellation_0, 'iq'))
         self.msg_connect((self.pause_button, 'state'), (self.sic_periodic_message_source_0, 'pause'))
+        self.msg_connect((self.sic_ble_hier_rx_0, 'pdu'), (self.sic_successive_interference_cancellation_0, 'pdu'))
         self.msg_connect((self.sic_periodic_message_source_0, 'out'), (self.sic_transmission_enabler_0, 'trigger'))
+        self.msg_connect((self.sic_successive_interference_cancellation_0, 'out'), (self.ble_plot_sic_results_0, 'in'))
         self.msg_connect((self.tx_trigger_button, 'pressed'), (self.sic_transmission_enabler_0, 'trigger'))
-        self.connect((self.blocks_delay_0, 0), (self.iio_pluto_sink_0, 0))
-        self.connect((self.iio_pluto_source_0, 0), (self.qtgui_time_sink_x_0_0_0, 0))
+        self.connect((self.ble_tag_iq_stream_0, 0), (self.ble_tagged_iq_to_vector_0, 0))
+        self.connect((self.blocks_add_xx_0, 0), (self.iio_pluto_sink_0, 0))
+        self.connect((self.blocks_delay_0, 0), (self.blocks_multiply_const_vxx_0_0_0, 0))
+        self.connect((self.blocks_delay_0_0, 0), (self.blocks_multiply_const_vxx_0_0, 0))
+        self.connect((self.blocks_multiply_const_vxx_0_0, 0), (self.blocks_add_xx_0, 0))
+        self.connect((self.blocks_multiply_const_vxx_0_0_0, 0), (self.blocks_add_xx_0, 1))
+        self.connect((self.iio_pluto_source_0, 0), (self.ble_tag_iq_stream_0, 0))
+        self.connect((self.iio_pluto_source_0, 0), (self.sic_ble_hier_rx_0, 0))
+        self.connect((self.sic_ble_hier_rx_0, 0), (self.ble_tag_iq_stream_0, 1))
         self.connect((self.sic_ble_packet_source_0_0, 0), (self.blocks_delay_0, 0))
+        self.connect((self.sic_ieee802154_packet_source_0, 0), (self.blocks_delay_0_0, 0))
         self.connect((self.sic_transmission_enabler_0, 0), (self.sic_ble_packet_source_0_0, 0))
+        self.connect((self.sic_transmission_enabler_0, 0), (self.sic_ieee802154_packet_source_0, 0))
 
 
     def closeEvent(self, event):
@@ -311,18 +293,16 @@ class sic_app(gr.top_block, Qt.QWidget):
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.set_delay_h((int(160 * self.samp_rate * 1e-6)))
-        self.iio_pluto_sink_0.set_bandwidth(int(self.samp_rate))
+        self.set_delay_h((int(0 * self.samp_rate * 1e-6)))
+        self.iio_pluto_sink_0.set_bandwidth((int(self.samp_rate)*2))
         self.iio_pluto_sink_0.set_samplerate(self.samp_rate)
         self.iio_pluto_source_0.set_samplerate(self.samp_rate)
-        self.qtgui_time_sink_x_0_0_0.set_samp_rate(self.samp_rate)
 
     def get_trigger_delay(self):
         return self.trigger_delay
 
     def set_trigger_delay(self, trigger_delay):
         self.trigger_delay = trigger_delay
-        self.qtgui_time_sink_x_0_0_0.set_trigger_mode(qtgui.TRIG_MODE_NORM, qtgui.TRIG_SLOPE_POS, 0.5, self.trigger_delay, 0, "Payload start")
 
     def get_symbol_rate_high(self):
         return self.symbol_rate_high
@@ -342,6 +322,7 @@ class sic_app(gr.top_block, Qt.QWidget):
 
     def set_payload_length_h(self, payload_length_h):
         self.payload_length_h = payload_length_h
+        self.sic_ieee802154_packet_source_0.set_payload_length(self.payload_length_h)
 
     def get_pause_button(self):
         return self.pause_button
@@ -382,6 +363,7 @@ class sic_app(gr.top_block, Qt.QWidget):
 
     def set_delay_h(self, delay_h):
         self.delay_h = delay_h
+        self.blocks_delay_0_0.set_dly(int(self.delay_h))
 
     def get_centre_frequency(self):
         return self.centre_frequency
@@ -404,12 +386,14 @@ class sic_app(gr.top_block, Qt.QWidget):
 
     def set_amplitude_l(self, amplitude_l):
         self.amplitude_l = amplitude_l
+        self.blocks_multiply_const_vxx_0_0_0.set_k(self.amplitude_l)
 
     def get_amplitude_h(self):
         return self.amplitude_h
 
     def set_amplitude_h(self, amplitude_h):
         self.amplitude_h = amplitude_h
+        self.blocks_multiply_const_vxx_0_0.set_k(self.amplitude_h)
 
 
 
