@@ -65,9 +65,13 @@ class sic_app(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.samp_rate = samp_rate = int(4e6)
+        self.slowing_factor = slowing_factor = 2
+        self.ble_transmission_rate = ble_transmission_rate = 1000000
+        self.symbol_rate_ble = symbol_rate_ble = int(ble_transmission_rate / slowing_factor)
         self.trigger_delay = trigger_delay = 700e-6 *2
-        self.symbol_rate_high = symbol_rate_high = int(1e6)
+        self.symbol_rate_ieee802154 = symbol_rate_ieee802154 = int(2e6 / slowing_factor)
+        self.symbol_rate_high = symbol_rate_high = symbol_rate_ble
+        self.samp_rate = samp_rate = int(2e6)
         self.payload_length_l = payload_length_l = 140
         self.payload_length_h = payload_length_h = 10
         self.pause_button = pause_button = 0
@@ -75,11 +79,10 @@ class sic_app(gr.top_block, Qt.QWidget):
         self.label_802154_tx_rate = label_802154_tx_rate = '250 kbit/s'
         self.label_802154 = label_802154 = ''
         self.delay_l = delay_l = 0
-        self.delay_h = delay_h = (int(0 * samp_rate * 1e-6))
+        self.delay_h = delay_h = 0
         self.centre_frequency = centre_frequency = int(2495e6)
-        self.ble_transmission_rate = ble_transmission_rate = 1000000
-        self.amplitude_l = amplitude_l = 0.5
-        self.amplitude_h = amplitude_h = 1
+        self.amplitude_l = amplitude_l = 0.3
+        self.amplitude_h = amplitude_h = 0.3
 
         ##################################################
         # Blocks
@@ -99,48 +102,28 @@ class sic_app(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(0, 1):
             self.top_grid_layout.setColumnStretch(c, 1)
-        self._delay_l_range = qtgui.Range(0, (int(800 * samp_rate * 1e-6)), 1, 0, 200)
+        self._delay_l_range = qtgui.Range(0, 6000, 1, 0, 200)
         self._delay_l_win = qtgui.RangeWidget(self._delay_l_range, self.set_delay_l, "Delay (µs)", "eng_slider", int, QtCore.Qt.Horizontal)
         self.top_grid_layout.addWidget(self._delay_l_win, 4, 1, 1, 1)
         for r in range(4, 5):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(1, 2):
             self.top_grid_layout.setColumnStretch(c, 1)
-        self._delay_h_range = qtgui.Range(0, (int(800 * samp_rate * 1e-6)), 1, (int(0 * samp_rate * 1e-6)), 200)
+        self._delay_h_range = qtgui.Range(0, 6000, 1, 0, 200)
         self._delay_h_win = qtgui.RangeWidget(self._delay_h_range, self.set_delay_h, "Delay (µs)", "eng_slider", int, QtCore.Qt.Horizontal)
         self.top_grid_layout.addWidget(self._delay_h_win, 4, 0, 1, 1)
         for r in range(4, 5):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(0, 1):
             self.top_grid_layout.setColumnStretch(c, 1)
-        # Create the options list
-        self._ble_transmission_rate_options = [1000000, 2000000]
-        # Create the labels list
-        self._ble_transmission_rate_labels = ['1 Mbit/s', '2 Mbit/s']
-        # Create the combo box
-        self._ble_transmission_rate_tool_bar = Qt.QToolBar(self)
-        self._ble_transmission_rate_tool_bar.addWidget(Qt.QLabel("BLE Transmission Rate" + ": "))
-        self._ble_transmission_rate_combo_box = Qt.QComboBox()
-        self._ble_transmission_rate_tool_bar.addWidget(self._ble_transmission_rate_combo_box)
-        for _label in self._ble_transmission_rate_labels: self._ble_transmission_rate_combo_box.addItem(_label)
-        self._ble_transmission_rate_callback = lambda i: Qt.QMetaObject.invokeMethod(self._ble_transmission_rate_combo_box, "setCurrentIndex", Qt.Q_ARG("int", self._ble_transmission_rate_options.index(i)))
-        self._ble_transmission_rate_callback(self.ble_transmission_rate)
-        self._ble_transmission_rate_combo_box.currentIndexChanged.connect(
-            lambda i: self.set_ble_transmission_rate(self._ble_transmission_rate_options[i]))
-        # Create the radio buttons
-        self.top_grid_layout.addWidget(self._ble_transmission_rate_tool_bar, 2, 1, 1, 1)
-        for r in range(2, 3):
-            self.top_grid_layout.setRowStretch(r, 1)
-        for c in range(1, 2):
-            self.top_grid_layout.setColumnStretch(c, 1)
-        self._amplitude_l_range = qtgui.Range(0, 4, 0.2, 0.5, 200)
+        self._amplitude_l_range = qtgui.Range(0, 1, 0.05, 0.3, 200)
         self._amplitude_l_win = qtgui.RangeWidget(self._amplitude_l_range, self.set_amplitude_l, "Amplitude Multiplier", "eng_slider", float, QtCore.Qt.Horizontal)
         self.top_grid_layout.addWidget(self._amplitude_l_win, 5, 1, 1, 1)
         for r in range(5, 6):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(1, 2):
             self.top_grid_layout.setColumnStretch(c, 1)
-        self._amplitude_h_range = qtgui.Range(0, 4, 0.2, 1, 200)
+        self._amplitude_h_range = qtgui.Range(0, 1, 0.05, 0.3, 200)
         self._amplitude_h_win = qtgui.RangeWidget(self._amplitude_h_range, self.set_amplitude_h, "Amplitude Multiplier", "eng_slider", float, QtCore.Qt.Horizontal)
         self.top_grid_layout.addWidget(self._amplitude_h_win, 5, 0, 1, 1)
         for r in range(5, 6):
@@ -158,7 +141,7 @@ class sic_app(gr.top_block, Qt.QWidget):
         self.sic_transmission_enabler_0 = sic.transmission_enabler(1024)
         self.sic_successive_interference_cancellation_0 = sic.successive_interference_cancellation(
           samp_rate,
-          10,
+          2,
           0,
           1,
           -10000,
@@ -166,13 +149,14 @@ class sic_app(gr.top_block, Qt.QWidget):
           100,
           2,
           50,
-          1e6,
           2,
+          symbol_rate_ble,
+          symbol_rate_ieee802154,
         )
         self.sic_periodic_message_source_0 = sic.periodic_message_source(gr.pmt.mp("trigger"), 2000, (-1))
-        self.sic_ieee802154_packet_source_0 = sic.ieee802154_packet_source(samp_rate, payload_length_h, True)
-        self.sic_ble_packet_source_0_0 = sic.ble_packet_source(samp_rate, payload_length_l, ble_transmission_rate, 0x12345678)
-        self.sic_ble_hier_rx_0 = sic.ble_hier_rx(samp_rate, ble_transmission_rate, 0, 0x12345678)
+        self.sic_ieee802154_packet_source_0 = sic.ieee802154_packet_source(samp_rate, payload_length_h, True, symbol_rate_ieee802154)
+        self.sic_ble_packet_source_0_0 = sic.ble_packet_source(samp_rate, payload_length_l, 0x12345678, symbol_rate_ble)
+        self.sic_ble_hier_rx_0 = sic.ble_hier_rx(samp_rate, symbol_rate_ble, 0, 0x12345678)
         self._pause_button_choices = {'Pressed': bool(1), 'Released': bool(0)}
 
         _pause_button_toggle_button = qtgui.ToggleButton(self.set_pause_button, 'Pause Periodic Transmission', self._pause_button_choices, False, 'value')
@@ -239,6 +223,13 @@ class sic_app(gr.top_block, Qt.QWidget):
         self.iio_pluto_source_0.set_rfdc(True)
         self.iio_pluto_source_0.set_bbdc(True)
         self.iio_pluto_source_0.set_filter_params('Auto', '', 0, 0)
+        self.iio_pluto_sink_0_0 = iio.fmcomms2_sink_fc32('192.168.2.1' if '192.168.2.1' else iio.get_pluto_uri(), [True, True], 32768, False)
+        self.iio_pluto_sink_0_0.set_len_tag_key('')
+        self.iio_pluto_sink_0_0.set_bandwidth(int(samp_rate))
+        self.iio_pluto_sink_0_0.set_frequency(centre_frequency)
+        self.iio_pluto_sink_0_0.set_samplerate(samp_rate)
+        self.iio_pluto_sink_0_0.set_attenuation(0, 0)
+        self.iio_pluto_sink_0_0.set_filter_params('Auto', '', 0, 0)
         self.iio_pluto_sink_0 = iio.fmcomms2_sink_fc32('192.168.3.1' if '192.168.3.1' else iio.get_pluto_uri(), [True, True], 32768, False)
         self.iio_pluto_sink_0.set_len_tag_key('')
         self.iio_pluto_sink_0.set_bandwidth((int(samp_rate)*2))
@@ -246,11 +237,30 @@ class sic_app(gr.top_block, Qt.QWidget):
         self.iio_pluto_sink_0.set_samplerate(samp_rate)
         self.iio_pluto_sink_0.set_attenuation(0, 0)
         self.iio_pluto_sink_0.set_filter_params('Auto', '', 0, 0)
-        self.blocks_multiply_const_vxx_0_0_0 = blocks.multiply_const_cc(amplitude_l)
-        self.blocks_multiply_const_vxx_0_0 = blocks.multiply_const_cc(amplitude_h)
-        self.blocks_delay_0_0 = blocks.delay(gr.sizeof_gr_complex*1, delay_h)
-        self.blocks_delay_0 = blocks.delay(gr.sizeof_gr_complex*1, delay_l)
-        self.blocks_add_xx_0 = blocks.add_vcc(1)
+        self.blocks_multiply_const_vxx_0_0 = blocks.multiply_const_cc(amplitude_l)
+        self.blocks_multiply_const_vxx_0 = blocks.multiply_const_cc(amplitude_h)
+        self.blocks_delay_0_0 = blocks.delay(gr.sizeof_gr_complex*1, (int(delay_h * samp_rate * 1e-6)))
+        self.blocks_delay_0 = blocks.delay(gr.sizeof_gr_complex*1, (int(delay_l * samp_rate * 1e-6)))
+        # Create the options list
+        self._ble_transmission_rate_options = [1000000, 2000000]
+        # Create the labels list
+        self._ble_transmission_rate_labels = ['1 Mbit/s', '2 Mbit/s']
+        # Create the combo box
+        self._ble_transmission_rate_tool_bar = Qt.QToolBar(self)
+        self._ble_transmission_rate_tool_bar.addWidget(Qt.QLabel("BLE Transmission Rate" + ": "))
+        self._ble_transmission_rate_combo_box = Qt.QComboBox()
+        self._ble_transmission_rate_tool_bar.addWidget(self._ble_transmission_rate_combo_box)
+        for _label in self._ble_transmission_rate_labels: self._ble_transmission_rate_combo_box.addItem(_label)
+        self._ble_transmission_rate_callback = lambda i: Qt.QMetaObject.invokeMethod(self._ble_transmission_rate_combo_box, "setCurrentIndex", Qt.Q_ARG("int", self._ble_transmission_rate_options.index(i)))
+        self._ble_transmission_rate_callback(self.ble_transmission_rate)
+        self._ble_transmission_rate_combo_box.currentIndexChanged.connect(
+            lambda i: self.set_ble_transmission_rate(self._ble_transmission_rate_options[i]))
+        # Create the radio buttons
+        self.top_grid_layout.addWidget(self._ble_transmission_rate_tool_bar, 2, 1, 1, 1)
+        for r in range(2, 3):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(1, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
         self.ble_tagged_iq_to_vector_0 = sic.tagged_iq_to_vector((int(trigger_delay * samp_rate)), (int(trigger_delay * samp_rate)), (100000 * int(samp_rate / symbol_rate_high)))
         self.ble_tag_iq_stream_0 = sic.tag_iq_stream((int(samp_rate / symbol_rate_high)))
         self.ble_plot_sic_results_0 = sic.plot_sic_results(samp_rate, 10)
@@ -266,11 +276,10 @@ class sic_app(gr.top_block, Qt.QWidget):
         self.msg_connect((self.sic_successive_interference_cancellation_0, 'out'), (self.ble_plot_sic_results_0, 'in'))
         self.msg_connect((self.tx_trigger_button, 'pressed'), (self.sic_transmission_enabler_0, 'trigger'))
         self.connect((self.ble_tag_iq_stream_0, 0), (self.ble_tagged_iq_to_vector_0, 0))
-        self.connect((self.blocks_add_xx_0, 0), (self.iio_pluto_sink_0, 0))
-        self.connect((self.blocks_delay_0, 0), (self.blocks_multiply_const_vxx_0_0_0, 0))
-        self.connect((self.blocks_delay_0_0, 0), (self.blocks_multiply_const_vxx_0_0, 0))
-        self.connect((self.blocks_multiply_const_vxx_0_0, 0), (self.blocks_add_xx_0, 0))
-        self.connect((self.blocks_multiply_const_vxx_0_0_0, 0), (self.blocks_add_xx_0, 1))
+        self.connect((self.blocks_delay_0, 0), (self.blocks_multiply_const_vxx_0_0, 0))
+        self.connect((self.blocks_delay_0_0, 0), (self.blocks_multiply_const_vxx_0, 0))
+        self.connect((self.blocks_multiply_const_vxx_0, 0), (self.iio_pluto_sink_0_0, 0))
+        self.connect((self.blocks_multiply_const_vxx_0_0, 0), (self.iio_pluto_sink_0, 0))
         self.connect((self.iio_pluto_source_0, 0), (self.ble_tag_iq_stream_0, 0))
         self.connect((self.iio_pluto_source_0, 0), (self.sic_ble_hier_rx_0, 0))
         self.connect((self.sic_ble_hier_rx_0, 0), (self.ble_tag_iq_stream_0, 1))
@@ -288,15 +297,31 @@ class sic_app(gr.top_block, Qt.QWidget):
 
         event.accept()
 
-    def get_samp_rate(self):
-        return self.samp_rate
+    def get_slowing_factor(self):
+        return self.slowing_factor
 
-    def set_samp_rate(self, samp_rate):
-        self.samp_rate = samp_rate
-        self.set_delay_h((int(0 * self.samp_rate * 1e-6)))
-        self.iio_pluto_sink_0.set_bandwidth((int(self.samp_rate)*2))
-        self.iio_pluto_sink_0.set_samplerate(self.samp_rate)
-        self.iio_pluto_source_0.set_samplerate(self.samp_rate)
+    def set_slowing_factor(self, slowing_factor):
+        self.slowing_factor = slowing_factor
+        self.set_symbol_rate_ble(int(self.ble_transmission_rate / self.slowing_factor))
+        self.set_symbol_rate_ieee802154(int(2e6 / self.slowing_factor))
+
+    def get_ble_transmission_rate(self):
+        return self.ble_transmission_rate
+
+    def set_ble_transmission_rate(self, ble_transmission_rate):
+        self.ble_transmission_rate = ble_transmission_rate
+        self._ble_transmission_rate_callback(self.ble_transmission_rate)
+        self.set_symbol_rate_ble(int(self.ble_transmission_rate / self.slowing_factor))
+
+    def get_symbol_rate_ble(self):
+        return self.symbol_rate_ble
+
+    def set_symbol_rate_ble(self, symbol_rate_ble):
+        self.symbol_rate_ble = symbol_rate_ble
+        self.set_symbol_rate_high(self.symbol_rate_ble)
+        self.sic_ble_hier_rx_0.set_symbol_rate(self.symbol_rate_ble)
+        self.sic_ble_packet_source_0_0.set_transmission_rate(self.symbol_rate_ble)
+        self.sic_successive_interference_cancellation_0.set_ble_transmission_rate(self.symbol_rate_ble)
 
     def get_trigger_delay(self):
         return self.trigger_delay
@@ -304,11 +329,32 @@ class sic_app(gr.top_block, Qt.QWidget):
     def set_trigger_delay(self, trigger_delay):
         self.trigger_delay = trigger_delay
 
+    def get_symbol_rate_ieee802154(self):
+        return self.symbol_rate_ieee802154
+
+    def set_symbol_rate_ieee802154(self, symbol_rate_ieee802154):
+        self.symbol_rate_ieee802154 = symbol_rate_ieee802154
+        self.sic_ieee802154_packet_source_0.set_transmission_rate(self.symbol_rate_ieee802154)
+        self.sic_successive_interference_cancellation_0.set_ieee802154_transmission_rate(self.symbol_rate_ieee802154)
+
     def get_symbol_rate_high(self):
         return self.symbol_rate_high
 
     def set_symbol_rate_high(self, symbol_rate_high):
         self.symbol_rate_high = symbol_rate_high
+
+    def get_samp_rate(self):
+        return self.samp_rate
+
+    def set_samp_rate(self, samp_rate):
+        self.samp_rate = samp_rate
+        self.blocks_delay_0.set_dly(int((int(self.delay_l * self.samp_rate * 1e-6))))
+        self.blocks_delay_0_0.set_dly(int((int(self.delay_h * self.samp_rate * 1e-6))))
+        self.iio_pluto_sink_0.set_bandwidth((int(self.samp_rate)*2))
+        self.iio_pluto_sink_0.set_samplerate(self.samp_rate)
+        self.iio_pluto_sink_0_0.set_bandwidth(int(self.samp_rate))
+        self.iio_pluto_sink_0_0.set_samplerate(self.samp_rate)
+        self.iio_pluto_source_0.set_samplerate(self.samp_rate)
 
     def get_payload_length_l(self):
         return self.payload_length_l
@@ -356,14 +402,14 @@ class sic_app(gr.top_block, Qt.QWidget):
 
     def set_delay_l(self, delay_l):
         self.delay_l = delay_l
-        self.blocks_delay_0.set_dly(int(self.delay_l))
+        self.blocks_delay_0.set_dly(int((int(self.delay_l * self.samp_rate * 1e-6))))
 
     def get_delay_h(self):
         return self.delay_h
 
     def set_delay_h(self, delay_h):
         self.delay_h = delay_h
-        self.blocks_delay_0_0.set_dly(int(self.delay_h))
+        self.blocks_delay_0_0.set_dly(int((int(self.delay_h * self.samp_rate * 1e-6))))
 
     def get_centre_frequency(self):
         return self.centre_frequency
@@ -371,29 +417,22 @@ class sic_app(gr.top_block, Qt.QWidget):
     def set_centre_frequency(self, centre_frequency):
         self.centre_frequency = centre_frequency
         self.iio_pluto_sink_0.set_frequency(self.centre_frequency)
+        self.iio_pluto_sink_0_0.set_frequency(self.centre_frequency)
         self.iio_pluto_source_0.set_frequency(self.centre_frequency)
-
-    def get_ble_transmission_rate(self):
-        return self.ble_transmission_rate
-
-    def set_ble_transmission_rate(self, ble_transmission_rate):
-        self.ble_transmission_rate = ble_transmission_rate
-        self._ble_transmission_rate_callback(self.ble_transmission_rate)
-        self.sic_ble_packet_source_0_0.set_transmission_rate(self.ble_transmission_rate)
 
     def get_amplitude_l(self):
         return self.amplitude_l
 
     def set_amplitude_l(self, amplitude_l):
         self.amplitude_l = amplitude_l
-        self.blocks_multiply_const_vxx_0_0_0.set_k(self.amplitude_l)
+        self.blocks_multiply_const_vxx_0_0.set_k(self.amplitude_l)
 
     def get_amplitude_h(self):
         return self.amplitude_h
 
     def set_amplitude_h(self, amplitude_h):
         self.amplitude_h = amplitude_h
-        self.blocks_multiply_const_vxx_0_0.set_k(self.amplitude_h)
+        self.blocks_multiply_const_vxx_0.set_k(self.amplitude_h)
 
 
 
