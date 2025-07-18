@@ -66,9 +66,9 @@ class sic_simulation_app(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.samp_rate = samp_rate = int(10e6)
         self.trigger_delay = trigger_delay = 700e-6 *2
         self.symbol_rate_high = symbol_rate_high = int(2e6)
+        self.samp_rate = samp_rate = int(10e6)
         self.payload_length_l = payload_length_l = 140
         self.payload_length_h = payload_length_h = 10
         self.pause_button = pause_button = 0
@@ -76,7 +76,7 @@ class sic_simulation_app(gr.top_block, Qt.QWidget):
         self.label_802154_tx_rate = label_802154_tx_rate = '250 kbit/s'
         self.label_802154 = label_802154 = ''
         self.delay_l = delay_l = 0
-        self.delay_h = delay_h = (int(160 * samp_rate * 1e-6))
+        self.delay_h = delay_h = 160
         self.ble_transmission_rate = ble_transmission_rate = 1000000
         self.amplitude_l = amplitude_l = 0.5
         self.amplitude_h = amplitude_h = 1
@@ -99,14 +99,14 @@ class sic_simulation_app(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(0, 1):
             self.top_grid_layout.setColumnStretch(c, 1)
-        self._delay_l_range = qtgui.Range(0, (int(800 * samp_rate * 1e-6)), 1, 0, 200)
+        self._delay_l_range = qtgui.Range(0, 1000, 1, 0, 200)
         self._delay_l_win = qtgui.RangeWidget(self._delay_l_range, self.set_delay_l, "Delay (µs)", "eng_slider", int, QtCore.Qt.Horizontal)
         self.top_grid_layout.addWidget(self._delay_l_win, 4, 1, 1, 1)
         for r in range(4, 5):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(1, 2):
             self.top_grid_layout.setColumnStretch(c, 1)
-        self._delay_h_range = qtgui.Range(0, (int(800 * samp_rate * 1e-6)), 1, (int(160 * samp_rate * 1e-6)), 200)
+        self._delay_h_range = qtgui.Range(0, 1000, 1, 160, 200)
         self._delay_h_win = qtgui.RangeWidget(self._delay_h_range, self.set_delay_h, "Delay (µs)", "eng_slider", int, QtCore.Qt.Horizontal)
         self.top_grid_layout.addWidget(self._delay_h_win, 4, 0, 1, 1)
         for r in range(4, 5):
@@ -166,13 +166,14 @@ class sic_simulation_app(gr.top_block, Qt.QWidget):
           100,
           2,
           50,
-          1e6,
           2,
+          1e6,
+          2e6,
         )
         self.sic_periodic_message_source_0 = sic.periodic_message_source(gr.pmt.mp("trigger"), 2000, (-1))
-        self.sic_ieee802154_packet_source_0 = sic.ieee802154_packet_source(samp_rate, payload_length_h, True)
+        self.sic_ieee802154_packet_source_0 = sic.ieee802154_packet_source(samp_rate, payload_length_h, True, 2000000)
         self.sic_ieee802154_hier_rx_0 = sic.ieee802154_hier_rx(samp_rate, 2e6, 5)
-        self.sic_ble_packet_source_0_0 = sic.ble_packet_source(samp_rate, payload_length_l, ble_transmission_rate, 0x12345678)
+        self.sic_ble_packet_source_0_0 = sic.ble_packet_source(samp_rate, payload_length_l, 0x12345678, ble_transmission_rate)
         self.qtgui_waterfall_sink_x_0 = qtgui.waterfall_sink_c(
             32768, #size
             window.WIN_HANN, #wintype
@@ -287,8 +288,8 @@ class sic_simulation_app(gr.top_block, Qt.QWidget):
         self.blocks_tag_gate_0.set_single_key("")
         self.blocks_multiply_const_vxx_0_0 = blocks.multiply_const_cc(amplitude_l)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_cc(amplitude_h)
-        self.blocks_delay_0_0 = blocks.delay(gr.sizeof_gr_complex*1, delay_h)
-        self.blocks_delay_0 = blocks.delay(gr.sizeof_gr_complex*1, delay_l)
+        self.blocks_delay_0_0 = blocks.delay(gr.sizeof_gr_complex*1, (int(delay_h * samp_rate * 1e-6)))
+        self.blocks_delay_0 = blocks.delay(gr.sizeof_gr_complex*1, (int(delay_l * samp_rate * 1e-6)))
         self.blocks_add_xx_0 = blocks.add_vcc(1)
         self.ble_tagged_iq_to_vector_0 = sic.tagged_iq_to_vector((int(trigger_delay * samp_rate)), (int(trigger_delay * samp_rate)), (100000 * int(samp_rate / symbol_rate_high)))
         self.ble_tag_iq_stream_0 = sic.tag_iq_stream((int(samp_rate / symbol_rate_high)))
@@ -331,15 +332,6 @@ class sic_simulation_app(gr.top_block, Qt.QWidget):
 
         event.accept()
 
-    def get_samp_rate(self):
-        return self.samp_rate
-
-    def set_samp_rate(self, samp_rate):
-        self.samp_rate = samp_rate
-        self.set_delay_h((int(160 * self.samp_rate * 1e-6)))
-        self.blocks_throttle2_0_1.set_sample_rate((self.samp_rate/20))
-        self.qtgui_waterfall_sink_x_0.set_frequency_range(0, self.samp_rate)
-
     def get_trigger_delay(self):
         return self.trigger_delay
 
@@ -351,6 +343,16 @@ class sic_simulation_app(gr.top_block, Qt.QWidget):
 
     def set_symbol_rate_high(self, symbol_rate_high):
         self.symbol_rate_high = symbol_rate_high
+
+    def get_samp_rate(self):
+        return self.samp_rate
+
+    def set_samp_rate(self, samp_rate):
+        self.samp_rate = samp_rate
+        self.blocks_delay_0.set_dly(int((int(self.delay_l * self.samp_rate * 1e-6))))
+        self.blocks_delay_0_0.set_dly(int((int(self.delay_h * self.samp_rate * 1e-6))))
+        self.blocks_throttle2_0_1.set_sample_rate((self.samp_rate/20))
+        self.qtgui_waterfall_sink_x_0.set_frequency_range(0, self.samp_rate)
 
     def get_payload_length_l(self):
         return self.payload_length_l
@@ -398,14 +400,14 @@ class sic_simulation_app(gr.top_block, Qt.QWidget):
 
     def set_delay_l(self, delay_l):
         self.delay_l = delay_l
-        self.blocks_delay_0.set_dly(int(self.delay_l))
+        self.blocks_delay_0.set_dly(int((int(self.delay_l * self.samp_rate * 1e-6))))
 
     def get_delay_h(self):
         return self.delay_h
 
     def set_delay_h(self, delay_h):
         self.delay_h = delay_h
-        self.blocks_delay_0_0.set_dly(int(self.delay_h))
+        self.blocks_delay_0_0.set_dly(int((int(self.delay_h * self.samp_rate * 1e-6))))
 
     def get_ble_transmission_rate(self):
         return self.ble_transmission_rate

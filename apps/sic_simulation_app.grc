@@ -116,8 +116,8 @@ blocks:
     rangeType: int
     start: '0'
     step: '1'
-    stop: int(800 * samp_rate * 1e-6)
-    value: int(160 * samp_rate * 1e-6)
+    stop: '1000'
+    value: '160'
     widget: eng_slider
   states:
     bus_sink: false
@@ -137,7 +137,7 @@ blocks:
     rangeType: int
     start: '0'
     step: '1'
-    stop: int(800 * samp_rate * 1e-6)
+    stop: '1000'
     value: '0'
     widget: eng_slider
   states:
@@ -369,7 +369,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    delay: delay_l
+    delay: int(delay_l * samp_rate * 1e-6)
     maxoutbuf: '0'
     minoutbuf: '0'
     num_ports: '1'
@@ -389,7 +389,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    delay: delay_h
+    delay: int(delay_h * samp_rate * 1e-6)
     maxoutbuf: '0'
     minoutbuf: '0'
     num_ports: '1'
@@ -761,6 +761,7 @@ blocks:
     minoutbuf: '0'
     payload_length: payload_length_h
     sample_rate: samp_rate
+    transmission_rate: '2000000'
   states:
     bus_sink: false
     bus_source: false
@@ -798,6 +799,7 @@ blocks:
     frequency_step_coarse: '100'
     frequency_step_fine: '2'
     frequency_stop: '10000'
+    ieee802154_transmission_rate: 2e6
     max_queue_size: '10'
     maxoutbuf: '0'
     minoutbuf: '0'
