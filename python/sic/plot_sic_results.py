@@ -76,30 +76,39 @@ class sic_plotter(QtWidgets.QWidget):
         super().__init__(parent)
         self.sample_rate = sample_rate
         self.setWindowTitle("SIC Results")
-        # self.resize(1200, 800)
         layout = QtWidgets.QGridLayout()
         self.setLayout(layout)
 
+        # Create plots
         self.iq_before_plot = PlotWidget(title="IQ (Before SIC)")
         self.iq_after_plot = PlotWidget(title="IQ (After SIC)")
         self.payload_before_plot = PlotWidget(title="Payload (Before SIC)")
         self.payload_after_plot = PlotWidget(title="Payload (After SIC)")
 
-        self._configure_iq_plot(self.iq_before_plot)
-        self._configure_iq_plot(self.iq_after_plot)
+        # Configure plots
+        self._configure_iq_plot(self.iq_before_plot, autorange=True)
+        self._configure_iq_plot(self.iq_after_plot, autorange=False)
         self._configure_payload_plot(self.payload_before_plot)
         self._configure_payload_plot(self.payload_after_plot)
 
+        # Link X and Y axes between before and after IQ plots
+        self.iq_after_plot.setXLink(self.iq_before_plot)
+        self.iq_after_plot.setYLink(self.iq_before_plot)
+
+        # Add to layout
         layout.addWidget(self.iq_before_plot, 0, 0)
         layout.addWidget(self.payload_before_plot, 0, 1)
         layout.addWidget(self.iq_after_plot, 1, 0)
         layout.addWidget(self.payload_after_plot, 1, 1)
 
-    def _configure_iq_plot(self, plot):
+    def _configure_iq_plot(self, plot, autorange=True):
         plot.setLabel("left", "Amplitude")
         plot.addLegend()
         plot.showGrid(x=True, y=True)
-        plot.enableAutoRange(axis=pg.ViewBox.YAxis)
+        if autorange:
+            plot.enableAutoRange(axis=pg.ViewBox.XYAxes)
+        else:
+            plot.disableAutoRange()
 
     def _configure_payload_plot(self, plot):
         plot.setLabel("left", "Value (0-255)")
@@ -127,8 +136,6 @@ class sic_plotter(QtWidgets.QWidget):
         plot.plot(time_axis, np.imag(iq_data), pen=pg.mkPen("r", width=1.5), name="Q (Quadrature)", alpha=0.7)
 
         plot.setLabel("bottom", "Time (µs)" if plot_sample_rate != 1 else "Samples")
-        plot.autoRange()
-        plot.setXRange(time_axis[0], time_axis[-1], padding=0)
 
     def _update_payload_plot(self, plot, payload_data, label):
         payload_ints = np.frombuffer(payload_data, dtype=np.uint8)
