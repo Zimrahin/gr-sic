@@ -17,7 +17,6 @@ parameters:
   label: Symbol Rate
   dtype: float
   default: 2e6
-  hide: part
 - id: preamble_threshold
   label: Preamble Threshold
   dtype: int
