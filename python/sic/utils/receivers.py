@@ -272,13 +272,15 @@ class Receiver802154(Receiver):
             iq_samples = scipy.signal.correlate(iq_samples, self.hss_taps, mode="full")
 
             # Frequency demodulation
-            freq_samples = demodulate_frequency(iq_samples, gain=(self._sample_rate) / (2 * np.pi * self.fsk_deviation))
+            freq_samples = demodulate_frequency(
+                iq_samples, gain=(self._sample_rate) / (2 * np.pi * self._fsk_deviation)
+            )
             freq_samples -= single_pole_iir_filter(freq_samples, alpha=160e-6)
             before_symbol_sync = scipy.signal.correlate(freq_samples, self.rect_taps, mode="full")
 
         elif demodulation_type == "BAND_PASS":
             complex_exp = np.exp(
-                1j * 2 * np.pi * self.fsk_deviation * np.arange(len(self.rect_taps)) / self._sample_rate
+                1j * 2 * np.pi * self._fsk_deviation * np.arange(len(self.rect_taps)) / self._sample_rate
             )
             rect_bandpass_lower = self.rect_taps / complex_exp
             rect_bandpass_higher = self.rect_taps * complex_exp
