@@ -21,7 +21,6 @@ public:
     tag_iq_stream_impl(uint sps);
     ~tag_iq_stream_impl();
 
-    // Where all the action really happens
     void forecast(int noutput_items, gr_vector_int& ninput_items_required);
 
     int general_work(int noutput_items,
@@ -29,8 +28,12 @@ public:
                      gr_vector_const_void_star& input_items,
                      gr_vector_void_star& output_items);
 
+    uint sps() const override { return d_sps; }
+    void set_sps(uint sps) override;
+
 private:
     uint d_sps; // Samples per symbol
+    gr::thread::mutex d_mutex;
 };
 
 } // namespace sic

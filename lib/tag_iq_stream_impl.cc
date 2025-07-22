@@ -31,7 +31,7 @@ tag_iq_stream_impl::tag_iq_stream_impl(uint sps)
       d_sps(sps)
 {
     set_output_multiple(d_sps);
-    set_tag_propagation_policy(TPP_CUSTOM); // Handle tags manually
+    set_tag_propagation_policy(TPP_CUSTOM);
 }
 
 // Destructor
@@ -44,6 +44,14 @@ void tag_iq_stream_impl::forecast(int noutput_items, gr_vector_int& ninput_items
     ninput_items_required[1] = noutput_items / d_sps;
 }
 
+void tag_iq_stream_impl::set_sps(uint sps)
+{
+    gr::thread::scoped_lock guard(d_mutex);
+    d_sps = sps;
+    set_output_multiple(d_sps);
+    set_relative_rate(1, d_sps);
+}
+
 int tag_iq_stream_impl::general_work(int noutput_items,
                                      gr_vector_int& ninput_items,
                                      gr_vector_const_void_star& input_items,
@@ -52,10 +60,15 @@ int tag_iq_stream_impl::general_work(int noutput_items,
     auto in_iq = static_cast<const input_type_0*>(input_items[0]);
     auto out_iq = static_cast<output_type*>(output_items[0]);
 
+
+    gr::thread::scoped_lock lock(d_mutex);
+    const uint current_sps = d_sps;
+
+
     // Ensure ratio between IQ input and symbol input of sps to 1
     int n_symbols = std::min(static_cast<int>(ninput_items[1]),
-                             std::min(static_cast<int>(ninput_items[0] / d_sps),
-                                      static_cast<int>(noutput_items / d_sps)));
+                             std::min(static_cast<int>(ninput_items[0] / current_sps),
+                                      static_cast<int>(noutput_items / current_sps)));
     if (n_symbols == 0) {
         consume(0, 0);
         consume(1, 0);
@@ -63,7 +76,7 @@ int tag_iq_stream_impl::general_work(int noutput_items,
     }
 
     // Copy IQ samples
-    int n_produced = n_symbols * d_sps;
+    int n_produced = n_symbols * current_sps;
     memcpy(out_iq, in_iq, n_produced * sizeof(output_type));
 
     // Get symbol stream tags
@@ -74,7 +87,8 @@ int tag_iq_stream_impl::general_work(int noutput_items,
 
     // Copy tags to IQ steam
     for (auto& tag : symbol_tags) {
-        uint64_t iq_tag_offset = (tag.offset - nitems_read(1)) * d_sps + nitems_read(0);
+        uint64_t iq_tag_offset =
+            (tag.offset - nitems_read(1)) * current_sps + nitems_read(0);
         add_item_tag(0, iq_tag_offset, tag.key, tag.value);
     }
 

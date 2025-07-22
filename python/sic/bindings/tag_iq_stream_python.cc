@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(tag_iq_stream.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(60c296bbfb46b91bdd1c4043065d912f)                     */
+/* BINDTOOL_HEADER_FILE_HASH(54f49b8a34b2d96ddd1b2ba913828dc1)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -38,6 +38,12 @@ void bind_tag_iq_stream(py::module& m)
 
         .def(py::init(&tag_iq_stream::make), py::arg("sps"), D(tag_iq_stream, make))
 
+
+        .def("sps", &tag_iq_stream::sps, D(tag_iq_stream, sps))
+
+
+        .def(
+            "set_sps", &tag_iq_stream::set_sps, py::arg("sps"), D(tag_iq_stream, set_sps))
 
         ;
 }
