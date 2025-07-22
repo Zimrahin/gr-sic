@@ -73,7 +73,7 @@ class sic_app(gr.top_block, Qt.QWidget):
         self.symbol_rate_ble = symbol_rate_ble = int(ble_transmission_rate / slowing_factor)
         self.ieee_label_variable = ieee_label_variable = " (stronger signal)" if protocol_first == 1 else " (weaker signal)"
         self.ble_label_variable = ble_label_variable = " (stronger signal)" if protocol_first == 0 else " (weaker signal)"
-        self.trigger_delay = trigger_delay = 4000e-6
+        self.trigger_delay = trigger_delay = 1000e-6 * slowing_factor
         self.symbol_rate_high = symbol_rate_high = symbol_rate_ble if not protocol_first else symbol_rate_ieee802154
         self.samp_rate = samp_rate = int(4e6 / slowing_factor)
         self.payload_length_l = payload_length_l = 254 if protocol_first else 140
@@ -361,6 +361,7 @@ class sic_app(gr.top_block, Qt.QWidget):
         self.set_samp_rate(int(4e6 / self.slowing_factor))
         self.set_symbol_rate_ble(int(self.ble_transmission_rate / self.slowing_factor))
         self.set_symbol_rate_ieee802154(int(2e6 / self.slowing_factor))
+        self.set_trigger_delay(1000e-6 * self.slowing_factor)
 
     def get_protocol_first(self):
         return self.protocol_first

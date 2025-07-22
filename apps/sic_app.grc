@@ -374,7 +374,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: 4000e-6
+    value: 1000e-6 * slowing_factor
   states:
     bus_sink: false
     bus_source: false
