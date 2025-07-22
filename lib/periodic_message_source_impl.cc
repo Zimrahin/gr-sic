@@ -113,7 +113,7 @@ void periodic_message_source_impl::handle_pause(pmt::pmt_t msg)
 // Setters
 void periodic_message_source_impl::set_paused(bool paused)
 {
-    gr::thread::scoped_lock d_mutex;
+    gr::thread::scoped_lock guard(d_mutex);
     d_paused = paused;
 
     // Restart timer if unpaused
@@ -126,7 +126,7 @@ void periodic_message_source_impl::set_paused(bool paused)
 }
 void periodic_message_source_impl::set_period(long period_ms)
 {
-    gr::thread::scoped_lock d_mutex;
+    gr::thread::scoped_lock guard(d_mutex);
     d_period_ms = period_ms;
 
     // Restart with new period if running
@@ -139,7 +139,7 @@ void periodic_message_source_impl::set_period(long period_ms)
 }
 void periodic_message_source_impl::set_n_messages(int n_messages)
 {
-    gr::thread::scoped_lock d_mutex;
+    gr::thread::scoped_lock guard(d_mutex);
     d_n_messages = n_messages;
 }
 
