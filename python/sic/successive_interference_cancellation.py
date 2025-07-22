@@ -269,14 +269,14 @@ class successive_interference_cancellation(gr.basic_block):
         with self.mutex:
             self.frequency_step_fine = frequency_step_fine
 
-    def set_ble_transmission_rate(self, rate: float, protocol_high, protocol_low):
+    def set_ble_transmission_rate(self, rate: float):
         with self.mutex:
             self.ble_transmission_rate = rate
-            self.transmitter_high, self.receiver_high = self._init_protocol(protocol_high)
-            self.transmitter_low, self.receiver_low = self._init_protocol(protocol_low)
+            self.transmitter_high, self.receiver_high = self._init_protocol(self.protocol_high)
+            self.transmitter_low, self.receiver_low = self._init_protocol(self.protocol_low)
 
-    def set_ieee802154_transmission_rate(self, rate: float, protocol_high, protocol_low):
+    def set_ieee802154_transmission_rate(self, rate: float):
         with self.mutex:
             self.ieee802154_transmission_rate = rate
-            self.transmitter_high, self.receiver_high = self._init_protocol(protocol_high)
-            self.transmitter_low, self.receiver_low = self._init_protocol(protocol_low)
+            self.transmitter_high, self.receiver_high = self._init_protocol(self.protocol_high)
+            self.transmitter_low, self.receiver_low = self._init_protocol(self.protocol_low)

@@ -100,5 +100,4 @@ class ble_hier_rx(gr.hier_block2):
         self.quadrature_demod.set_gain(new_gain)
 
         # Update Symbol Sync samples/symbol
-        omega = self._sample_rate / symbol_rate
-        self.symbol_sync.set_omega(omega)
+        self.symbol_sync.set_sps(self._sample_rate / symbol_rate)
