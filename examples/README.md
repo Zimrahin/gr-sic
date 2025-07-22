@@ -1,7 +1,6 @@
 # Examples
 
-This folder contains GNU Radio Companion (GRC) flowgraphs that demonstrate the BLE decoder in action.
+This folder contains GNU Radio Companion (GRC) flowgraphs that showcase BLE and IEEE 802.15.4 decoders in action, along with a Successive Interference Cancellation (SIC) block that operates on the IQ data of overlapping signals.
 
-The examples use pre-recorded 124-byte BLE packets captured with a Pluto SDR from a Nordic Semiconductor nRF board. They showcase how the decoder processes real BLE signals and extracts the payload.
-
-The flowgraphs are designed for offline use with recorded data but can be adapted for live reception with a Pluto SDR.
+The examples use pre-recorded BLE and IEEE 802.15.4 packets captured with a Pluto SDR from a Nordic Semiconductor nRF board.
+The flowgraphs are intended for offline analysis but can be adapted for live reception using a Pluto SDR.

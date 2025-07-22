@@ -1,0 +1,44 @@
+id: sic_ble_hier_rx
+label: BLE RX Hierarchical
+category: '[sic]'
+
+templates:
+  imports: from gnuradio import sic
+  make: sic.ble_hier_rx(${sample_rate}, ${symbol_rate}, ${preamble_threshold}, ${base_address})
+  callbacks:
+  - set_symbol_rate(${symbol_rate})
+
+parameters:
+- id: sample_rate
+  label: Sample Rate
+  dtype: float
+  default: 4e6
+- id: symbol_rate
+  label: Symbol Rate
+  dtype: float
+  default: 1e6
+- id: preamble_threshold
+  label: Preamble Threshold
+  dtype: int
+  default: 0
+- id: base_address
+  label: Base Address
+  dtype: int
+  default: '0x12345678'
+
+inputs:
+- label: in
+  domain: stream
+  dtype: complex
+  vlen: 1
+
+outputs:
+- label: out
+  domain: stream
+  dtype: byte
+  optional: true
+- id: pdu
+  domain: message
+  optional: true
+
+file_format: 1

@@ -5,6 +5,8 @@ category: '[sic]'
 templates:
   imports: from gnuradio import sic
   make: sic.tag_iq_stream(${sps})
+  callbacks:
+  - set_sps(${sps})
 
 parameters:
 - id: sps

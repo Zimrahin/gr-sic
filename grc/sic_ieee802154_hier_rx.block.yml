@@ -1,0 +1,40 @@
+id: sic_ieee802154_hier_rx
+label: IEEE 802.15.4 RX Hierarchical
+category: '[sic]'
+
+templates:
+  imports: from gnuradio import sic
+  make: sic.ieee802154_hier_rx(${sample_rate}, ${symbol_rate}, ${preamble_threshold})
+  callbacks:
+  - set_symbol_rate(${symbol_rate})
+
+parameters:
+- id: sample_rate
+  label: Sample Rate
+  dtype: float
+  default: 4e6
+- id: symbol_rate
+  label: Symbol Rate
+  dtype: float
+  default: 2e6
+- id: preamble_threshold
+  label: Preamble Threshold
+  dtype: int
+  default: 7
+
+inputs:
+- label: in
+  domain: stream
+  dtype: complex
+  vlen: 1
+
+outputs:
+- label: out
+  domain: stream
+  dtype: byte
+  optional: true
+- id: pdu
+  domain: message
+  optional: true
+
+file_format: 1

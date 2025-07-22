@@ -25,8 +25,8 @@ class ble_packet_source(gr.sync_block):
         self,
         sample_rate: float,
         payload_length: int,
-        transmission_rate: float,
         base_address: int,
+        transmission_rate: float,
     ):
         gr.sync_block.__init__(
             self,
@@ -47,20 +47,19 @@ class ble_packet_source(gr.sync_block):
 
         # State variables
         self.transmitting = False
-        self.samples_remaining = 0
-        self.waveform_offset = 0  # Where in the waveform we are currently transmitting
+        self.active_waveform = np.array([], dtype=np.complex64)
+        self.active_remaining = 0
+        self.active_offset = 0  # Where in the waveform we are currently transmitting
 
         self.waveform = self.generate_waveform(payload_length, transmission_rate)
 
     def generate_waveform(self, payload_length: int, transmission_rate: float) -> np.ndarray:
-        """Generate IQ waveform using current parameters"""
         constrained_length = max(0, min(payload_length, self.max_payload_length))
         payload_segment = self.payload_template[:constrained_length]
         self.transmitter.transmission_rate = transmission_rate
         return self.transmitter.modulate_from_payload(payload_segment, self.base_address)
 
     def set_payload_length(self, length: int):
-        """Update payload length and regenerate waveform"""
         new_length = int(length)
         new_waveform = self.generate_waveform(new_length, self.transmitter.transmission_rate)
         with self.mutex:
@@ -68,21 +67,21 @@ class ble_packet_source(gr.sync_block):
             self.waveform = new_waveform
 
     def set_transmission_rate(self, transmission_rate: float):
-        """Update transmission rate and regenerate waveform"""
         new_waveform = self.generate_waveform(self.current_payload_length, transmission_rate)
         with self.mutex:
             self.transmitter.transmission_rate = transmission_rate
             self.waveform = new_waveform
 
     def start_burst(self):
-        """Start new burst using current parameters"""
         with self.mutex:
             if len(self.waveform) == 0:
                 self.transmitting = False
                 return
             self.transmitting = True
-            self.samples_remaining = len(self.waveform)
-            self.waveform_offset = 0
+            # Capture current waveform for the entire burst
+            self.active_waveform = self.waveform
+            self.active_remaining = len(self.waveform)
+            self.active_offset = 0
 
     def work(self, input_items, output_items):
         in0 = input_items[0]
@@ -92,16 +91,17 @@ class ble_packet_source(gr.sync_block):
 
         while idx < noutput_items:
             if self.transmitting:
-                # Copy precomputed waveform in chunks
-                chunk = min(noutput_items - idx, self.samples_remaining)
-                out[idx : idx + chunk] = self.waveform[self.waveform_offset : self.waveform_offset + chunk]
+                # Use burst-specific waveform copy
+                chunk = min(noutput_items - idx, self.active_remaining)
+                out[idx : idx + chunk] = self.active_waveform[self.active_offset : self.active_offset + chunk]
                 idx += chunk
-                self.samples_remaining -= chunk
+                self.active_offset += chunk
+                self.active_remaining -= chunk
 
-                if self.samples_remaining <= 0:
+                if self.active_remaining <= 0:
                     self.transmitting = False
             else:
-                # Check for trigger tags in remaining buffer
+                # Check for triggers
                 tags = self.get_tags_in_window(0, idx, noutput_items)
                 if not tags:
                     out[idx:] = in0[idx:]

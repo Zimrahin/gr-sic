@@ -34,6 +34,9 @@ public:
      * rate than the symbol input by a factor of `sps`.
      */
     static sptr make(uint sps);
+
+    virtual uint sps() const = 0;
+    virtual void set_sps(uint sps) = 0;
 };
 
 } // namespace sic

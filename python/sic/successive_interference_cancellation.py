@@ -48,25 +48,29 @@ class successive_interference_cancellation(gr.basic_block):
         frequency_step_coarse: float,
         frequency_step_fine: float,
         frequency_fine_window: float,
-        ble_transmission_rate: float,
         upsampling_factor: int,
+        ble_transmission_rate: float,
+        ieee802154_transmission_rate: float,  # Chip rate
     ):
         gr.basic_block.__init__(self, name="successive_interference_cancellation", in_sig=None, out_sig=None)
         self.upsampling_factor = upsampling_factor
         self.sample_rate = upsampling_factor * sample_rate
         self.max_queue_size = max_queue_size
+        self.protocol_high = protocol_high
+        self.protocol_low = protocol_low
         self.ble_transmission_rate = ble_transmission_rate
+        self.ieee802154_transmission_rate = ieee802154_transmission_rate
         self.frequency_start = frequency_start
         self.frequency_stop = frequency_stop
         self.frequency_step_coarse = frequency_step_coarse
         self.frequency_step_fine = frequency_step_fine
         self.frequency_fine_window = frequency_fine_window
-        protocol_map = {
+        self.protocol_map = {
             0: (TransmitterBLE, ReceiverBLE, True),
             1: (Transmitter802154, Receiver802154, False),
         }
-        self.transmitter_high, self.receiver_high = self._init_protocol(protocol_high, protocol_map)
-        self.transmitter_low, self.receiver_low = self._init_protocol(protocol_low, protocol_map)
+        self.transmitter_high, self.receiver_high = self._init_protocol(protocol_high)
+        self.transmitter_low, self.receiver_low = self._init_protocol(protocol_low)
 
         self.message_port_register_in(gr.pmt.intern("iq"))
         self.set_msg_handler(gr.pmt.intern("iq"), self.handle_iq_message)
@@ -83,17 +87,17 @@ class successive_interference_cancellation(gr.basic_block):
         self.processing_thread = threading.Thread(target=self.process_iq_queue, daemon=True)
         self.processing_thread.start()
 
-    def _init_protocol(self, protocol_id: int, protocol_map: dict) -> tuple[Transmitter, Receiver]:
-        if protocol_id not in protocol_map:
+    def _init_protocol(self, protocol_id: int) -> tuple[Transmitter, Receiver]:
+        if protocol_id not in self.protocol_map:
             raise ValueError(f"Invalid protocol ID: {protocol_id}")
-        tx_class, rx_class, needs_tx_rate = protocol_map[protocol_id]
+        tx_class, rx_class, is_ble = self.protocol_map[protocol_id]
 
-        if needs_tx_rate:
+        if is_ble:
             transmitter = tx_class(self.sample_rate, self.ble_transmission_rate)
             receiver = rx_class(self.sample_rate, self.ble_transmission_rate)
         else:
-            transmitter = tx_class(self.sample_rate)
-            receiver = rx_class(self.sample_rate)
+            transmitter = tx_class(self.sample_rate, self.ieee802154_transmission_rate)
+            receiver = rx_class(self.sample_rate, self.ieee802154_transmission_rate)
 
         return transmitter, receiver
 
@@ -265,6 +269,14 @@ class successive_interference_cancellation(gr.basic_block):
         with self.mutex:
             self.frequency_step_fine = frequency_step_fine
 
-    def set_ble_transmission_rate(self, ble_transmission_rate: float):
+    def set_ble_transmission_rate(self, rate: float):
         with self.mutex:
-            self.ble_transmission_rate = ble_transmission_rate
+            self.ble_transmission_rate = rate
+            self.transmitter_high, self.receiver_high = self._init_protocol(self.protocol_high)
+            self.transmitter_low, self.receiver_low = self._init_protocol(self.protocol_low)
+
+    def set_ieee802154_transmission_rate(self, rate: float):
+        with self.mutex:
+            self.ieee802154_transmission_rate = rate
+            self.transmitter_high, self.receiver_high = self._init_protocol(self.protocol_high)
+            self.transmitter_low, self.receiver_low = self._init_protocol(self.protocol_low)

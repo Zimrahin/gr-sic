@@ -23,7 +23,9 @@ gr_python_install(FILES __init__.py
     plot_sic_results.py
     ble_packet_source.py
     ieee802154_packet_source.py
-    successive_interference_cancellation.py DESTINATION ${GR_PYTHON_DIR}/gnuradio/sic)
+    successive_interference_cancellation.py
+    ieee802154_hier_rx.py
+    ble_hier_rx.py DESTINATION ${GR_PYTHON_DIR}/gnuradio/sic)
 
 ########################################################################
 # Handle the unit tests

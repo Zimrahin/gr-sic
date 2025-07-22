@@ -15,14 +15,17 @@ templates:
       ${frequency_step_coarse},
       ${frequency_step_fine},
       ${frequency_fine_window},
-      ${ble_transmission_rate},
       ${upsampling_factor},
+      ${ble_transmission_rate},
+      ${ieee802154_transmission_rate},
     )
   callbacks:
   - set_frequency_start(${frequency_start})
   - set_frequency_stop(${frequency_stop})
   - set_frequency_step_coarse(${frequency_step_coarse})
   - set_frequency_step_fine(${frequency_step_fine})
+  - set_ble_transmission_rate(${ble_transmission_rate})
+  - set_ieee802154_transmission_rate(${ieee802154_transmission_rate})
 
 parameters:
 - id: sample_rate
@@ -36,14 +39,18 @@ parameters:
   hide: part
 - id: protocol_high
   label: Protocol High
-  dtype: enum
-  options: ['0', '1']
-  option_labels: ['BLE', 'IEEE 802.15.4']
+  dtype: int
+  default: 0
+  # dtype: enum
+  # options: ['0', '1']
+  # option_labels: ['BLE', 'IEEE 802.15.4']
 - id: protocol_low
   label: Protocol Low
-  dtype: enum
-  options: ['0', '1']
-  option_labels: ['BLE', 'IEEE 802.15.4']
+  dtype: int
+  default: 1
+  # dtype: enum
+  # options: ['0', '1']
+  # option_labels: ['BLE', 'IEEE 802.15.4']
 - id: frequency_start
   label: Frequency Start
   dtype: float
@@ -66,14 +73,18 @@ parameters:
   dtype: float
   default: 50
   hide: part
-- id: ble_transmission_rate
-  label: BLE Transmission Rate
-  dtype: float
-  default: 1e6
 - id: upsampling_factor
   label: Upsampling Factor
   dtype: int
   default: 1
+- id: ble_transmission_rate
+  label: BLE Transmission Rate
+  dtype: float
+  default: 1e6
+- id: ieee802154_transmission_rate
+  label: IEEE 802.154 Chip Rate
+  dtype: float
+  default: 2e6
 
 inputs:
 - label: iq

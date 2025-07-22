@@ -99,8 +99,9 @@ class sic_rx_test(gr.top_block, Qt.QWidget):
           50,
           1,
           50,
-          1e6,
           2,
+          1e6,
+          2e6,
         )
         self.qtgui_time_sink_x_1 = qtgui.time_sink_f(
             (int( plot_N/ samples_per_chip)), #size
@@ -293,6 +294,7 @@ class sic_rx_test(gr.top_block, Qt.QWidget):
 
     def set_samples_per_chip(self, samples_per_chip):
         self.samples_per_chip = samples_per_chip
+        self.ble_tag_iq_stream_0.set_sps(self.samples_per_chip)
         self.digital_symbol_sync_xx_0.set_sps((self.samples_per_chip / self.decimation))
         self.qtgui_time_sink_x_1.set_samp_rate(int(self.samp_rate / self.samples_per_chip))
 
