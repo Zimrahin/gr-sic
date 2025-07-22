@@ -39,14 +39,18 @@ parameters:
   hide: part
 - id: protocol_high
   label: Protocol High
-  dtype: enum
-  options: ['0', '1']
-  option_labels: ['BLE', 'IEEE 802.15.4']
+  dtype: int
+  default: 0
+  # dtype: enum
+  # options: ['0', '1']
+  # option_labels: ['BLE', 'IEEE 802.15.4']
 - id: protocol_low
   label: Protocol Low
-  dtype: enum
-  options: ['0', '1']
-  option_labels: ['BLE', 'IEEE 802.15.4']
+  dtype: int
+  default: 1
+  # dtype: enum
+  # options: ['0', '1']
+  # option_labels: ['BLE', 'IEEE 802.15.4']
 - id: frequency_start
   label: Frequency Start
   dtype: float

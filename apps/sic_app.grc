@@ -45,7 +45,7 @@ blocks:
     start: '0'
     step: '0.05'
     stop: '1'
-    value: '0.3'
+    value: 1 if protocol_first else 0.15
     widget: eng_slider
   states:
     bus_sink: false
@@ -66,13 +66,25 @@ blocks:
     start: '0'
     step: '0.05'
     stop: '1'
-    value: '0.3'
+    value: 0.45 if protocol_first else 1
     widget: eng_slider
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
     coordinate: [1528, 16.0]
+    rotation: 0
+    state: enabled
+- name: ble_label_variable
+  id: variable
+  parameters:
+    comment: ''
+    value: '" (stronger signal)" if protocol_first == 0 else " (weaker signal)"'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1936, 112.0]
     rotation: 0
     state: enabled
 - name: ble_transmission_rate
@@ -129,7 +141,7 @@ blocks:
     start: '0'
     step: '1'
     stop: '6000'
-    value: '0'
+    value: 1400 if protocol_first else 0
     widget: eng_slider
   states:
     bus_sink: false
@@ -150,7 +162,7 @@ blocks:
     start: '0'
     step: '1'
     stop: '6000'
-    value: '0'
+    value: 0 if protocol_first else 3180
     widget: eng_slider
   states:
     bus_sink: false
@@ -159,15 +171,27 @@ blocks:
     coordinate: [1192, 16.0]
     rotation: 0
     state: enabled
+- name: ieee_label_variable
+  id: variable
+  parameters:
+    comment: ''
+    value: '" (stronger signal)" if protocol_first == 1 else " (weaker signal)"'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1936, 200.0]
+    rotation: 0
+    state: enabled
 - name: label_802154
   id: variable_qtgui_label
   parameters:
     comment: ''
     formatter: None
     gui_hint: (1,0,1,1)
-    label: <font size='5'><b>IEEE 802.15.4</b> (stronger signal) </font>
+    label: <font size='5'><b>IEEE 802.15.4</b></font>
     type: string
-    value: ''
+    value: ieee_label_variable
   states:
     bus_sink: false
     bus_source: false
@@ -197,9 +221,9 @@ blocks:
     comment: ''
     formatter: None
     gui_hint: (1,1,1,1)
-    label: <font size='5'><b>BLE</b> (weaker signal) </font>
+    label: '<font size=''5''><b>BLE</b></font> '
     type: string
-    value: ''
+    value: ble_label_variable
   states:
     bus_sink: false
     bus_source: false
@@ -242,7 +266,7 @@ blocks:
     start: '1'
     step: '1'
     stop: '125'
-    value: '10'
+    value: 40 if protocol_first else 74
     widget: eng_slider
   states:
     bus_sink: false
@@ -263,7 +287,7 @@ blocks:
     start: '1'
     step: '1'
     stop: '255'
-    value: '140'
+    value: 254 if protocol_first else 140
     widget: eng_slider
   states:
     bus_sink: false
@@ -272,11 +296,25 @@ blocks:
     coordinate: [824, 16.0]
     rotation: 0
     state: enabled
+- name: protocol_first
+  id: variable
+  parameters:
+    comment: '0: BLE
+
+      1: IEEE 802.15.4'
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [752, 472.0]
+    rotation: 0
+    state: enabled
 - name: samp_rate
   id: variable
   parameters:
     comment: ''
-    value: int(2e6)
+    value: int(4e6 / slowing_factor)
   states:
     bus_sink: false
     bus_source: false
@@ -288,7 +326,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '2'
+    value: '4'
   states:
     bus_sink: false
     bus_source: false
@@ -312,7 +350,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: symbol_rate_ble
+    value: symbol_rate_ble if not protocol_first else symbol_rate_ieee802154
   states:
     bus_sink: false
     bus_source: false
@@ -336,12 +374,12 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: 700e-6 *2
+    value: 4000e-6
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1344, 568.0]
+    coordinate: [1032, 528.0]
     rotation: 0
     state: enabled
 - name: ble_plot_sic_results_0
@@ -356,7 +394,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1712, 720.0]
+    coordinate: [1704, 728.0]
     rotation: 0
     state: enabled
 - name: ble_tag_iq_stream_0
@@ -381,7 +419,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    max_gap: 100000 * int(samp_rate / symbol_rate_high)
+    max_gap: 4096 * int(samp_rate / symbol_rate_high)
     maxoutbuf: '0'
     minoutbuf: '0'
     post_offset: int(trigger_delay * samp_rate)
@@ -663,7 +701,7 @@ blocks:
     bus_structure: null
     coordinate: [1016, 720.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: qtgui_time_sink_x_0_0_0
   id: qtgui_time_sink_x
   parameters:
@@ -861,24 +899,24 @@ blocks:
     alias: ''
     ble_transmission_rate: symbol_rate_ble
     comment: ''
-    frequency_fine_window: '50'
+    frequency_fine_window: '100'
     frequency_start: '-10000'
-    frequency_step_coarse: '100'
+    frequency_step_coarse: '200'
     frequency_step_fine: '2'
-    frequency_stop: '10000'
+    frequency_stop: '5000'
     ieee802154_transmission_rate: symbol_rate_ieee802154
     max_queue_size: '2'
     maxoutbuf: '0'
     minoutbuf: '0'
-    protocol_high: '0'
-    protocol_low: '1'
+    protocol_high: protocol_first
+    protocol_low: 0 if protocol_first else 1
     sample_rate: samp_rate
     upsampling_factor: '2'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1328, 652.0]
+    coordinate: [1320, 660.0]
     rotation: 0
     state: enabled
 - name: sic_transmission_enabler_0
