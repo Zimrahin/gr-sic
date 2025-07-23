@@ -3,8 +3,13 @@ Proof-of-concept implementation of Successive Interference Cancellation (SIC) th
 
 The system, implemented in GNU Radio, first demodulates the stronger signal, then reconstructs and subtracts its waveform to recover the weaker transmission, enabling concurrent demodulation despite time/frequency overlaps. The experimental setup uses two transmitters and one receiver connected to a single host computer.
 
-![Physical Setup Diagram](docs/images/setup_demo.png)  
-*Dual PlutoSDR setup. One Pluto is used as transmitter and receiver, while the second one is used only as a transmitter.*
+<figure>
+  <img src="docs/images/setup_demo.png" alt="Physical Setup Diagram" width="70%">
+  <figcaption>
+    <em>Dual PlutoSDR setup. One Pluto is used as transmitter and receiver, while the second one is used only as a transmitter.</em>
+  </figcaption>
+</figure>
+
 
 
 ## Algorithm Overview
@@ -21,8 +26,13 @@ Assuming the received signal can be modelled as the addition of both protocols a
    - Amplitude (A_h)
 4. **Subtraction** and weak-signal protocol recovery from the residual.
 
-![SIC Processing Stages](docs/images/sic_diagram.png)  
-*SIC algorithm overview: (a) Received collision, (b) High-power reconstruction, (c) Residual after subtraction*
+<figure>
+  <img src="docs/images/sic_diagram.png" alt="SIC Processing Stages" width="60%">
+  <figcaption>
+    <em>SIC algorithm overview: (a) Received collision, (b) High-power reconstruction, (c) Residual after subtraction.</em>
+  </figcaption>
+</figure>
+
 
 ## Example applications
 Two example applications can be found in the `apps` folder:
