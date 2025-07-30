@@ -1,10 +1,10 @@
-id: ble_tag_iq_stream
-label: Tag IQ Stream
+id: ble_tag_aligner
+label: Tag Aligner
 category: '[sic]'
 
 templates:
   imports: from gnuradio import sic
-  make: sic.tag_iq_stream(${sps})
+  make: sic.tag_aligner(${sps}, ${type_high.size})
   callbacks:
   - set_sps(${sps})
 
@@ -13,19 +13,26 @@ parameters:
   label: Samples Per Symbol
   dtype: int
   default: 10
+- id: type_high
+  label: Type High
+  dtype: enum
+  options: [complex, float]
+  option_attributes:
+    size: [gr.sizeof_gr_complex, gr.sizeof_float]
+  hide: part
 
 inputs:
-- label: in_iq
+- label: in_high
   domain: stream
-  dtype: complex
-- label: in_sym
+  dtype: ${ type_high }
+- label: in_low
   domain: stream
   dtype: byte
 
 outputs:
 - label: out
   domain: stream
-  dtype: complex
+  dtype: ${ type_high }
 
 #  'file_format' specifies the version of the GRC yml format used in the file
 #  and should usually not be changed.

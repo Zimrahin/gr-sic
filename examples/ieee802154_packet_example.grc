@@ -195,8 +195,8 @@ blocks:
     coordinate: [1136, 440.0]
     rotation: 0
     state: enabled
-- name: ble_tag_iq_stream_0
-  id: ble_tag_iq_stream
+- name: ble_tag_aligner_0
+  id: ble_tag_aligner
   parameters:
     affinity: ''
     alias: ''
@@ -719,15 +719,15 @@ connections:
 - [analog_fastnoise_source_x_0, '0', blocks_add_xx_0, '1']
 - [analog_quadrature_demod_cf_0, '0', blocks_sub_xx_0, '0']
 - [analog_quadrature_demod_cf_0, '0', single_pole_iir_filter_xx_0, '0']
-- [ble_ieee802154_packet_sink_0, '0', ble_tag_iq_stream_0, '1']
+- [ble_ieee802154_packet_sink_0, '0', ble_tag_aligner_0, '1']
 - [ble_ieee802154_packet_sink_0, '0', blocks_uchar_to_float_0_0_0, '0']
 - [ble_ieee802154_packet_sink_0, pdu, blocks_message_debug_1, print]
 - [ble_ieee802154_packet_sink_0, pdu, sic_successive_interference_cancellation_0,
   pdu]
-- [ble_tag_iq_stream_0, '0', ble_tagged_iq_to_vector_0, '0']
-- [ble_tag_iq_stream_0, '0', qtgui_time_sink_x_0, '0']
+- [ble_tag_aligner_0, '0', ble_tagged_iq_to_vector_0, '0']
+- [ble_tag_aligner_0, '0', qtgui_time_sink_x_0, '0']
 - [ble_tagged_iq_to_vector_0, out, sic_successive_interference_cancellation_0, iq]
-- [blocks_add_xx_0, '0', ble_tag_iq_stream_0, '0']
+- [blocks_add_xx_0, '0', ble_tag_aligner_0, '0']
 - [blocks_add_xx_0, '0', low_pass_filter_0_0, '0']
 - [blocks_file_source_0, '0', blocks_throttle2_0, '0']
 - [blocks_sub_xx_0, '0', digital_symbol_sync_xx_0, '0']

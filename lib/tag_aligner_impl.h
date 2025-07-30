@@ -7,19 +7,19 @@
  */
 
 
-#ifndef INCLUDED_SIC_TAG_IQ_STREAM_IMPL_H
-#define INCLUDED_SIC_TAG_IQ_STREAM_IMPL_H
+#ifndef INCLUDED_SIC_tag_aligner_IMPL_H
+#define INCLUDED_SIC_tag_aligner_IMPL_H
 
-#include <gnuradio/sic/tag_iq_stream.h>
+#include <gnuradio/sic/tag_aligner.h>
 
 namespace gr {
 namespace sic {
 
-class tag_iq_stream_impl : public tag_iq_stream
+class tag_aligner_impl : public tag_aligner
 {
 public:
-    tag_iq_stream_impl(uint sps);
-    ~tag_iq_stream_impl();
+    tag_aligner_impl(uint sps, size_t type_size_high);
+    ~tag_aligner_impl();
 
     void forecast(int noutput_items, gr_vector_int& ninput_items_required);
 
@@ -33,10 +33,11 @@ public:
 
 private:
     uint d_sps; // Samples per symbol
+    size_t d_type_size_high;
     gr::thread::mutex d_mutex;
 };
 
 } // namespace sic
 } // namespace gr
 
-#endif /* INCLUDED_SIC_TAG_IQ_STREAM_IMPL_H */
+#endif /* INCLUDED_SIC_tag_aligner_IMPL_H */

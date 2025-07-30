@@ -15,19 +15,19 @@
  */
 
 
-static const char* __doc_gr_sic_tag_iq_stream = R"doc()doc";
+static const char* __doc_gr_sic_tag_aligner = R"doc()doc";
 
 
-static const char* __doc_gr_sic_tag_iq_stream_tag_iq_stream_0 = R"doc()doc";
+static const char* __doc_gr_sic_tag_aligner_tag_aligner_0 = R"doc()doc";
 
 
-static const char* __doc_gr_sic_tag_iq_stream_tag_iq_stream_1 = R"doc()doc";
+static const char* __doc_gr_sic_tag_aligner_tag_aligner_1 = R"doc()doc";
 
 
-static const char* __doc_gr_sic_tag_iq_stream_make = R"doc()doc";
+static const char* __doc_gr_sic_tag_aligner_make = R"doc()doc";
 
 
-static const char* __doc_gr_sic_tag_iq_stream_sps = R"doc()doc";
+static const char* __doc_gr_sic_tag_aligner_sps = R"doc()doc";
 
 
-static const char* __doc_gr_sic_tag_iq_stream_set_sps = R"doc()doc";
+static const char* __doc_gr_sic_tag_aligner_set_sps = R"doc()doc";

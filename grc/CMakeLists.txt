@@ -10,7 +10,7 @@ install(FILES
     sic_ble_packet_sink.block.yml
     sic_ieee802154_packet_sink.block.yml
     sic_plot_sic_results.block.yml
-    sic_tag_iq_stream.block.yml
+    sic_tag_aligner.block.yml
     sic_tagged_iq_to_vector.block.yml
     sic_ble_packet_source.block.yml
     sic_transmission_enabler.block.yml

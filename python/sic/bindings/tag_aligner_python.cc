@@ -13,8 +13,8 @@
 /* If manual edits are made, the following tags should be modified accordingly.    */
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
-/* BINDTOOL_HEADER_FILE(tag_iq_stream.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(54f49b8a34b2d96ddd1b2ba913828dc1)                     */
+/* BINDTOOL_HEADER_FILE(tag_aligner.h)                                        */
+/* BINDTOOL_HEADER_FILE_HASH(c53653cec70aedbd8b711015fd315f3d)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -23,27 +23,29 @@
 
 namespace py = pybind11;
 
-#include <gnuradio/sic/tag_iq_stream.h>
+#include <gnuradio/sic/tag_aligner.h>
 // pydoc.h is automatically generated in the build directory
-#include <tag_iq_stream_pydoc.h>
+#include <tag_aligner_pydoc.h>
 
-void bind_tag_iq_stream(py::module& m)
+void bind_tag_aligner(py::module& m)
 {
 
-    using tag_iq_stream = ::gr::sic::tag_iq_stream;
+    using tag_aligner = ::gr::sic::tag_aligner;
 
 
-    py::class_<tag_iq_stream, gr::block, gr::basic_block, std::shared_ptr<tag_iq_stream>>(
-        m, "tag_iq_stream", D(tag_iq_stream))
+    py::class_<tag_aligner, gr::block, gr::basic_block, std::shared_ptr<tag_aligner>>(
+        m, "tag_aligner", D(tag_aligner))
 
-        .def(py::init(&tag_iq_stream::make), py::arg("sps"), D(tag_iq_stream, make))
+        .def(py::init(&tag_aligner::make),
+             py::arg("sps"),
+             py::arg("type_size_high"),
+             D(tag_aligner, make))
 
 
-        .def("sps", &tag_iq_stream::sps, D(tag_iq_stream, sps))
+        .def("sps", &tag_aligner::sps, D(tag_aligner, sps))
 
 
-        .def(
-            "set_sps", &tag_iq_stream::set_sps, py::arg("sps"), D(tag_iq_stream, set_sps))
+        .def("set_sps", &tag_aligner::set_sps, py::arg("sps"), D(tag_aligner, set_sps))
 
         ;
 }

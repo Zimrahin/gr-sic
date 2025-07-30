@@ -311,7 +311,7 @@ class sic_simulation_app(gr.top_block, Qt.QWidget):
         for c in range(1, 2):
             self.top_grid_layout.setColumnStretch(c, 1)
         self.ble_tagged_iq_to_vector_0 = sic.tagged_iq_to_vector((int(trigger_delay * samp_rate)), (int(trigger_delay * samp_rate)), (4096 * int(samp_rate / symbol_rate_high)))
-        self.ble_tag_iq_stream_0 = sic.tag_iq_stream((int(samp_rate / symbol_rate_high)))
+        self.ble_tag_aligner_0 = sic.tag_aligner((int(samp_rate / symbol_rate_high)), gr.sizeof_gr_complex)
         self.ble_plot_sic_results_0 = sic.plot_sic_results(samp_rate, 10)
 
 
@@ -324,21 +324,21 @@ class sic_simulation_app(gr.top_block, Qt.QWidget):
         self.msg_connect((self.sic_periodic_message_source_0, 'out'), (self.sic_transmission_enabler_0, 'trigger'))
         self.msg_connect((self.sic_successive_interference_cancellation_0, 'out'), (self.ble_plot_sic_results_0, 'in'))
         self.msg_connect((self.tx_trigger_button, 'pressed'), (self.sic_transmission_enabler_0, 'trigger'))
-        self.connect((self.ble_tag_iq_stream_0, 0), (self.ble_tagged_iq_to_vector_0, 0))
-        self.connect((self.ble_tag_iq_stream_0, 0), (self.qtgui_time_sink_x_0_0, 0))
+        self.connect((self.ble_tag_aligner_0, 0), (self.ble_tagged_iq_to_vector_0, 0))
+        self.connect((self.ble_tag_aligner_0, 0), (self.qtgui_time_sink_x_0_0, 0))
         self.connect((self.blocks_add_xx_0, 0), (self.blocks_tag_gate_0, 0))
         self.connect((self.blocks_delay_0, 0), (self.blocks_multiply_const_vxx_0_0, 0))
         self.connect((self.blocks_delay_0_0, 0), (self.blocks_multiply_const_vxx_0, 0))
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.channels_channel_model_0, 0))
         self.connect((self.blocks_multiply_const_vxx_0_0, 0), (self.channels_channel_model_0_0, 0))
-        self.connect((self.blocks_tag_gate_0, 0), (self.ble_tag_iq_stream_0, 0))
+        self.connect((self.blocks_tag_gate_0, 0), (self.ble_tag_aligner_0, 0))
         self.connect((self.blocks_tag_gate_0, 0), (self.sic_ieee802154_hier_rx_0, 0))
         self.connect((self.blocks_throttle2_0_1, 0), (self.sic_ble_packet_source_0_0, 0))
         self.connect((self.blocks_throttle2_0_1, 0), (self.sic_ieee802154_packet_source_0, 0))
         self.connect((self.channels_channel_model_0, 0), (self.blocks_add_xx_0, 0))
         self.connect((self.channels_channel_model_0_0, 0), (self.blocks_add_xx_0, 1))
         self.connect((self.sic_ble_packet_source_0_0, 0), (self.blocks_delay_0, 0))
-        self.connect((self.sic_ieee802154_hier_rx_0, 0), (self.ble_tag_iq_stream_0, 1))
+        self.connect((self.sic_ieee802154_hier_rx_0, 0), (self.ble_tag_aligner_0, 1))
         self.connect((self.sic_ieee802154_packet_source_0, 0), (self.blocks_delay_0_0, 0))
         self.connect((self.sic_transmission_enabler_0, 0), (self.blocks_throttle2_0_1, 0))
 
@@ -429,14 +429,14 @@ class sic_simulation_app(gr.top_block, Qt.QWidget):
 
     def set_symbol_rate_high(self, symbol_rate_high):
         self.symbol_rate_high = symbol_rate_high
-        self.ble_tag_iq_stream_0.set_sps((int(self.samp_rate / self.symbol_rate_high)))
+        self.ble_tag_aligner_0.set_sps((int(self.samp_rate / self.symbol_rate_high)))
 
     def get_samp_rate(self):
         return self.samp_rate
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.ble_tag_iq_stream_0.set_sps((int(self.samp_rate / self.symbol_rate_high)))
+        self.ble_tag_aligner_0.set_sps((int(self.samp_rate / self.symbol_rate_high)))
         self.blocks_delay_0.set_dly(int((int(self.delay_l * self.samp_rate * 1e-6))))
         self.blocks_delay_0_0.set_dly(int((int(self.delay_h * self.samp_rate * 1e-6))))
         self.blocks_throttle2_0_1.set_sample_rate((self.samp_rate/20))

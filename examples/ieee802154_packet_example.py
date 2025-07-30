@@ -99,8 +99,9 @@ class ieee802154_packet_example(gr.top_block, Qt.QWidget):
           50,
           1,
           50,
-          1e6,
           1,
+          1e6,
+          2e6,
         )
         self.qtgui_time_sink_x_1 = qtgui.time_sink_f(
             (int( plot_N/ samples_per_chip)), #size
@@ -233,7 +234,7 @@ class ieee802154_packet_example(gr.top_block, Qt.QWidget):
         self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
         self.blocks_add_xx_0 = blocks.add_vcc(1)
         self.ble_tagged_iq_to_vector_0 = sic.tagged_iq_to_vector((int(trigger_delay * samp_rate)), (int(trigger_delay * samp_rate)), (128*8*8*samples_per_chip))
-        self.ble_tag_iq_stream_0 = sic.tag_iq_stream(samples_per_chip)
+        self.ble_tag_aligner_0 = sic.tag_aligner(samples_per_chip, gr.sizeof_gr_complex)
         self.ble_plot_sic_results_0 = sic.plot_sic_results(samp_rate, 10)
         self.ble_ieee802154_packet_sink_0 = sic.ieee802154_packet_sink(7, True, 0)
         self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(((samp_rate / decimation)/(2*math.pi*fsk_deviation_hz)))
@@ -249,11 +250,11 @@ class ieee802154_packet_example(gr.top_block, Qt.QWidget):
         self.connect((self.analog_fastnoise_source_x_0, 0), (self.blocks_add_xx_0, 1))
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.blocks_sub_xx_0, 0))
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.single_pole_iir_filter_xx_0, 0))
-        self.connect((self.ble_ieee802154_packet_sink_0, 0), (self.ble_tag_iq_stream_0, 1))
+        self.connect((self.ble_ieee802154_packet_sink_0, 0), (self.ble_tag_aligner_0, 1))
         self.connect((self.ble_ieee802154_packet_sink_0, 0), (self.blocks_uchar_to_float_0_0_0, 0))
-        self.connect((self.ble_tag_iq_stream_0, 0), (self.ble_tagged_iq_to_vector_0, 0))
-        self.connect((self.ble_tag_iq_stream_0, 0), (self.qtgui_time_sink_x_0, 0))
-        self.connect((self.blocks_add_xx_0, 0), (self.ble_tag_iq_stream_0, 0))
+        self.connect((self.ble_tag_aligner_0, 0), (self.ble_tagged_iq_to_vector_0, 0))
+        self.connect((self.ble_tag_aligner_0, 0), (self.qtgui_time_sink_x_0, 0))
+        self.connect((self.blocks_add_xx_0, 0), (self.ble_tag_aligner_0, 0))
         self.connect((self.blocks_add_xx_0, 0), (self.low_pass_filter_0_0, 0))
         self.connect((self.blocks_file_source_0, 0), (self.blocks_throttle2_0, 0))
         self.connect((self.blocks_sub_xx_0, 0), (self.digital_symbol_sync_xx_0, 0))
@@ -293,6 +294,7 @@ class ieee802154_packet_example(gr.top_block, Qt.QWidget):
 
     def set_samples_per_chip(self, samples_per_chip):
         self.samples_per_chip = samples_per_chip
+        self.ble_tag_aligner_0.set_sps(self.samples_per_chip)
         self.digital_symbol_sync_xx_0.set_sps((self.samples_per_chip / self.decimation))
         self.qtgui_time_sink_x_1.set_samp_rate(int(self.samp_rate / self.samples_per_chip))
 

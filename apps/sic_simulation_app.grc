@@ -397,8 +397,8 @@ blocks:
     coordinate: [1720, 1112.0]
     rotation: 0
     state: enabled
-- name: ble_tag_iq_stream_0
-  id: ble_tag_iq_stream
+- name: ble_tag_aligner_0
+  id: ble_tag_aligner
   parameters:
     affinity: ''
     alias: ''
@@ -953,8 +953,8 @@ blocks:
     state: enabled
 
 connections:
-- [ble_tag_iq_stream_0, '0', ble_tagged_iq_to_vector_0, '0']
-- [ble_tag_iq_stream_0, '0', qtgui_time_sink_x_0_0, '0']
+- [ble_tag_aligner_0, '0', ble_tagged_iq_to_vector_0, '0']
+- [ble_tag_aligner_0, '0', qtgui_time_sink_x_0_0, '0']
 - [ble_tagged_iq_to_vector_0, out, sic_successive_interference_cancellation_0, iq]
 - [blocks_add_xx_0, '0', blocks_tag_gate_0, '0']
 - [blocks_delay_0, '0', blocks_multiply_const_vxx_0_0, '0']
@@ -967,11 +967,11 @@ connections:
 - [channels_channel_model_0, '0', blocks_add_xx_0, '0']
 - [channels_channel_model_0_0, '0', blocks_add_xx_0, '1']
 - [pause_button, state, sic_periodic_message_source_0, pause]
-- [sic_ble_hier_rx_0, '0', ble_tag_iq_stream_0, '1']
+- [sic_ble_hier_rx_0, '0', ble_tag_aligner_0, '1']
 - [sic_ble_hier_rx_0, pdu, blocks_message_debug_0, print]
 - [sic_ble_hier_rx_0, pdu, sic_successive_interference_cancellation_0, pdu]
 - [sic_ble_packet_source_0_0, '0', blocks_delay_0, '0']
-- [sic_ieee802154_hier_rx_0, '0', ble_tag_iq_stream_0, '1']
+- [sic_ieee802154_hier_rx_0, '0', ble_tag_aligner_0, '1']
 - [sic_ieee802154_hier_rx_0, pdu, blocks_message_debug_0, print]
 - [sic_ieee802154_hier_rx_0, pdu, sic_successive_interference_cancellation_0, pdu]
 - [sic_ieee802154_packet_source_0, '0', blocks_delay_0_0, '0']
@@ -980,7 +980,7 @@ connections:
 - [sic_transmission_enabler_0, '0', blocks_throttle2_0_1, '0']
 - [tx_trigger_button, pressed, sic_transmission_enabler_0, trigger]
 - [virtual_source_0, '0', channels_channel_model_0, '0']
-- [virtual_source_0_0, '0', ble_tag_iq_stream_0, '0']
+- [virtual_source_0_0, '0', ble_tag_aligner_0, '0']
 - [virtual_source_0_0, '0', sic_ble_hier_rx_0, '0']
 - [virtual_source_0_0, '0', sic_ieee802154_hier_rx_0, '0']
 - [virtual_source_1, '0', channels_channel_model_0_0, '0']

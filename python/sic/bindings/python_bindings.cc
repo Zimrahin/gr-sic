@@ -21,12 +21,12 @@ namespace py = pybind11;
 // Please do not delete
 /**************************************/
 // BINDING_FUNCTION_PROTOTYPES(
-    void bind_ble_packet_sink(py::module& m);
-    void bind_ieee802154_packet_sink(py::module& m);
-    void bind_tag_iq_stream(py::module& m);
-    void bind_tagged_iq_to_vector(py::module& m);
-    void bind_transmission_enabler(py::module& m);
-    void bind_periodic_message_source(py::module& m);
+void bind_ble_packet_sink(py::module& m);
+void bind_ieee802154_packet_sink(py::module& m);
+void bind_tag_aligner(py::module& m);
+void bind_tagged_iq_to_vector(py::module& m);
+void bind_transmission_enabler(py::module& m);
+void bind_periodic_message_source(py::module& m);
 // ) END BINDING_FUNCTION_PROTOTYPES
 
 
@@ -57,7 +57,7 @@ PYBIND11_MODULE(sic_python, m)
     // BINDING_FUNCTION_CALLS(
     bind_ble_packet_sink(m);
     bind_ieee802154_packet_sink(m);
-    bind_tag_iq_stream(m);
+    bind_tag_aligner(m);
     bind_tagged_iq_to_vector(m);
     bind_transmission_enabler(m);
     bind_periodic_message_source(m);
