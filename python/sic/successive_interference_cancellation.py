@@ -129,8 +129,12 @@ class successive_interference_cancellation(gr.basic_block):
 
     def process_iq_queue(self) -> None:
         while True:
-            msg = self.iq_queue.get(block=True)
-            self.process_iq_message(msg)
+            try:
+                msg = self.iq_queue.get(block=True)
+                self.process_iq_message(msg)
+            except Exception as e:
+                print(f"process_iq_queue thread failed: {e}")
+                time.sleep(0.1)
 
     def process_iq_message(self, msg: gr.pmt) -> None:
         try:
