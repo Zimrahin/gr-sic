@@ -33,7 +33,7 @@ tagged_iq_to_vector_impl::tagged_iq_to_vector_impl(uint64_t pre_offset,
       d_max_gap(max_gap)
 {
     // Initialise buffer size based on input parameters
-    d_buffer_size = d_pre_offset + d_max_gap + d_pre_offset;
+    d_buffer_size = d_pre_offset + d_max_gap + d_post_offset;
     d_buffer_base = 0;
 
     // PMT message output port
