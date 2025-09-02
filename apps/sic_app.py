@@ -67,7 +67,7 @@ class sic_app(gr.top_block, Qt.QWidget):
         # Variables
         ##################################################
         self.slowing_factor = slowing_factor = 4
-        self.protocol_first = protocol_first = 0
+        self.protocol_first = protocol_first = 1
         self.ble_transmission_rate = ble_transmission_rate = 1000000
         self.symbol_rate_ieee802154 = symbol_rate_ieee802154 = int(2e6 / slowing_factor)
         self.symbol_rate_ble = symbol_rate_ble = int(ble_transmission_rate / slowing_factor)
@@ -82,7 +82,7 @@ class sic_app(gr.top_block, Qt.QWidget):
         self.label_ble = label_ble = ble_label_variable
         self.label_802154_tx_rate = label_802154_tx_rate = '250 kbit/s'
         self.label_802154 = label_802154 = ieee_label_variable
-        self.delay_l = delay_l = 0 if protocol_first else 3180
+        self.delay_l = delay_l = 0 if protocol_first else 4300
         self.delay_h = delay_h = 1400 if protocol_first else 0
         self.centre_frequency = centre_frequency = int(2495e6)
         self.amplitude_l = amplitude_l = 0.45 if protocol_first else 1
@@ -106,7 +106,7 @@ class sic_app(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(0, 1):
             self.top_grid_layout.setColumnStretch(c, 1)
-        self._delay_l_range = qtgui.Range(0, 6000, 1, 0 if protocol_first else 3180, 200)
+        self._delay_l_range = qtgui.Range(0, 6000, 1, 0 if protocol_first else 4300, 200)
         self._delay_l_win = qtgui.RangeWidget(self._delay_l_range, self.set_delay_l, "Delay (µs)", "eng_slider", int, QtCore.Qt.Horizontal)
         self.top_grid_layout.addWidget(self._delay_l_win, 4, 1, 1, 1)
         for r in range(4, 5):
@@ -145,7 +145,7 @@ class sic_app(gr.top_block, Qt.QWidget):
         self.sic_transmission_enabler_0 = sic.transmission_enabler(1024)
         self.sic_successive_interference_cancellation_0 = sic.successive_interference_cancellation(
           samp_rate,
-          2,
+          16,
           protocol_first,
           0 if protocol_first else 1,
           -10000,
@@ -159,8 +159,8 @@ class sic_app(gr.top_block, Qt.QWidget):
         )
         self.sic_periodic_message_source_0 = sic.periodic_message_source(gr.pmt.mp("trigger"), 2000, (-1))
         self.sic_ieee802154_packet_source_0 = sic.ieee802154_packet_source(samp_rate, payload_length_h, True, symbol_rate_ieee802154)
+        self.sic_ieee802154_hier_rx_0 = sic.ieee802154_hier_rx(samp_rate, symbol_rate_ieee802154, 5)
         self.sic_ble_packet_source_0_0 = sic.ble_packet_source(samp_rate, payload_length_l, 0x12345678, symbol_rate_ble)
-        self.sic_ble_hier_rx_0 = sic.ble_hier_rx(samp_rate, symbol_rate_ble, 0, 0x12345678)
         self.qtgui_time_sink_x_0_0 = qtgui.time_sink_c(
             16000, #size
             samp_rate, #samp_rate
@@ -316,7 +316,7 @@ class sic_app(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(1, 2):
             self.top_grid_layout.setColumnStretch(c, 1)
-        self.ble_tagged_iq_to_vector_0 = sic.tagged_iq_to_vector((int(trigger_delay * samp_rate)), (int(trigger_delay * samp_rate)), (4096 * int(samp_rate / symbol_rate_high)))
+        self.ble_tagged_iq_to_vector_0 = sic.tagged_iq_to_vector((int(trigger_delay * samp_rate * 1.5)), (int(trigger_delay * samp_rate * 1.5)), (4096 * int(samp_rate / symbol_rate_high) * 4))
         self.ble_tag_iq_stream_0 = sic.tag_iq_stream((int(samp_rate / symbol_rate_high)))
         self.ble_plot_sic_results_0 = sic.plot_sic_results(samp_rate, 10)
 
@@ -326,7 +326,7 @@ class sic_app(gr.top_block, Qt.QWidget):
         ##################################################
         self.msg_connect((self.ble_tagged_iq_to_vector_0, 'out'), (self.sic_successive_interference_cancellation_0, 'iq'))
         self.msg_connect((self.pause_button, 'state'), (self.sic_periodic_message_source_0, 'pause'))
-        self.msg_connect((self.sic_ble_hier_rx_0, 'pdu'), (self.sic_successive_interference_cancellation_0, 'pdu'))
+        self.msg_connect((self.sic_ieee802154_hier_rx_0, 'pdu'), (self.sic_successive_interference_cancellation_0, 'pdu'))
         self.msg_connect((self.sic_periodic_message_source_0, 'out'), (self.sic_transmission_enabler_0, 'trigger'))
         self.msg_connect((self.sic_successive_interference_cancellation_0, 'out'), (self.ble_plot_sic_results_0, 'in'))
         self.msg_connect((self.tx_trigger_button, 'pressed'), (self.sic_transmission_enabler_0, 'trigger'))
@@ -337,9 +337,9 @@ class sic_app(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.iio_pluto_sink_0_0, 0))
         self.connect((self.blocks_multiply_const_vxx_0_0, 0), (self.iio_pluto_sink_0, 0))
         self.connect((self.iio_pluto_source_0, 0), (self.ble_tag_iq_stream_0, 0))
-        self.connect((self.iio_pluto_source_0, 0), (self.sic_ble_hier_rx_0, 0))
-        self.connect((self.sic_ble_hier_rx_0, 0), (self.ble_tag_iq_stream_0, 1))
+        self.connect((self.iio_pluto_source_0, 0), (self.sic_ieee802154_hier_rx_0, 0))
         self.connect((self.sic_ble_packet_source_0_0, 0), (self.blocks_delay_0, 0))
+        self.connect((self.sic_ieee802154_hier_rx_0, 0), (self.ble_tag_iq_stream_0, 1))
         self.connect((self.sic_ieee802154_packet_source_0, 0), (self.blocks_delay_0_0, 0))
         self.connect((self.sic_transmission_enabler_0, 0), (self.sic_ble_packet_source_0_0, 0))
         self.connect((self.sic_transmission_enabler_0, 0), (self.sic_ieee802154_packet_source_0, 0))
@@ -372,7 +372,7 @@ class sic_app(gr.top_block, Qt.QWidget):
         self.set_amplitude_l(0.45 if self.protocol_first else 1)
         self.set_ble_label_variable(" (stronger signal)" if self.protocol_first == 0 else " (weaker signal)")
         self.set_delay_h(1400 if self.protocol_first else 0)
-        self.set_delay_l(0 if self.protocol_first else 3180)
+        self.set_delay_l(0 if self.protocol_first else 4300)
         self.set_ieee_label_variable(" (stronger signal)" if self.protocol_first == 1 else " (weaker signal)")
         self.set_payload_length_h(40 if self.protocol_first else 74)
         self.set_payload_length_l(254 if self.protocol_first else 140)
@@ -392,6 +392,7 @@ class sic_app(gr.top_block, Qt.QWidget):
     def set_symbol_rate_ieee802154(self, symbol_rate_ieee802154):
         self.symbol_rate_ieee802154 = symbol_rate_ieee802154
         self.set_symbol_rate_high(self.symbol_rate_ble if not self.protocol_first else self.symbol_rate_ieee802154)
+        self.sic_ieee802154_hier_rx_0.set_symbol_rate(self.symbol_rate_ieee802154)
         self.sic_ieee802154_packet_source_0.set_transmission_rate(self.symbol_rate_ieee802154)
         self.sic_successive_interference_cancellation_0.set_ieee802154_transmission_rate(self.symbol_rate_ieee802154)
 
@@ -401,7 +402,6 @@ class sic_app(gr.top_block, Qt.QWidget):
     def set_symbol_rate_ble(self, symbol_rate_ble):
         self.symbol_rate_ble = symbol_rate_ble
         self.set_symbol_rate_high(self.symbol_rate_ble if not self.protocol_first else self.symbol_rate_ieee802154)
-        self.sic_ble_hier_rx_0.set_symbol_rate(self.symbol_rate_ble)
         self.sic_ble_packet_source_0_0.set_transmission_rate(self.symbol_rate_ble)
         self.sic_successive_interference_cancellation_0.set_ble_transmission_rate(self.symbol_rate_ble)
 
