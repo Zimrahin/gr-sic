@@ -77,7 +77,7 @@ class sic_simulation_app(gr.top_block, Qt.QWidget):
         self.symbol_rate_high = symbol_rate_high = symbol_rate_ble if not protocol_first else symbol_rate_ieee802154
         self.samp_rate = samp_rate = int(4e6 / slowing_factor)
         self.payload_length_l = payload_length_l = 254 if protocol_first else 140
-        self.payload_length_h = payload_length_h = 40 if protocol_first else 74
+        self.payload_length_h = payload_length_h = 60 if protocol_first else 74
         self.pause_button = pause_button = 0
         self.label_ble = label_ble = ble_label_variable
         self.label_802154_tx_rate = label_802154_tx_rate = '250 kbit/s'
@@ -99,7 +99,7 @@ class sic_simulation_app(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(1, 2):
             self.top_grid_layout.setColumnStretch(c, 1)
-        self._payload_length_h_range = qtgui.Range(1, 125, 1, 40 if protocol_first else 74, 200)
+        self._payload_length_h_range = qtgui.Range(1, 125, 1, 60 if protocol_first else 74, 200)
         self._payload_length_h_win = qtgui.RangeWidget(self._payload_length_h_range, self.set_payload_length_h, "Payload Length (bytes)", "eng_slider", int, QtCore.Qt.Horizontal)
         self.top_grid_layout.addWidget(self._payload_length_h_win, 3, 0, 1, 1)
         for r in range(3, 4):
@@ -310,7 +310,7 @@ class sic_simulation_app(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(1, 2):
             self.top_grid_layout.setColumnStretch(c, 1)
-        self.ble_tagged_iq_to_vector_0 = sic.tagged_iq_to_vector((int(trigger_delay * samp_rate)), (int(trigger_delay * samp_rate)), (4096 * int(samp_rate / symbol_rate_high)))
+        self.ble_tagged_iq_to_vector_0 = sic.tagged_iq_to_vector((int(trigger_delay * samp_rate)), (int(trigger_delay * samp_rate)), (4096 * int(samp_rate / symbol_rate_high) * 4))
         self.ble_tag_iq_stream_0 = sic.tag_iq_stream((int(samp_rate / symbol_rate_high)))
         self.ble_plot_sic_results_0 = sic.plot_sic_results(samp_rate, 10)
 
@@ -372,7 +372,7 @@ class sic_simulation_app(gr.top_block, Qt.QWidget):
         self.set_delay_h(434 if self.protocol_first else 0)
         self.set_delay_l(0 if self.protocol_first else 788)
         self.set_ieee_label_variable(" (stronger signal)" if self.protocol_first == 1 else " (weaker signal)")
-        self.set_payload_length_h(40 if self.protocol_first else 74)
+        self.set_payload_length_h(60 if self.protocol_first else 74)
         self.set_payload_length_l(254 if self.protocol_first else 140)
         self.set_symbol_rate_high(self.symbol_rate_ble if not self.protocol_first else self.symbol_rate_ieee802154)
 

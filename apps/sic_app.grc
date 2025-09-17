@@ -162,7 +162,7 @@ blocks:
     start: '0'
     step: '1'
     stop: '6000'
-    value: 0 if protocol_first else 3180
+    value: 0 if protocol_first else 4300
     widget: eng_slider
   states:
     bus_sink: false
@@ -302,7 +302,7 @@ blocks:
     comment: '0: BLE
 
       1: IEEE 802.15.4'
-    value: '0'
+    value: '1'
   states:
     bus_sink: false
     bus_source: false
@@ -419,11 +419,11 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    max_gap: 4096 * int(samp_rate / symbol_rate_high)
+    max_gap: 4096 * int(samp_rate / symbol_rate_high) * 4
     maxoutbuf: '0'
     minoutbuf: '0'
-    post_offset: int(trigger_delay * samp_rate)
-    pre_offset: int(trigger_delay * samp_rate)
+    post_offset: int(trigger_delay * samp_rate * 1.5)
+    pre_offset: int(trigger_delay * samp_rate * 1.5)
   states:
     bus_sink: false
     bus_source: false
@@ -808,7 +808,7 @@ blocks:
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    preamble_threshold: '0'
+    preamble_threshold: '5'
     sample_rate: samp_rate
     symbol_rate: symbol_rate_ble
   states:
@@ -817,7 +817,7 @@ blocks:
     bus_structure: null
     coordinate: [344, 808.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: sic_ble_packet_source_0_0
   id: sic_ble_packet_source
   parameters:
@@ -852,9 +852,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [336, 696.0]
+    coordinate: [344, 696.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: sic_ieee802154_packet_source_0
   id: sic_ieee802154_packet_source
   parameters:
@@ -905,7 +905,7 @@ blocks:
     frequency_step_fine: '2'
     frequency_stop: '5000'
     ieee802154_transmission_rate: symbol_rate_ieee802154
-    max_queue_size: '2'
+    max_queue_size: '16'
     maxoutbuf: '0'
     minoutbuf: '0'
     protocol_high: protocol_first

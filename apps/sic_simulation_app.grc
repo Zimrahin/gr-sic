@@ -266,7 +266,7 @@ blocks:
     start: '1'
     step: '1'
     stop: '125'
-    value: 40 if protocol_first else 74
+    value: 60 if protocol_first else 74
     widget: eng_slider
   states:
     bus_sink: false
@@ -394,7 +394,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1720, 1112.0]
+    coordinate: [1688, 1112.0]
     rotation: 0
     state: enabled
 - name: ble_tag_iq_stream_0
@@ -419,7 +419,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    max_gap: 4096 * int(samp_rate / symbol_rate_high)
+    max_gap: 4096 * int(samp_rate / symbol_rate_high) * 4
     maxoutbuf: '0'
     minoutbuf: '0'
     post_offset: int(trigger_delay * samp_rate)
